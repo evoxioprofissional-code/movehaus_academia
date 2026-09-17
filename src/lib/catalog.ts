@@ -1,206 +1,103 @@
+import { createClient } from "@/lib/supabase/server";
 import type { Category, Product } from "@/types/catalog";
+import type { Database } from "@/types/database";
+import { CATEGORIES, SAMPLE_PRODUCTS } from "@/lib/catalog-data";
+
+export { CATEGORIES } from "@/lib/catalog-data";
 
 /**
- * Camada de acesso ao catálogo.
- *
- * Hoje devolve dados de exemplo (mock) para desenvolver a interface pública.
- * Na Fase 3, o CORPO destas funções passa a consultar o Supabase — a
- * assinatura (async) e os tipos permanecem, então as páginas não mudam.
+ * Acesso ao catálogo. Lê do Supabase; se o banco estiver indisponível ou vazio
+ * por erro, cai para os dados de exemplo (catalog-data.ts) para a loja não
+ * quebrar. O painel administrativo (Fase 4) é a fonte real dos dados.
  */
 
-export const CATEGORIES: Category[] = [
-  { slug: "vestuario", name: "Vestuário" },
-  { slug: "acessorios", name: "Acessórios" },
-  { slug: "programas", name: "Programas de treino" },
-  { slug: "nutricao", name: "Nutrição" },
-];
+type Row = Database["public"]["Tables"]["products"]["Row"];
 
-const PRODUCTS: Product[] = [
-  // ---------------- Físicos ----------------
-  {
-    id: "p-cam-dry",
-    slug: "camiseta-dry-movehaus",
-    type: "physical",
-    name: "Camiseta Dry MoveHaus",
-    shortDescription: "Tecido leve com secagem rápida para treino pesado.",
-    description:
-      "Camiseta de treino em malha dry com toque seco e caimento atlético. Costuras reforçadas e logo emborrachado no peito. Feita para suar sem pesar.",
-    categorySlug: "vestuario",
-    images: [],
-    featured: true,
-    active: true,
-    price: 12900,
-    compareAtPrice: 15900,
-    stock: 42,
-    sku: "MH-CAM-DRY",
-    variants: [{ label: "Tamanho", options: ["P", "M", "G", "GG"] }],
-    weightGrams: 180,
-  },
-  {
-    id: "p-regata",
-    slug: "regata-training",
-    type: "physical",
-    name: "Regata Training",
-    shortDescription: "Cava ampla e liberdade total de movimento.",
-    description:
-      "Regata de treino com cava esportiva e tecido respirável. Corte reto, sem apertar. Ideal para dias de ombro e costas.",
-    categorySlug: "vestuario",
-    images: [],
-    featured: false,
-    active: true,
-    price: 9900,
-    stock: 30,
-    sku: "MH-REG-01",
-    variants: [{ label: "Tamanho", options: ["P", "M", "G", "GG"] }],
-    weightGrams: 150,
-  },
-  {
-    id: "p-moletom",
-    slug: "moletom-movehaus",
-    type: "physical",
-    name: "Moletom MoveHaus",
-    shortDescription: "Para o aquecimento e para a rua.",
-    description:
-      "Moletom flanelado por dentro, com capuz e bolso canguru. Peso médio, quente sem esquentar demais. Bordado da marca no peito.",
-    categorySlug: "vestuario",
-    images: [],
-    featured: true,
-    active: true,
-    price: 21900,
-    stock: 18,
-    sku: "MH-MOL-01",
-    variants: [{ label: "Tamanho", options: ["P", "M", "G", "GG"] }],
-    weightGrams: 520,
-  },
-  {
-    id: "p-squeeze",
-    slug: "squeeze-1l",
-    type: "physical",
-    name: "Squeeze MoveHaus 1L",
-    shortDescription: "Garrafa de 1 litro livre de BPA.",
-    description:
-      "Garrafa de treino de 1 litro com marcação de volume e bico de rosca vedante. Material resistente e livre de BPA.",
-    categorySlug: "acessorios",
-    images: [],
-    featured: false,
-    active: true,
-    price: 5900,
-    compareAtPrice: 6900,
-    stock: 60,
-    sku: "MH-SQZ-1L",
-    weightGrams: 140,
-  },
-  {
-    id: "p-straps",
-    slug: "straps-de-treino",
-    type: "physical",
-    name: "Straps de Treino",
-    shortDescription: "Pegada firme nos exercícios de puxada.",
-    description:
-      "Par de straps em algodão reforçado para auxiliar a pegada em levantamentos e puxadas. Costura dupla e boa durabilidade.",
-    categorySlug: "acessorios",
-    images: [],
-    featured: false,
-    active: true,
-    price: 4500,
-    stock: 0,
-    sku: "MH-STR-01",
-    weightGrams: 90,
-  },
-
-  // ---------------- Digitais (programas) ----------------
-  {
-    id: "d-hipertrofia-12",
-    slug: "programa-hipertrofia-12-semanas",
-    type: "digital",
-    name: "Programa de Hipertrofia — 12 semanas",
-    shortDescription: "Plano completo de 12 semanas para ganho de massa.",
-    description:
-      "Programa progressivo de 12 semanas com divisão de treinos, séries, repetições e orientações de execução. Pensado para quem já treina e quer estrutura para evoluir. Acesso permanente após a compra.",
-    categorySlug: "programas",
-    images: [],
-    featured: true,
-    active: true,
-    billingModel: "one_time",
-    price: 14900,
-    accessDurationDays: null,
-  },
-  {
-    id: "d-full-body-mensal",
-    slug: "full-body-clube",
-    type: "digital",
-    name: "Full Body Clube — treinos mensais",
-    shortDescription: "Treinos novos todo mês enquanto a assinatura estiver ativa.",
-    description:
-      "Assinatura com novos treinos full body publicados mensalmente, com variações para academia e para casa. O acesso acompanha a assinatura ativa.",
-    categorySlug: "programas",
-    images: [],
-    featured: true,
-    active: true,
-    billingModel: "subscription",
-    monthlyPrice: 3990,
-    graceDays: 5,
-  },
-
-  // ---------------- E-books ----------------
-  {
-    id: "e-alimentacao-treino",
-    slug: "guia-alimentacao-para-treino",
+function mapRow(r: Row, slugById: Map<string, string>): Product {
+  const base = {
+    id: r.id,
+    slug: r.slug,
+    name: r.name,
+    shortDescription: r.short_description,
+    description: r.description,
+    categorySlug: r.category_id ? (slugById.get(r.category_id) ?? "") : "",
+    images: r.images ?? [],
+    featured: r.featured,
+    active: r.active,
+  };
+  if (r.type === "physical") {
+    return {
+      ...base,
+      type: "physical",
+      price: r.price ?? 0,
+      ...(r.compare_at_price ? { compareAtPrice: r.compare_at_price } : {}),
+      stock: r.stock,
+      sku: r.sku ?? "",
+      variants: r.variants ?? [],
+      ...(r.weight_grams != null ? { weightGrams: r.weight_grams } : {}),
+    };
+  }
+  if (r.type === "digital") {
+    return {
+      ...base,
+      type: "digital",
+      billingModel: r.billing_model ?? "one_time",
+      ...(r.price != null ? { price: r.price } : {}),
+      ...(r.monthly_price != null ? { monthlyPrice: r.monthly_price } : {}),
+      accessDurationDays: r.access_duration_days,
+      ...(r.grace_days != null ? { graceDays: r.grace_days } : {}),
+    };
+  }
+  return {
+    ...base,
     type: "ebook",
-    name: "Guia de Alimentação para Treino",
-    shortDescription: "Como organizar as refeições em torno do treino.",
-    description:
-      "Material introdutório sobre organização das refeições ao longo do dia de treino, hidratação e leitura de rótulos. Conteúdo educativo, sem substituir acompanhamento individual.",
-    categorySlug: "nutricao",
-    images: [],
-    featured: true,
-    active: true,
-    author: "Equipe MoveHaus",
-    chaptersCount: 6,
-    billingModel: "one_time",
-    price: 4900,
-    accessDurationDays: null,
-  },
-  {
-    id: "e-receitas-clube",
-    slug: "receitas-do-clube",
-    type: "ebook",
-    name: "Receitas do Clube",
-    shortDescription: "Novas receitas práticas todo mês.",
-    description:
-      "Coletânea de receitas práticas atualizada mensalmente, com opções para diferentes objetivos. O acesso acompanha a assinatura ativa.",
-    categorySlug: "nutricao",
-    images: [],
-    featured: false,
-    active: true,
-    author: "Equipe MoveHaus",
-    chaptersCount: 10,
-    billingModel: "subscription",
-    monthlyPrice: 2490,
-    graceDays: 7,
-  },
-  {
-    id: "e-organizacao-90",
-    slug: "organizacao-de-rotina-90-dias",
-    type: "ebook",
-    name: "Organização de Rotina — 90 dias",
-    shortDescription: "Planejamento de treino e alimentação por 90 dias.",
-    description:
-      "Guia com um plano de 90 dias para organizar treino, sono e refeições. Acesso liberado por 180 dias após a compra.",
-    categorySlug: "nutricao",
-    images: [],
-    featured: false,
-    active: true,
-    author: "Equipe MoveHaus",
-    chaptersCount: 8,
-    billingModel: "one_time",
-    price: 6900,
-    accessDurationDays: 180,
-  },
-];
+    billingModel: r.billing_model ?? "one_time",
+    ...(r.price != null ? { price: r.price } : {}),
+    ...(r.monthly_price != null ? { monthlyPrice: r.monthly_price } : {}),
+    accessDurationDays: r.access_duration_days,
+    ...(r.grace_days != null ? { graceDays: r.grace_days } : {}),
+    ...(r.author ? { author: r.author } : {}),
+    ...(r.chapters_count != null ? { chaptersCount: r.chapters_count } : {}),
+  };
+}
 
-function activeProducts() {
-  return PRODUCTS.filter((p) => p.active);
+async function fetchAll(): Promise<Product[] | null> {
+  try {
+    const supabase = await createClient();
+    const [{ data: cats }, { data, error }] = await Promise.all([
+      supabase.from("categories").select("id, slug"),
+      supabase.from("products").select("*").eq("active", true),
+    ]);
+    if (error || !data) return null;
+    const slugById = new Map((cats ?? []).map((c) => [c.id, c.slug]));
+    return data.map((r) => mapRow(r as Row, slugById));
+  } catch {
+    return null;
+  }
+}
+
+function applyFilter(
+  list: Product[],
+  filter?: { type?: Product["type"]; categorySlug?: string; query?: string },
+): Product[] {
+  let out = list;
+  if (filter?.type) out = out.filter((p) => p.type === filter.type);
+  if (filter?.categorySlug)
+    out = out.filter((p) => p.categorySlug === filter.categorySlug);
+  if (filter?.query) {
+    const q = filter.query.toLowerCase().trim();
+    out = out.filter(
+      (p) =>
+        p.name.toLowerCase().includes(q) ||
+        p.shortDescription.toLowerCase().includes(q),
+    );
+  }
+  return out;
+}
+
+async function allProducts(): Promise<Product[]> {
+  const fromDb = await fetchAll();
+  return fromDb ?? SAMPLE_PRODUCTS.filter((p) => p.active);
 }
 
 export async function getProducts(filter?: {
@@ -208,40 +105,38 @@ export async function getProducts(filter?: {
   categorySlug?: string;
   query?: string;
 }): Promise<Product[]> {
-  let list = activeProducts();
-  if (filter?.type) list = list.filter((p) => p.type === filter.type);
-  if (filter?.categorySlug)
-    list = list.filter((p) => p.categorySlug === filter.categorySlug);
-  if (filter?.query) {
-    const q = filter.query.toLowerCase().trim();
-    list = list.filter(
-      (p) =>
-        p.name.toLowerCase().includes(q) ||
-        p.shortDescription.toLowerCase().includes(q),
-    );
-  }
-  return list;
+  return applyFilter(await allProducts(), filter);
 }
 
 export async function getProductBySlug(slug: string): Promise<Product | null> {
-  return activeProducts().find((p) => p.slug === slug) ?? null;
+  return (await allProducts()).find((p) => p.slug === slug) ?? null;
 }
 
 export async function getFeaturedProducts(): Promise<Product[]> {
-  return activeProducts().filter((p) => p.featured);
+  return (await allProducts()).filter((p) => p.featured);
 }
 
-/** Produtos físicos com preço promocional ativo. */
 export async function getOnSaleProducts(): Promise<Product[]> {
-  return activeProducts().filter(
+  return (await allProducts()).filter(
     (p) => p.type === "physical" && p.compareAtPrice && p.compareAtPrice > p.price,
   );
 }
 
 export async function getEbooks(): Promise<Product[]> {
-  return activeProducts().filter((p) => p.type === "ebook");
+  return (await allProducts()).filter((p) => p.type === "ebook");
 }
 
 export async function getCategories(): Promise<Category[]> {
-  return CATEGORIES;
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("categories")
+      .select("slug, name")
+      .eq("active", true)
+      .order("position", { ascending: true });
+    if (error || !data || data.length === 0) return CATEGORIES;
+    return data.map((c) => ({ slug: c.slug, name: c.name }));
+  } catch {
+    return CATEGORIES;
+  }
 }

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { ProductMedia } from "@/components/catalog/product-media";
 import { QuickAdd } from "@/components/catalog/quick-add";
 import { Price } from "@/components/catalog/price";
-import { CATEGORIES } from "@/lib/catalog";
+import { CATEGORIES } from "@/lib/catalog-data";
 import { isPhysical, type Product } from "@/types/catalog";
 import { cn } from "@/lib/utils";
 

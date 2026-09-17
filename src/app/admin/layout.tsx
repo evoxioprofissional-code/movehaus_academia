@@ -3,6 +3,7 @@ import { ArrowUpRight, LogOut, ShieldCheck } from "lucide-react";
 import { requireAdmin, getProfile } from "@/lib/auth/user";
 import { signOut } from "@/lib/auth/actions";
 import { Button } from "@/components/ui/button";
+import { AdminNav } from "@/components/admin/admin-nav";
 
 export default async function AdminLayout({
   children,
@@ -42,6 +43,12 @@ export default async function AdminLayout({
           </div>
         </div>
       </header>
+
+      <div className="border-b border-white/10 bg-mh-ink/60">
+        <div className="mx-auto max-w-6xl px-4 py-2 sm:px-6">
+          <AdminNav />
+        </div>
+      </div>
 
       <main className="flex-1">{children}</main>
     </div>
