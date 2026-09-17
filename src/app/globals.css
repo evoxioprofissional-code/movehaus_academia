@@ -1,0 +1,128 @@
+@import "tailwindcss";
+
+/*
+  MoveHaus Training Club — Design System
+  Base preta e grafite, vermelho como ação, branco de contraste e blocos
+  claros pontuais (paper) para dar ritmo editorial. Dark-first.
+*/
+
+@theme {
+  /* Marca */
+  --color-mh-red: #e5121c;
+  --color-mh-red-hover: #c00f18;
+  --color-mh-red-deep: #9d0d14;
+  --color-mh-red-soft: #ff4b54;
+
+  /* Neutros / grafite */
+  --color-mh-black: #0a0a0b;
+  --color-mh-ink: #050506;
+  --color-mh-surface: #131316;
+  --color-mh-surface-2: #1b1b1f;
+  --color-mh-elevated: #242429;
+  --color-mh-border: #2a2a2e;
+  --color-mh-muted: #9a9aa2;
+  --color-mh-text: #f4f4f5;
+
+  /* Superfície clara (blocos pontuais / editorial) */
+  --color-mh-paper: #f2efe9;
+  --color-mh-paper-2: #e7e3da;
+  --color-mh-paper-ink: #16161a;
+  --color-mh-paper-muted: #5c5b57;
+
+  /* Tokens semânticos */
+  --color-background: var(--color-mh-black);
+  --color-foreground: var(--color-mh-text);
+  --color-border: var(--color-mh-border);
+  --color-primary: var(--color-mh-red);
+  --color-primary-foreground: #ffffff;
+
+  /* Tipografia: display condensado (impacto) + sans limpo (leitura) */
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-oswald), var(--font-inter), sans-serif;
+
+  /* Raios e sombras */
+  --radius-mh: 0.625rem;
+  --radius-lg: 1.25rem;
+  --shadow-mh: 0 20px 60px -24px rgb(0 0 0 / 0.85);
+  --shadow-soft: 0 8px 30px -16px rgb(0 0 0 / 0.6);
+}
+
+:root {
+  color-scheme: dark;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/*
+  Headings usam a sans por padrão (leitura). A família de impacto (Oswald)
+  entra só onde há a classe .font-display — títulos estratégicos.
+*/
+h1, h2, h3, h4, h5 {
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+.font-display {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
+::selection {
+  background: var(--color-mh-red);
+  color: #fff;
+}
+
+/* Textura sutil de grão para superfícies/placeholders fotográficos */
+.mh-noise::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity: 0.06;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+}
+
+/* Carrossel: esconde a scrollbar mantendo o arraste nativo */
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Scrollbar discreta */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-mh-border);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #3a3a40;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
