@@ -17,6 +17,17 @@ supabase db push
 ```
 (Requer a senha do banco do projeto.)
 
+### Migration do painel comercial
+
+Depois da migration de catálogo, aplique também
+`20260917140000_admin_commerce.sql`. Ela é incremental: preserva produtos e
+URLs existentes, copia `products.images` para `product_images` e adiciona as
+estruturas de estoque, pedidos, cupons e banners.
+
+O bucket `catalog` aceita JPEG, PNG, WebP e AVIF com até 8 MB. Upload, alteração
+e exclusão exigem papel administrativo; a leitura é pública por se tratar de
+imagens comerciais da loja.
+
 ## Autenticação (configuração no painel)
 - **Authentication → Providers → Email**: habilite e-mail/senha.
 - Para desenvolvimento, é possível desativar "Confirm email" (senão o cadastro

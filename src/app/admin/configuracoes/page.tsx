@@ -1,5 +1,6 @@
 import { getSettings } from "@/lib/admin/data";
 import { SettingsForm } from "@/components/admin/settings-form";
+import { AdminPageHeader } from "@/components/admin/page-header";
 
 export const metadata = { title: "Configurações" };
 
@@ -7,14 +8,11 @@ export default async function AdminConfiguracoesPage() {
   const settings = await getSettings();
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
-      <h1 className="text-2xl font-semibold tracking-tight text-white sm:text-3xl">
-        Configurações
-      </h1>
-      <p className="mb-6 mt-1 text-mh-muted">
-        Dados da academia, contato, regras e políticas. Usados na loja.
-      </p>
+    <div className="mx-auto max-w-[1300px] px-4 py-6 sm:px-6 lg:px-8">
+      <AdminPageHeader title="Configurações" description="Dados da academia, contato, regras da loja, segurança e políticas." />
+      <div className="mt-5">
       <SettingsForm settings={settings} />
+      </div>
     </div>
   );
 }

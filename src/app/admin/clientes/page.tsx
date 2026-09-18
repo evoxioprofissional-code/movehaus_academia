@@ -1,92 +1,20 @@
-import { MessageCircle, ShieldCheck } from "lucide-react";
-import { listCustomers } from "@/lib/admin/data";
+import { MessageCircle, Search, ShieldCheck, Users } from "lucide-react";
+import { AdminPageHeader } from "@/components/admin/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Badge } from "@/components/ui/badge";
-import { Users } from "lucide-react";
+import { listCustomers } from "@/lib/admin/data";
+import { formatBRL } from "@/lib/utils";
 
-export const metadata = { title: "Clientes" };
+export const metadata = { title: "Clientes | MoveHaus Admin" };
+function waLink(phone: string | null, name: string | null) { const digits = (phone ?? "").replace(/\D/g, ""); if (!digits) return null; const number = digits.length <= 11 ? `55${digits}` : digits; return `https://wa.me/${number}?text=${encodeURIComponent(`Olá${name ? `, ${name.split(" ")[0]}` : ""}! Aqui é da MoveHaus.`)}`; }
 
-function waLink(whatsapp: string | null, name: string | null) {
-  const digits = (whatsapp ?? "").replace(/\D/g, "");
-  if (!digits) return null;
-  const num = digits.length <= 11 ? `55${digits}` : digits;
-  const msg = `Olá${name ? `, ${name.split(" ")[0]}` : ""}! Aqui é da MoveHaus.`;
-  return `https://wa.me/${num}?text=${encodeURIComponent(msg)}`;
-}
-
-export default async function AdminClientesPage() {
-  const customers = await listCustomers();
-
-  return (
-    <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6">
-      <h1 className="text-2xl font-semibold tracking-tight text-white sm:text-3xl">
-        Clientes
-      </h1>
-      <p className="mt-1 text-mh-muted">{customers.length} cadastrados</p>
-
-      {customers.length === 0 ? (
-        <div className="mt-8">
-          <EmptyState
-            icon={Users}
-            title="Nenhum cliente ainda"
-            description="As contas criadas na loja aparecem aqui."
-          />
-        </div>
-      ) : (
-        <div className="mt-6 overflow-x-auto rounded-lg border border-white/10">
-          <table className="w-full min-w-[640px] text-sm">
-            <thead className="bg-mh-surface text-left text-xs uppercase tracking-wide text-mh-muted">
-              <tr>
-                <th className="px-4 py-3">Nome</th>
-                <th className="px-4 py-3">Contato</th>
-                <th className="px-4 py-3">Papel</th>
-                <th className="px-4 py-3 text-right">WhatsApp</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-white/5">
-              {customers.map((c) => {
-                const wa = waLink(c.whatsapp, c.full_name);
-                return (
-                  <tr key={c.id} className="hover:bg-mh-surface/40">
-                    <td className="px-4 py-3 font-medium text-white">
-                      {c.full_name || "—"}
-                    </td>
-                    <td className="px-4 py-3 text-mh-muted">
-                      <div>{c.email}</div>
-                      {c.whatsapp && <div className="text-xs">{c.whatsapp}</div>}
-                    </td>
-                    <td className="px-4 py-3">
-                      {c.role === "admin" ? (
-                        <Badge tone="red">
-                          <ShieldCheck className="size-3" />
-                          Admin
-                        </Badge>
-                      ) : (
-                        <Badge tone="muted">Cliente</Badge>
-                      )}
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      {wa ? (
-                        <a
-                          href={wa}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1.5 rounded-md bg-emerald-600/15 px-3 py-1.5 text-xs font-medium text-emerald-400 hover:bg-emerald-600/25"
-                        >
-                          <MessageCircle className="size-4" />
-                          Conversar
-                        </a>
-                      ) : (
-                        <span className="text-xs text-mh-muted">sem número</span>
-                      )}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      )}
-    </div>
-  );
+export default async function CustomersPage({ searchParams }: { searchParams: Promise<{ q?: string; role?: string }> }) {
+  const params = await searchParams;
+  const all = await listCustomers();
+  const query = (params.q || "").toLowerCase();
+  const customers = all.filter((customer) => (!query || `${customer.full_name} ${customer.email} ${customer.whatsapp}`.toLowerCase().includes(query)) && (!params.role || customer.role === params.role));
+  return <div className="mx-auto max-w-[1500px] px-4 py-6 sm:px-6 lg:px-8"><AdminPageHeader title="Clientes" description={`${all.length} conta(s) cadastrada(s). Administradores aparecem identificados separadamente.`} />
+    <form className="mt-5 flex flex-col gap-2 rounded-lg bg-mh-surface p-3 sm:flex-row"><label className="relative flex-1"><Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-mh-muted" /><input name="q" defaultValue={params.q} placeholder="Buscar nome, e-mail ou telefone" className="h-10 w-full rounded border border-white/10 bg-[#0d0d0f] pl-9 pr-3 text-sm" /></label><select name="role" defaultValue={params.role || ""} className="h-10 rounded border border-white/10 bg-[#0d0d0f] px-3 text-sm"><option value="">Todos os perfis</option><option value="customer">Clientes</option><option value="admin">Administradores</option></select><button className="h-10 rounded bg-white px-4 text-sm font-medium text-black">Filtrar</button></form>
+    {customers.length === 0 ? <div className="mt-5"><EmptyState icon={Users} title="Nenhum cliente encontrado" description="Ajuste a busca ou aguarde novos cadastros na loja." /></div> : <div className="mt-5 overflow-x-auto rounded-lg bg-mh-surface"><table className="w-full min-w-[980px] text-sm"><thead className="border-b border-white/8 text-left text-xs text-mh-muted"><tr><th className="p-3">Cliente</th><th>Contato</th><th>Pedidos</th><th>Total gasto</th><th>Último acesso</th><th>Cadastro</th><th>Status</th><th /></tr></thead><tbody className="divide-y divide-white/6">{customers.map((customer) => { const initials = (customer.full_name || customer.email || "C").split(" ").map((part) => part[0]).join("").slice(0,2).toUpperCase(); const wa = waLink(customer.whatsapp, customer.full_name); return <tr key={customer.id} className="hover:bg-white/[0.025]"><td className="p-3"><div className="flex items-center gap-3"><span className="grid size-9 place-items-center rounded-full bg-white/8 text-xs font-semibold">{initials}</span><div><p className="font-medium">{customer.full_name || "Sem nome"}</p>{customer.role === "admin" && <span className="inline-flex items-center gap-1 text-xs text-mh-red-soft"><ShieldCheck className="size-3" />Administrador</span>}</div></div></td><td><p>{customer.email}</p><p className="text-xs text-mh-muted">{customer.whatsapp || customer.phone || "Sem telefone"}</p></td><td>{customer.orderCount}</td><td>{formatBRL(customer.totalSpent)}</td><td className="text-mh-muted">{customer.last_access_at ? new Intl.DateTimeFormat("pt-BR").format(new Date(customer.last_access_at)) : "—"}</td><td className="text-mh-muted">{new Intl.DateTimeFormat("pt-BR").format(new Date(customer.created_at))}</td><td><Badge tone={customer.status === "active" ? "success" : "muted"}>{customer.status === "active" ? "Ativo" : customer.status}</Badge></td><td>{wa && <a href={wa} target="_blank" rel="noreferrer" className="grid size-9 place-items-center rounded text-emerald-400 hover:bg-emerald-500/10" aria-label="Conversar no WhatsApp"><MessageCircle className="size-4" /></a>}</td></tr>; })}</tbody></table></div>}
+  </div>;
 }

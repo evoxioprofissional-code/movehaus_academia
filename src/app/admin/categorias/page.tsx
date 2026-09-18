@@ -1,92 +1,19 @@
-import { Trash2 } from "lucide-react";
-import { listCategories } from "@/lib/admin/data";
-import { upsertCategory, deleteCategory } from "@/lib/admin/actions";
+import { Plus, Tags } from "lucide-react";
+import { AdminPageHeader } from "@/components/admin/page-header";
+import { CategoryDelete } from "@/components/admin/category-delete";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { EmptyState } from "@/components/ui/empty-state";
+import { upsertCategory } from "@/lib/admin/actions";
+import { listCategoriesWithCounts } from "@/lib/admin/data";
 
-export const metadata = { title: "Categorias" };
-
-export default async function AdminCategoriasPage() {
-  const categories = await listCategories();
-
-  return (
-    <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
-      <h1 className="text-2xl font-semibold tracking-tight text-white sm:text-3xl">
-        Categorias
-      </h1>
-
-      {/* Nova categoria */}
-      <form
-        action={upsertCategory}
-        className="mt-6 flex flex-wrap items-end gap-3 rounded-lg border border-white/10 bg-mh-surface p-4"
-      >
-        <div className="flex-1 space-y-1.5">
-          <label className="block text-sm font-medium text-white">Nome</label>
-          <input
-            name="name"
-            required
-            placeholder="Ex.: Suplementos"
-            className="h-10 w-full rounded-mh border border-mh-border bg-mh-black px-3 text-sm text-white placeholder:text-mh-muted focus:border-mh-red focus:outline-none"
-          />
-        </div>
-        <div className="w-24 space-y-1.5">
-          <label className="block text-sm font-medium text-white">Ordem</label>
-          <input
-            name="position"
-            type="number"
-            defaultValue={categories.length + 1}
-            className="h-10 w-full rounded-mh border border-mh-border bg-mh-black px-3 text-sm text-white focus:border-mh-red focus:outline-none"
-          />
-        </div>
-        <Button type="submit">Adicionar</Button>
-      </form>
-
-      {/* Lista */}
-      <div className="mt-6 space-y-2">
-        {categories.map((c) => (
-          <div
-            key={c.id}
-            className="flex flex-wrap items-center gap-3 rounded-lg border border-white/10 bg-mh-surface p-3"
-          >
-            <form action={upsertCategory} className="flex flex-1 flex-wrap items-center gap-3">
-              <input type="hidden" name="id" value={c.id} />
-              <input
-                name="name"
-                defaultValue={c.name}
-                className="h-9 flex-1 rounded-mh border border-mh-border bg-mh-black px-3 text-sm text-white focus:border-mh-red focus:outline-none"
-              />
-              <input
-                name="slug"
-                defaultValue={c.slug}
-                className="h-9 w-40 rounded-mh border border-mh-border bg-mh-black px-3 text-sm text-mh-muted focus:border-mh-red focus:outline-none"
-              />
-              <input
-                name="position"
-                type="number"
-                defaultValue={c.position}
-                className="h-9 w-16 rounded-mh border border-mh-border bg-mh-black px-3 text-sm text-white focus:border-mh-red focus:outline-none"
-              />
-              <label className="flex items-center gap-1.5 text-xs text-mh-muted">
-                <input type="checkbox" name="active" defaultChecked={c.active} className="size-4 accent-mh-red" />
-                ativa
-              </label>
-              <Button type="submit" variant="outline" size="sm">Salvar</Button>
-            </form>
-            <form action={deleteCategory}>
-              <input type="hidden" name="id" value={c.id} />
-              <button
-                type="submit"
-                aria-label="Excluir categoria"
-                className="grid size-9 place-items-center rounded-md text-mh-muted hover:bg-white/5 hover:text-mh-red-soft"
-              >
-                <Trash2 className="size-4" />
-              </button>
-            </form>
-          </div>
-        ))}
-        {categories.length === 0 && (
-          <p className="text-sm text-mh-muted">Nenhuma categoria cadastrada.</p>
-        )}
-      </div>
-    </div>
-  );
+export const metadata = { title: "Categorias | MoveHaus Admin" };
+export default async function CategoriesPage() {
+  const categories = await listCategoriesWithCounts();
+  return <div className="mx-auto max-w-[1200px] px-4 py-6 sm:px-6 lg:px-8">
+    <AdminPageHeader title="Categorias" description="Organize a navegação da loja sem expor campos técnicos no fluxo principal." />
+    <details className="mt-5 rounded-lg bg-mh-surface p-4"><summary className="flex cursor-pointer list-none items-center gap-2 text-sm font-medium"><Plus className="size-4" />Nova categoria</summary><form action={upsertCategory} className="mt-4 grid gap-4 md:grid-cols-[1fr_1.5fr_100px_auto]"><label className="space-y-1.5"><span className="text-sm text-mh-muted">Nome</span><input name="name" required className="h-10 w-full rounded border border-white/10 bg-[#0d0d0f] px-3 text-sm" /></label><label className="space-y-1.5"><span className="text-sm text-mh-muted">Descrição</span><input name="description" className="h-10 w-full rounded border border-white/10 bg-[#0d0d0f] px-3 text-sm" /></label><label className="space-y-1.5"><span className="text-sm text-mh-muted">Ordem</span><input name="position" type="number" defaultValue={categories.length + 1} className="h-10 w-full rounded border border-white/10 bg-[#0d0d0f] px-3 text-sm" /></label><div className="flex items-end gap-3"><label className="flex h-10 items-center gap-2 text-sm"><input type="checkbox" name="active" defaultChecked />Ativa</label><Button>Adicionar</Button></div></form></details>
+    {categories.length === 0 ? <div className="mt-5"><EmptyState icon={Tags} title="Nenhuma categoria" description="Crie a primeira categoria para organizar os produtos." /></div> : <div className="mt-5 overflow-hidden rounded-lg bg-mh-surface"><div className="hidden grid-cols-[1fr_100px_100px_110px_50px] border-b border-white/8 px-4 py-3 text-xs text-mh-muted md:grid"><span>Categoria</span><span>Produtos</span><span>Ordem</span><span>Status</span><span /></div>{categories.map((category) => <form key={category.id} action={upsertCategory} className="grid gap-3 border-b border-white/6 p-4 md:grid-cols-[1fr_100px_100px_110px_50px] md:items-center"><input type="hidden" name="id" value={category.id} /><div><input name="name" defaultValue={category.name} className="w-full bg-transparent font-medium outline-none focus:text-mh-red-soft" /><input name="description" defaultValue={category.description} placeholder="Adicionar descrição" className="mt-1 w-full bg-transparent text-sm text-mh-muted outline-none" /><input type="hidden" name="slug" value={category.slug} /></div><span className="text-sm text-mh-muted">{category.productCount}</span><input name="position" type="number" defaultValue={category.position} className="h-9 w-20 rounded border border-white/10 bg-[#0d0d0f] px-2 text-sm" /><label className="flex items-center gap-2 text-sm"><input type="checkbox" name="active" defaultChecked={category.active} /><Badge tone={category.active ? "success" : "muted"}>{category.active ? "Ativa" : "Inativa"}</Badge></label><div className="flex"><button className="sr-only">Salvar</button><CategoryDelete id={category.id} count={category.productCount} name={category.name} /></div></form>)}</div>}
+    <p className="mt-3 text-xs text-mh-muted">Edite os campos e pressione Enter para salvar uma categoria.</p>
+  </div>;
 }

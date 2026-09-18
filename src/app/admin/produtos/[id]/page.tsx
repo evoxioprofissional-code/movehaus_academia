@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
-import { getProductById, listCategories } from "@/lib/admin/data";
+import { getProductById, getProductImages, listCategories } from "@/lib/admin/data";
 import { ProductForm } from "@/components/admin/product-form";
 
 export const metadata = { title: "Editar produto" };
@@ -12,9 +12,10 @@ export default async function EditarProdutoPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const [product, categories] = await Promise.all([
+  const [product, categories, images] = await Promise.all([
     getProductById(id),
     listCategories(),
+    getProductImages(id),
   ]);
   if (!product) notFound();
 
@@ -30,7 +31,7 @@ export default async function EditarProdutoPage({
       <h1 className="mb-6 mt-3 text-2xl font-semibold tracking-tight text-white sm:text-3xl">
         Editar produto
       </h1>
-      <ProductForm product={product} categories={categories} />
+      <ProductForm product={product} categories={categories} images={images} />
     </div>
   );
 }

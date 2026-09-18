@@ -2,7 +2,6 @@
 
 import { useActionState } from "react";
 import { Button } from "@/components/ui/button";
-import { Field } from "@/components/ui/field";
 import { saveEbookMeta, type FormState } from "@/lib/admin/actions";
 import type { EbookRow } from "@/lib/admin/data";
 
@@ -19,16 +18,11 @@ export function EbookMetaForm({
   );
 
   return (
-    <form action={formAction} className="space-y-4 rounded-lg border border-white/10 bg-mh-surface p-5">
+    <form action={formAction} encType="multipart/form-data" className="space-y-4 rounded-lg bg-mh-surface p-5">
       <input type="hidden" name="product_id" value={productId} />
+      <input type="hidden" name="existing_cover_path" value={ebook?.cover_path ?? ""} />
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field
-          id="cover_url"
-          name="cover_url"
-          label="URL da capa (opcional)"
-          placeholder="https://..."
-          defaultValue={ebook?.cover_url ?? ""}
-        />
+        <label className="space-y-1.5"><span className="text-sm font-medium text-white">Capa</span><input id="cover" name="cover" type="file" accept="image/jpeg,image/png,image/webp,image/avif" className="block w-full text-sm text-mh-muted" /><span className="block text-xs text-mh-muted">Até 8 MB. A capa atual será mantida se nenhum arquivo for escolhido.</span></label>
         <div className="space-y-1.5">
           <label htmlFor="status" className="block text-sm font-medium text-white">Status</label>
           <select

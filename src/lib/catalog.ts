@@ -14,6 +14,10 @@ export { CATEGORIES } from "@/lib/catalog-data";
 type Row = Database["public"]["Tables"]["products"]["Row"];
 
 function mapRow(r: Row, slugById: Map<string, string>): Product {
+  const now = Date.now();
+  const promotionActive =
+    (!r.promotion_starts_at || new Date(r.promotion_starts_at).getTime() <= now) &&
+    (!r.promotion_ends_at || new Date(r.promotion_ends_at).getTime() >= now);
   const base = {
     id: r.id,
     slug: r.slug,
@@ -30,7 +34,7 @@ function mapRow(r: Row, slugById: Map<string, string>): Product {
       ...base,
       type: "physical",
       price: r.price ?? 0,
-      ...(r.compare_at_price ? { compareAtPrice: r.compare_at_price } : {}),
+      ...(promotionActive && r.compare_at_price ? { compareAtPrice: r.compare_at_price } : {}),
       stock: r.stock,
       sku: r.sku ?? "",
       variants: r.variants ?? [],
