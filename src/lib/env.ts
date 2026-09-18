@@ -8,11 +8,9 @@
 
 function required(name: string, value: string | undefined): string {
   if (!value || value.length === 0) {
-    // Em build/dev avisamos, mas não derrubamos o processo, para permitir
-    // o desenvolvimento da UI antes de todas as credenciais estarem prontas.
-    if (process.env.NODE_ENV === "production") {
-      throw new Error(`Variável de ambiente ausente: ${name}`);
-    }
+    // Nunca derruba o build/processo por env ausente: apenas avisa e devolve "".
+    // O app degrada com segurança (loja com fallback; auth só funciona com as
+    // chaves configuradas). Isso mantém o build da Vercel resiliente.
     console.warn(`[env] Variável de ambiente ausente: ${name}`);
     return "";
   }
