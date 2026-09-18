@@ -8,8 +8,8 @@ aprovação explícita** antes da próxima. `docs/` é a fonte de verdade.
 | 1 | Auditoria e fundação (stack, design system, estrutura, Supabase clients, env, docs) | ✅ Concluída |
 | 2 | Interface pública (home, catálogo, produto, carrinho, auth visual, responsividade) | ✅ Concluída |
 | 3 | Banco e autenticação (migrations, tipos, RLS, perfis, papéis, proteção de rotas) | ✅ Concluída |
-| 4 | Painel administrativo (dashboard, produtos, e-books, capítulos, clientes, pedidos, promoções, configurações) | ⏳ Aguardando aprovação |
-| 5 | Pagamentos (Mercado Pago: pagamento único, assinatura, webhooks, idempotência, liberação/bloqueio) | ⬜ |
+| 4 | Painel administrativo (dashboard, produtos, e-books, capítulos, clientes, configurações) | 🟡 Código pronto — aplicar migration/seed + testar quando o Supabase religar |
+| 5 | Pagamentos (Mercado Pago: pagamento único, assinatura, webhooks, idempotência, liberação/bloqueio) — inclui pedidos e promoções/cupons | ⬜ |
 | 6 | Área do cliente e leitor (biblioteca, assinaturas, pedidos, leitor, progresso, marca-d'água, dispositivos, logs) | ⬜ |
 | 7 | Revisão (build, lint, TS, responsividade, segurança, acessibilidade, desempenho, docs) | ⬜ |
 

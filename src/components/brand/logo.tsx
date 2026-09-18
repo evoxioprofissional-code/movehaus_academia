@@ -25,7 +25,6 @@ export function Logo({
         height={size}
         priority={priority}
         className="rounded-lg"
-        style={{ height: size, width: size }}
       />
     </Link>
   );
