@@ -63,17 +63,22 @@ export default async function AdminCoachingPage() {
                     {m.hasAccess ? (m.source === "subscription" ? "Assinatura" : "Manual") : "—"}
                   </td>
                   <td className="text-right">
-                    {m.hasAccess ? (
-                      <form action={revokeCoachingAccess} className="inline">
-                        <input type="hidden" name="user_id" value={m.id} />
-                        <Button type="submit" variant="outline" size="sm">Revogar</Button>
-                      </form>
-                    ) : (
-                      <form action={grantCoachingAccess} className="inline">
-                        <input type="hidden" name="user_id" value={m.id} />
-                        <Button type="submit" size="sm">Liberar acesso</Button>
-                      </form>
-                    )}
+                    <div className="flex items-center justify-end gap-2">
+                      <Button asChild variant="outline" size="sm">
+                        <a href={`/admin/acompanhamento/${m.id}/treino`}>Montar treino</a>
+                      </Button>
+                      {m.hasAccess ? (
+                        <form action={revokeCoachingAccess} className="inline">
+                          <input type="hidden" name="user_id" value={m.id} />
+                          <Button type="submit" variant="outline" size="sm">Revogar</Button>
+                        </form>
+                      ) : (
+                        <form action={grantCoachingAccess} className="inline">
+                          <input type="hidden" name="user_id" value={m.id} />
+                          <Button type="submit" size="sm">Liberar acesso</Button>
+                        </form>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}

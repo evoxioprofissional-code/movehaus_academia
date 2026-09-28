@@ -42,4 +42,10 @@ Regra de acesso válido: `active = true AND (expires_at IS NULL OR expires_at > 
 - Autorização de acesso à área sempre conferida no servidor.
 
 ## Estado atual
-Sub-fase A em construção. Migration `*_coaching_foundation.sql`.
+- **Sub-fase A concluída**: `coaching_access`, gate, `/acompanhamento`, admin concede/revoga.
+- **Sub-fase B concluída**: plano semanal (`workout_plans/days/exercises`), sessões e
+  logs de carga; admin monta o treino em `/admin/acompanhamento/[userId]/treino`;
+  aluno vê "Meu dia" e usa o **Modo Treino** (marcar série, registrar carga,
+  cronômetro de descanso, feedback pós-treino). Migrations
+  `*_coaching_foundation.sql` e `*_coaching_workouts.sql`.
+- **Próximo**: Sub-fase C (engajamento: metas, pontos, recompensas) — aguardando.
