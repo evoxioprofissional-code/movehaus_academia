@@ -177,28 +177,40 @@ alter table public.order_items enable row level security;
 alter table public.coupons enable row level security;
 alter table public.banners enable row level security;
 
+drop policy if exists product_images_public_read on public.product_images;
 create policy product_images_public_read on public.product_images for select
   using (exists (select 1 from public.products p where p.id = product_id and (p.active or public.is_admin())));
+drop policy if exists product_images_admin_write on public.product_images;
 create policy product_images_admin_write on public.product_images for all
   using (public.is_admin()) with check (public.is_admin());
+drop policy if exists product_variants_public_read on public.product_variants;
 create policy product_variants_public_read on public.product_variants for select
   using (active and exists (select 1 from public.products p where p.id = product_id and p.active) or public.is_admin());
+drop policy if exists product_variants_admin_write on public.product_variants;
 create policy product_variants_admin_write on public.product_variants for all
   using (public.is_admin()) with check (public.is_admin());
+drop policy if exists inventory_admin_all on public.inventory_movements;
 create policy inventory_admin_all on public.inventory_movements for all
   using (public.is_admin()) with check (public.is_admin());
+drop policy if exists orders_owner_read on public.orders;
 create policy orders_owner_read on public.orders for select
   using (customer_id = auth.uid() or public.is_admin());
+drop policy if exists orders_admin_write on public.orders;
 create policy orders_admin_write on public.orders for all
   using (public.is_admin()) with check (public.is_admin());
+drop policy if exists order_items_owner_read on public.order_items;
 create policy order_items_owner_read on public.order_items for select
   using (exists (select 1 from public.orders o where o.id = order_id and (o.customer_id = auth.uid() or public.is_admin())));
+drop policy if exists order_items_admin_write on public.order_items;
 create policy order_items_admin_write on public.order_items for all
   using (public.is_admin()) with check (public.is_admin());
+drop policy if exists coupons_admin_all on public.coupons;
 create policy coupons_admin_all on public.coupons for all
   using (public.is_admin()) with check (public.is_admin());
+drop policy if exists banners_public_read on public.banners;
 create policy banners_public_read on public.banners for select
   using (active or public.is_admin());
+drop policy if exists banners_admin_write on public.banners;
 create policy banners_admin_write on public.banners for all
   using (public.is_admin()) with check (public.is_admin());
 
