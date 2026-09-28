@@ -212,11 +212,42 @@ export type Database = {
         Update: { reps_done?: number | null; load_used?: number | null };
         Relationships: [];
       };
+      points_ledger: {
+        Row: { id: string; user_id: string; points: number; reason: string; created_at: string };
+        Insert: { id?: string; user_id: string; points: number; reason?: string };
+        Update: { points?: number; reason?: string };
+        Relationships: [];
+      };
+      goals: {
+        Row: { id: string; user_id: string; title: string; type: string; target: number; period: string | null; status: string; created_by: string | null; achieved_at: string | null; created_at: string };
+        Insert: { id?: string; user_id: string; title: string; type?: string; target?: number; period?: string | null; status?: string; created_by?: string | null; achieved_at?: string | null };
+        Update: { title?: string; type?: string; target?: number; period?: string | null; status?: string; achieved_at?: string | null };
+        Relationships: [];
+      };
+      achievements: {
+        Row: { id: string; user_id: string; code: string; title: string; achieved_at: string };
+        Insert: { id?: string; user_id: string; code: string; title: string; achieved_at?: string };
+        Update: { title?: string };
+        Relationships: [];
+      };
+      rewards: {
+        Row: { id: string; title: string; description: string; cost_points: number; type: string; active: boolean; created_at: string; updated_at: string };
+        Insert: { id?: string; title: string; description?: string; cost_points?: number; type?: string; active?: boolean };
+        Update: { title?: string; description?: string; cost_points?: number; type?: string; active?: boolean };
+        Relationships: [];
+      };
+      reward_redemptions: {
+        Row: { id: string; user_id: string; reward_id: string | null; reward_title: string; points_spent: number; status: string; created_at: string; decided_at: string | null };
+        Insert: { id?: string; user_id: string; reward_id?: string | null; reward_title?: string; points_spent?: number; status?: string };
+        Update: { status?: string; decided_at?: string | null };
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: {
       is_admin: { Args: Record<string, never>; Returns: boolean };
       has_coaching_access: { Args: { uid?: string }; Returns: boolean };
+      points_balance: { Args: { uid?: string }; Returns: number };
     };
     Enums: {
       app_role: AppRole;

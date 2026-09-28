@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { requireAdmin, requireUser } from "@/lib/auth/user";
+import { awardWorkoutCompletion } from "@/lib/coaching/gamification";
 
 const S = (v: FormDataEntryValue | null) => String(v ?? "").trim();
 const N = (v: FormDataEntryValue | null) => {
@@ -185,6 +186,13 @@ export async function finishSession(fd: FormData): Promise<void> {
       notes: S(fd.get("notes")),
     })
     .eq("id", sessionId);
+
+  // Pontos + conquistas (via service role).
+  try {
+    await awardWorkoutCompletion(user.id);
+  } catch {
+    // não bloqueia a finalização do treino
+  }
 
   revalidatePath("/acompanhamento");
   redirect("/acompanhamento?treino=concluido");

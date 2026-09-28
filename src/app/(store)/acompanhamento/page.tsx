@@ -1,18 +1,23 @@
 import type { Metadata } from "next";
 import {
   Apple,
+  Award,
   CheckCircle2,
   Dumbbell,
+  Gift,
   LineChart,
   Lock,
   MessageCircle,
   Play,
+  Star,
   Target,
 } from "lucide-react";
 import { requireUser, getProfile } from "@/lib/auth/user";
 import { hasCoachingAccess } from "@/lib/coaching/access";
 import { getPlanTree, getRecentSessions, todayWeekday, WEEKDAYS } from "@/lib/coaching/workouts";
+import { getProgress, getActiveRewards } from "@/lib/coaching/gamification";
 import { startSession } from "@/lib/coaching/workout-actions";
+import { redeemReward } from "@/lib/coaching/gamification-actions";
 import { Button } from "@/components/ui/button";
 import { CtaButton } from "@/components/ui/cta-button";
 import { whatsappLink } from "@/lib/site";
@@ -22,7 +27,7 @@ export const metadata: Metadata = { title: "Acompanhamento" };
 export default async function AcompanhamentoPage({
   searchParams,
 }: {
-  searchParams: Promise<{ treino?: string }>;
+  searchParams: Promise<{ treino?: string; resgate?: string }>;
 }) {
   const user = await requireUser("/acompanhamento");
   const [access, profile, params] = await Promise.all([
@@ -80,9 +85,11 @@ export default async function AcompanhamentoPage({
   }
 
   // ---------- Com acesso: Meu dia ----------
-  const [tree, sessions] = await Promise.all([
+  const [tree, sessions, progress, rewards] = await Promise.all([
     getPlanTree(user.id),
     getRecentSessions(user.id, 5),
+    getProgress(user.id),
+    getActiveRewards(),
   ]);
   const today = todayWeekday();
   const todayDay = tree.days.find((d) => d.weekday === today) ?? null;
@@ -98,8 +105,96 @@ export default async function AcompanhamentoPage({
 
       {params.treino === "concluido" && (
         <div className="mt-4 flex items-center gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-300">
-          <CheckCircle2 className="size-5" /> Treino registrado. Mandou bem!
+          <CheckCircle2 className="size-5" /> Treino registrado. Mandou bem! (+10 pts)
         </div>
+      )}
+      {params.resgate === "ok" && (
+        <div className="mt-4 flex items-center gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-300">
+          <CheckCircle2 className="size-5" /> Resgate solicitado! A equipe vai confirmar em breve.
+        </div>
+      )}
+      {params.resgate === "saldo" && (
+        <div className="mt-4 rounded-lg border border-mh-red/30 bg-mh-red/10 px-4 py-3 text-sm text-mh-red-soft">
+          Pontos insuficientes para esse resgate.
+        </div>
+      )}
+
+      {/* Progresso */}
+      <section className="mt-8 grid gap-4 sm:grid-cols-[200px_1fr]">
+        <div className="flex flex-col items-center justify-center rounded-lg border border-mh-red/30 bg-[radial-gradient(90%_140%_at_50%_0%,rgba(229,18,28,0.15),transparent)] p-5 text-center">
+          <Star className="size-6 text-mh-red" />
+          <p className="mt-2 text-4xl font-semibold tabular-nums text-white">{progress.points}</p>
+          <p className="text-xs uppercase tracking-widest text-mh-muted">pontos</p>
+        </div>
+        <div className="rounded-lg border border-white/10 bg-mh-surface p-5">
+          <h2 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-widest text-mh-muted">
+            <Award className="size-4 text-mh-red" /> Conquistas
+          </h2>
+          {progress.achievements.length === 0 ? (
+            <p className="mt-3 text-sm text-mh-muted">Complete treinos para desbloquear conquistas.</p>
+          ) : (
+            <div className="mt-3 flex flex-wrap gap-2">
+              {progress.achievements.map((a) => (
+                <span key={a.code} className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-mh-black px-3 py-1 text-xs text-white">
+                  <Award className="size-3.5 text-mh-red" /> {a.title}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* Metas */}
+      {progress.goals.length > 0 && (
+        <section className="mt-6">
+          <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold uppercase tracking-widest text-mh-muted">
+            <Target className="size-4 text-mh-red" /> Metas
+          </h2>
+          <div className="grid gap-3">
+            {progress.goals.map((g) => (
+              <div key={g.id} className="rounded-lg border border-white/10 bg-mh-surface p-4">
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-sm font-medium text-white">{g.title}</p>
+                  <span className="text-xs text-mh-muted">
+                    {g.status === "achieved" ? "Concluída" : `${g.current}/${g.target}`}
+                  </span>
+                </div>
+                <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-white/10">
+                  <div className="h-full rounded-full bg-mh-red" style={{ width: `${g.pct}%` }} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Recompensas */}
+      {rewards.length > 0 && (
+        <section className="mt-6">
+          <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold uppercase tracking-widest text-mh-muted">
+            <Gift className="size-4 text-mh-red" /> Recompensas
+          </h2>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {rewards.map((rw) => {
+              const canRedeem = progress.points >= rw.cost_points;
+              return (
+                <div key={rw.id} className="flex items-center justify-between gap-3 rounded-lg border border-white/10 bg-mh-surface p-4">
+                  <div>
+                    <p className="text-sm font-medium text-white">{rw.title}</p>
+                    {rw.description && <p className="text-xs text-mh-muted">{rw.description}</p>}
+                    <p className="mt-1 text-xs text-mh-red-soft">{rw.cost_points} pts</p>
+                  </div>
+                  <form action={redeemReward}>
+                    <input type="hidden" name="reward_id" value={rw.id} />
+                    <Button type="submit" size="sm" variant={canRedeem ? "primary" : "outline"} disabled={!canRedeem}>
+                      Resgatar
+                    </Button>
+                  </form>
+                </div>
+              );
+            })}
+          </div>
+        </section>
       )}
 
       {/* Treino de hoje */}

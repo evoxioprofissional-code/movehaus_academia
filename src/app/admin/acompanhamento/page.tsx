@@ -17,6 +17,11 @@ export default async function AdminCoachingPage() {
       <AdminPageHeader
         title="Acompanhamento"
         description={`Libere o acesso à área do aluno. ${withAccess} com acesso ativo. (Na Fase 5, a assinatura fará isso automaticamente.)`}
+        action={
+          <Button asChild variant="outline">
+            <a href="/admin/acompanhamento/recompensas">Recompensas</a>
+          </Button>
+        }
       />
 
       {members.length === 0 ? (
@@ -66,6 +71,9 @@ export default async function AdminCoachingPage() {
                     <div className="flex items-center justify-end gap-2">
                       <Button asChild variant="outline" size="sm">
                         <a href={`/admin/acompanhamento/${m.id}/treino`}>Montar treino</a>
+                      </Button>
+                      <Button asChild variant="outline" size="sm">
+                        <a href={`/admin/acompanhamento/${m.id}/metas`}>Metas</a>
                       </Button>
                       {m.hasAccess ? (
                         <form action={revokeCoachingAccess} className="inline">
