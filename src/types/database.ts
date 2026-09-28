@@ -242,6 +242,30 @@ export type Database = {
         Update: { status?: string; decided_at?: string | null };
         Relationships: [];
       };
+      body_metrics: {
+        Row: { id: string; user_id: string; measured_on: string; weight: number | null; waist: number | null; hip: number | null; arm: number | null; chest: number | null; thigh: number | null; body_fat: number | null; notes: string; created_at: string };
+        Insert: { id?: string; user_id: string; measured_on?: string; weight?: number | null; waist?: number | null; hip?: number | null; arm?: number | null; chest?: number | null; thigh?: number | null; body_fat?: number | null; notes?: string };
+        Update: Partial<{ measured_on: string; weight: number | null; waist: number | null; hip: number | null; arm: number | null; chest: number | null; thigh: number | null; body_fat: number | null; notes: string }>;
+        Relationships: [];
+      };
+      checkins: {
+        Row: { id: string; user_id: string; week_start: string; energy: number | null; sleep: number | null; nutrition: number | null; disposition: number | null; pain: string; difficulty: string; notes: string; created_at: string };
+        Insert: { id?: string; user_id: string; week_start?: string; energy?: number | null; sleep?: number | null; nutrition?: number | null; disposition?: number | null; pain?: string; difficulty?: string; notes?: string };
+        Update: Partial<{ energy: number | null; sleep: number | null; nutrition: number | null; disposition: number | null; pain: string; difficulty: string; notes: string }>;
+        Relationships: [];
+      };
+      hydration_logs: {
+        Row: { user_id: string; day: string; total_ml: number; goal_ml: number; updated_at: string };
+        Insert: { user_id: string; day?: string; total_ml?: number; goal_ml?: number };
+        Update: { total_ml?: number; goal_ml?: number };
+        Relationships: [];
+      };
+      progress_photos: {
+        Row: { id: string; user_id: string; storage_path: string; taken_on: string; note: string; created_at: string };
+        Insert: { id?: string; user_id: string; storage_path: string; taken_on?: string; note?: string };
+        Update: { note?: string; taken_on?: string };
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: {

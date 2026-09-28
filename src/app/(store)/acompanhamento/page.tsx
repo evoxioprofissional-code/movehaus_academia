@@ -119,6 +119,15 @@ export default async function AcompanhamentoPage({
         </div>
       )}
 
+      {/* Atalhos */}
+      <div className="mt-6">
+        <Button asChild variant="outline" size="sm">
+          <a href="/acompanhamento/corpo">
+            <LineChart className="size-4" /> Corpo e evolução
+          </a>
+        </Button>
+      </div>
+
       {/* Progresso */}
       <section className="mt-8 grid gap-4 sm:grid-cols-[200px_1fr]">
         <div className="flex flex-col items-center justify-center rounded-lg border border-mh-red/30 bg-[radial-gradient(90%_140%_at_50%_0%,rgba(229,18,28,0.15),transparent)] p-5 text-center">
