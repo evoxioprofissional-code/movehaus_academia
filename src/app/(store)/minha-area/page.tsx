@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { BookOpen, LogOut, Package, RefreshCw } from "lucide-react";
+import { ArrowRight, BookOpen, Dumbbell, LogOut, Package, RefreshCw } from "lucide-react";
 import { requireUser, getProfile } from "@/lib/auth/user";
+import { hasCoachingAccess } from "@/lib/coaching/access";
 import { signOut } from "@/lib/auth/actions";
 import { Button } from "@/components/ui/button";
 
@@ -9,7 +10,7 @@ export const metadata: Metadata = { title: "Minha área" };
 
 export default async function MinhaAreaPage() {
   const user = await requireUser("/minha-area");
-  const profile = await getProfile();
+  const [profile, coaching] = await Promise.all([getProfile(), hasCoachingAccess()]);
   const displayName = profile?.full_name || user.email || "Atleta";
   const firstName = displayName.split(" ")[0];
 
@@ -34,6 +35,25 @@ export default async function MinhaAreaPage() {
           </Button>
         </form>
       </div>
+
+      {/* Acompanhamento */}
+      <Link
+        href="/acompanhamento"
+        className="group mt-6 flex items-center justify-between gap-4 rounded-lg border border-mh-red/30 bg-[radial-gradient(90%_140%_at_0%_0%,rgba(229,18,28,0.14),transparent)] p-5 transition-colors hover:border-mh-red/60"
+      >
+        <div className="flex items-center gap-3">
+          <Dumbbell className="size-6 shrink-0 text-mh-red" />
+          <div>
+            <p className="font-semibold text-white">MoveHaus Acompanhamento</p>
+            <p className="text-sm text-mh-muted">
+              {coaching
+                ? "Seu treino, evolução e metas — entrar na área."
+                : "Treino, nutrição e evolução com a equipe. Conhecer."}
+            </p>
+          </div>
+        </div>
+        <ArrowRight className="size-5 shrink-0 text-mh-muted transition-transform group-hover:translate-x-0.5" />
+      </Link>
 
       {/* Atalhos (conteúdo completo na Fase 6) */}
       <div className="mt-8 grid gap-4 sm:grid-cols-3">

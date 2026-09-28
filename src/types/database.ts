@@ -176,10 +176,17 @@ export type Database = {
         Update: Partial<Database["public"]["Tables"]["banners"]["Row"]>;
         Relationships: [];
       };
+      coaching_access: {
+        Row: { user_id: string; active: boolean; source: string; granted_by: string | null; starts_at: string; expires_at: string | null; created_at: string; updated_at: string };
+        Insert: { user_id: string; active?: boolean; source?: string; granted_by?: string | null; starts_at?: string; expires_at?: string | null };
+        Update: { active?: boolean; source?: string; granted_by?: string | null; starts_at?: string; expires_at?: string | null };
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: {
       is_admin: { Args: Record<string, never>; Returns: boolean };
+      has_coaching_access: { Args: { uid?: string }; Returns: boolean };
     };
     Enums: {
       app_role: AppRole;
