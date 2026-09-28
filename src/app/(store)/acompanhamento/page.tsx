@@ -120,10 +120,15 @@ export default async function AcompanhamentoPage({
       )}
 
       {/* Atalhos */}
-      <div className="mt-6">
+      <div className="mt-6 flex flex-wrap gap-2">
         <Button asChild variant="outline" size="sm">
           <a href="/acompanhamento/corpo">
             <LineChart className="size-4" /> Corpo e evolução
+          </a>
+        </Button>
+        <Button asChild variant="outline" size="sm">
+          <a href="/acompanhamento/nutricao">
+            <Apple className="size-4" /> Nutrição
           </a>
         </Button>
       </div>

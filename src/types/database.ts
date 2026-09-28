@@ -266,6 +266,36 @@ export type Database = {
         Update: { note?: string; taken_on?: string };
         Relationships: [];
       };
+      meal_plans: {
+        Row: { id: string; user_id: string; name: string; notes: string; active: boolean; created_by: string | null; created_at: string; updated_at: string };
+        Insert: { id?: string; user_id: string; name?: string; notes?: string; active?: boolean; created_by?: string | null };
+        Update: { name?: string; notes?: string; active?: boolean };
+        Relationships: [];
+      };
+      meals: {
+        Row: { id: string; plan_id: string; name: string; time_label: string; position: number; created_at: string };
+        Insert: { id?: string; plan_id: string; name?: string; time_label?: string; position?: number };
+        Update: { name?: string; time_label?: string; position?: number };
+        Relationships: [];
+      };
+      meal_items: {
+        Row: { id: string; meal_id: string; food: string; quantity: string; substitutions: string; notes: string; position: number; created_at: string };
+        Insert: { id?: string; meal_id: string; food: string; quantity?: string; substitutions?: string; notes?: string; position?: number };
+        Update: { food?: string; quantity?: string; substitutions?: string; notes?: string; position?: number };
+        Relationships: [];
+      };
+      meal_logs: {
+        Row: { id: string; user_id: string; meal_id: string; day: string; created_at: string };
+        Insert: { id?: string; user_id: string; meal_id: string; day?: string };
+        Update: { day?: string };
+        Relationships: [];
+      };
+      recipes: {
+        Row: { id: string; title: string; description: string; ingredients: string; steps: string; active: boolean; created_by: string | null; created_at: string; updated_at: string };
+        Insert: { id?: string; title: string; description?: string; ingredients?: string; steps?: string; active?: boolean; created_by?: string | null };
+        Update: { title?: string; description?: string; ingredients?: string; steps?: string; active?: boolean };
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: {

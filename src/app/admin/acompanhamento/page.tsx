@@ -18,9 +18,14 @@ export default async function AdminCoachingPage() {
         title="Acompanhamento"
         description={`Libere o acesso à área do aluno. ${withAccess} com acesso ativo. (Na Fase 5, a assinatura fará isso automaticamente.)`}
         action={
-          <Button asChild variant="outline">
-            <a href="/admin/acompanhamento/recompensas">Recompensas</a>
-          </Button>
+          <div className="flex gap-2">
+            <Button asChild variant="outline">
+              <a href="/admin/acompanhamento/receitas">Receitas</a>
+            </Button>
+            <Button asChild variant="outline">
+              <a href="/admin/acompanhamento/recompensas">Recompensas</a>
+            </Button>
+          </div>
         }
       />
 
@@ -74,6 +79,9 @@ export default async function AdminCoachingPage() {
                       </Button>
                       <Button asChild variant="outline" size="sm">
                         <a href={`/admin/acompanhamento/${m.id}/metas`}>Metas</a>
+                      </Button>
+                      <Button asChild variant="outline" size="sm">
+                        <a href={`/admin/acompanhamento/${m.id}/nutricao`}>Nutrição</a>
                       </Button>
                       {m.hasAccess ? (
                         <form action={revokeCoachingAccess} className="inline">
