@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { UserRound } from "lucide-react";
@@ -21,17 +21,32 @@ export const NAV = [
 export function SiteHeader() {
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
+  const scrolledRef = useRef(false);
 
   useEffect(() => {
-    const update = () => setScrolled(window.scrollY > 24);
+    let frame = 0;
+    const update = () => {
+      if (frame) return;
+      frame = requestAnimationFrame(() => {
+        frame = 0;
+        const next = window.scrollY > 24;
+        if (next !== scrolledRef.current) {
+          scrolledRef.current = next;
+          setScrolled(next);
+        }
+      });
+    };
     update();
     window.addEventListener("scroll", update, { passive: true });
-    return () => window.removeEventListener("scroll", update);
+    return () => {
+      window.removeEventListener("scroll", update);
+      if (frame) cancelAnimationFrame(frame);
+    };
   }, []);
 
   return (
     <header className={`sticky top-0 z-40 px-2.5 transition-[padding] duration-300 sm:px-5 ${scrolled ? "py-1.5 sm:py-2" : "py-2.5 sm:py-3"}`}>
-      <div className={`relative mx-auto flex max-w-5xl animate-[mh-navbar-enter_.45s_ease-out_both] items-center gap-2 rounded-full border px-2.5 text-white backdrop-blur-xl transition-[height,background-color,border-color,box-shadow] duration-300 sm:gap-3 sm:px-4 ${scrolled ? "h-12 border-white/10 bg-black/75 shadow-[0_12px_38px_-18px_rgba(0,0,0,.9)] sm:h-13" : "h-14 border-white/[0.07] bg-black/35 shadow-none sm:h-[58px]"}`}>
+      <div className={`relative mx-auto flex max-w-5xl animate-[mh-navbar-enter_.45s_ease-out_both] items-center gap-2 rounded-full border px-2.5 text-white transition-[height,background-color,border-color,box-shadow] duration-300 sm:gap-3 sm:px-4 sm:backdrop-blur-xl ${scrolled ? "h-12 border-white/10 bg-black/85 shadow-[0_12px_38px_-18px_rgba(0,0,0,.9)] sm:h-13 sm:bg-black/75" : "h-14 border-white/[0.07] bg-black/60 shadow-none sm:h-[58px] sm:bg-black/35"}`}>
         <span className={`absolute left-8 right-8 top-0 h-px bg-gradient-to-r from-transparent via-mh-red to-transparent transition-opacity duration-300 ${scrolled ? "opacity-70" : "opacity-35"}`} aria-hidden="true" />
         {/* Marca e navegação formam uma única unidade visual. */}
         <div className="flex min-w-0 items-center gap-2 md:gap-6">

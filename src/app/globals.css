@@ -112,6 +112,11 @@ h1, h2, h3, h4, h5 {
   to { transform: translateY(0); opacity: 1; }
 }
 
+@keyframes mh-route-loading {
+  from { transform: translateX(-120%); }
+  to { transform: translateX(420%); }
+}
+
 /* Scrollbar discreta */
 ::-webkit-scrollbar {
   width: 10px;

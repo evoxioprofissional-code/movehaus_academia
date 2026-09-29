@@ -24,5 +24,5 @@ export const getHomeMedia = unstable_cache(
     }
   },
   ["home-media"],
-  { revalidate: 30, tags: ["home-media"] },
+  { revalidate: 300, tags: ["home-media"] },
 );

@@ -67,7 +67,7 @@ function mapRow(r: Row, slugById: Map<string, string>): Product {
   };
 }
 
-// Cache entre requisições (Data Cache do Next): 1 leitura a cada 60s, servindo
+// Cache entre requisições (Data Cache do Next): 1 leitura a cada 5 min, servindo
 // todo o tráfego público a partir do cache — rápido e resiliente à lentidão do DB.
 const fetchAll = unstable_cache(
   async (): Promise<Product[] | null> => {
@@ -84,7 +84,7 @@ const fetchAll = unstable_cache(
     }
   },
   ["catalog:products"],
-  { revalidate: 60, tags: ["catalog"] },
+  { revalidate: 300, tags: ["catalog"] },
 );
 
 function applyFilter(
@@ -153,5 +153,5 @@ export const getCategories = unstable_cache(
     }
   },
   ["catalog:categories"],
-  { revalidate: 60, tags: ["catalog"] },
+  { revalidate: 300, tags: ["catalog"] },
 );
