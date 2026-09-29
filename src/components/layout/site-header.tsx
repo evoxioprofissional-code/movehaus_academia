@@ -4,7 +4,6 @@ import { Logo } from "@/components/brand/logo";
 import { CartButton } from "@/components/cart/cart-button";
 import { HeaderSearch } from "@/components/layout/header-search";
 import { MobileNav } from "@/components/layout/mobile-nav";
-import { getUser } from "@/lib/auth/user";
 
 export const NAV = [
   { href: "/loja", label: "Loja" },
@@ -13,15 +12,15 @@ export const NAV = [
   { href: "/sobre", label: "Sobre a MoveHaus" },
 ];
 
-export async function SiteHeader() {
-  const user = await getUser();
-  const authed = !!user;
+// Sem getUser aqui: o header é público e não deve depender do serviço de auth
+// a cada acesso. A conta leva a /minha-area, que é protegida no servidor.
+export function SiteHeader() {
   return (
     <header className="sticky top-0 z-40 border-b border-white/10 bg-mh-black/80 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-6xl items-center gap-3 px-4 sm:px-6">
         {/* Esquerda: menu mobile + logo */}
         <div className="flex items-center gap-2">
-          <MobileNav items={NAV} authed={authed} />
+          <MobileNav items={NAV} />
           <Logo priority size={44} />
         </div>
 
@@ -42,8 +41,8 @@ export async function SiteHeader() {
         <div className="ml-auto flex items-center gap-0.5 md:ml-0">
           <HeaderSearch />
           <Link
-            href={authed ? "/minha-area" : "/login"}
-            aria-label={authed ? "Minha conta" : "Entrar"}
+            href="/minha-area"
+            aria-label="Minha conta"
             className="grid size-10 place-items-center rounded-full text-mh-text transition-colors hover:bg-white/5 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mh-red"
           >
             <UserRound className="size-[22px]" strokeWidth={1.75} />

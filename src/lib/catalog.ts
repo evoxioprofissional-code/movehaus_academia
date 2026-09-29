@@ -1,4 +1,6 @@
-import { createClient } from "@/lib/supabase/server";
+import { cache } from "react";
+import { unstable_cache } from "next/cache";
+import { supabaseAnon } from "@/lib/supabase/anon";
 import type { Category, Product } from "@/types/catalog";
 import type { Database } from "@/types/database";
 import { CATEGORIES, SAMPLE_PRODUCTS } from "@/lib/catalog-data";
@@ -65,20 +67,25 @@ function mapRow(r: Row, slugById: Map<string, string>): Product {
   };
 }
 
-async function fetchAll(): Promise<Product[] | null> {
-  try {
-    const supabase = await createClient();
-    const [{ data: cats }, { data, error }] = await Promise.all([
-      supabase.from("categories").select("id, slug"),
-      supabase.from("products").select("*").eq("active", true),
-    ]);
-    if (error || !data) return null;
-    const slugById = new Map((cats ?? []).map((c) => [c.id, c.slug]));
-    return data.map((r) => mapRow(r as Row, slugById));
-  } catch {
-    return null;
-  }
-}
+// Cache entre requisições (Data Cache do Next): 1 leitura a cada 60s, servindo
+// todo o tráfego público a partir do cache — rápido e resiliente à lentidão do DB.
+const fetchAll = unstable_cache(
+  async (): Promise<Product[] | null> => {
+    try {
+      const [{ data: cats }, { data, error }] = await Promise.all([
+        supabaseAnon.from("categories").select("id, slug"),
+        supabaseAnon.from("products").select("*").eq("active", true),
+      ]);
+      if (error || !data) return null;
+      const slugById = new Map((cats ?? []).map((c) => [c.id, c.slug]));
+      return data.map((r) => mapRow(r as Row, slugById));
+    } catch {
+      return null;
+    }
+  },
+  ["catalog:products"],
+  { revalidate: 60, tags: ["catalog"] },
+);
 
 function applyFilter(
   list: Product[],
@@ -99,10 +106,11 @@ function applyFilter(
   return out;
 }
 
-async function allProducts(): Promise<Product[]> {
+// Memoizado por request: os vários getters da mesma página compartilham 1 busca.
+const allProducts = cache(async (): Promise<Product[]> => {
   const fromDb = await fetchAll();
   return fromDb ?? SAMPLE_PRODUCTS.filter((p) => p.active);
-}
+});
 
 export async function getProducts(filter?: {
   type?: Product["type"];
@@ -130,17 +138,20 @@ export async function getEbooks(): Promise<Product[]> {
   return (await allProducts()).filter((p) => p.type === "ebook");
 }
 
-export async function getCategories(): Promise<Category[]> {
-  try {
-    const supabase = await createClient();
-    const { data, error } = await supabase
-      .from("categories")
-      .select("slug, name")
-      .eq("active", true)
-      .order("position", { ascending: true });
-    if (error || !data || data.length === 0) return CATEGORIES;
-    return data.map((c) => ({ slug: c.slug, name: c.name }));
-  } catch {
-    return CATEGORIES;
-  }
-}
+export const getCategories = unstable_cache(
+  async (): Promise<Category[]> => {
+    try {
+      const { data, error } = await supabaseAnon
+        .from("categories")
+        .select("slug, name")
+        .eq("active", true)
+        .order("position", { ascending: true });
+      if (error || !data || data.length === 0) return CATEGORIES;
+      return data.map((c) => ({ slug: c.slug, name: c.name }));
+    } catch {
+      return CATEGORIES;
+    }
+  },
+  ["catalog:categories"],
+  { revalidate: 60, tags: ["catalog"] },
+);

@@ -56,7 +56,12 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
+  // Roda só nas áreas que precisam de sessão validada. As páginas públicas
+  // (home, loja, etc.) não pagam o custo de rede do getUser() no middleware.
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|brand|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    "/minha-area/:path*",
+    "/admin/:path*",
+    "/acompanhamento/:path*",
+    "/equipe/:path*",
   ],
 };

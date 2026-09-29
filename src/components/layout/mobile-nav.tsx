@@ -5,7 +5,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   ArrowUpRight,
-  LogOut,
   Menu,
   MessageCircle,
   Search,
@@ -16,14 +15,11 @@ import {
 import { Logo } from "@/components/brand/logo";
 import { cn } from "@/lib/utils";
 import { whatsappLink } from "@/lib/site";
-import { signOut } from "@/lib/auth/actions";
 
 export function MobileNav({
   items,
-  authed = false,
 }: {
   items: { href: string; label: string }[];
-  authed?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
@@ -110,37 +106,14 @@ export function MobileNav({
             </div>
 
             <div className="space-y-1 border-t border-mh-border px-3 py-3">
-              {authed ? (
-                <>
-                  <Link
-                    href="/minha-area"
-                    onClick={close}
-                    className="flex items-center gap-3 rounded-mh px-4 py-3 text-sm font-medium text-mh-text hover:bg-mh-surface"
-                  >
-                    <UserRound className="size-5 text-mh-muted" />
-                    Minha conta
-                  </Link>
-                  <form action={signOut}>
-                    <button
-                      type="submit"
-                      onClick={close}
-                      className="flex w-full items-center gap-3 rounded-mh px-4 py-3 text-sm font-medium text-mh-text hover:bg-mh-surface"
-                    >
-                      <LogOut className="size-5 text-mh-muted" />
-                      Sair
-                    </button>
-                  </form>
-                </>
-              ) : (
-                <Link
-                  href="/login"
-                  onClick={close}
-                  className="flex items-center gap-3 rounded-mh px-4 py-3 text-sm font-medium text-mh-text hover:bg-mh-surface"
-                >
-                  <UserRound className="size-5 text-mh-muted" />
-                  Entrar / Criar conta
-                </Link>
-              )}
+              <Link
+                href="/minha-area"
+                onClick={close}
+                className="flex items-center gap-3 rounded-mh px-4 py-3 text-sm font-medium text-mh-text hover:bg-mh-surface"
+              >
+                <UserRound className="size-5 text-mh-muted" />
+                Minha conta
+              </Link>
               <Link
                 href="/carrinho"
                 onClick={close}
