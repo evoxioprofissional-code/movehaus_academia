@@ -19,7 +19,7 @@ export function SectionHeading({
 }) {
   const isPaper = tone === "paper";
   return (
-    <div className="mb-7 flex items-end justify-between gap-6">
+    <div className="mb-7 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-end sm:gap-6">
       <div>
         {kicker && (
           <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-mh-red">
@@ -49,7 +49,7 @@ export function SectionHeading({
         <Link
           href={href}
           className={cn(
-            "group hidden shrink-0 items-center gap-1.5 text-sm font-medium transition-colors sm:inline-flex",
+            "group inline-flex shrink-0 items-center gap-1.5 text-sm font-medium transition-colors",
             isPaper
               ? "text-mh-paper-ink hover:text-mh-red"
               : "text-mh-muted hover:text-white",

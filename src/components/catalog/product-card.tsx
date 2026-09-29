@@ -60,9 +60,9 @@ export function ProductCard({
         />
 
         {/* Selos (não capturam clique) */}
-        <div className="pointer-events-none absolute left-3 top-3 flex flex-col items-start gap-1.5">
+        <div className="pointer-events-none absolute left-2 top-2 flex flex-col items-start gap-1.5 sm:left-3 sm:top-3">
           {discount > 0 && (
-            <span className="bg-mh-red px-2.5 py-1 text-xs font-semibold text-white">
+            <span className="bg-mh-red px-2 py-0.5 text-[11px] font-semibold text-white sm:px-2.5 sm:py-1 sm:text-xs">
               -{discount}%
             </span>
           )}
@@ -74,7 +74,7 @@ export function ProductCard({
         </div>
 
         {typeLabel && (
-          <span className="pointer-events-none absolute right-3 top-3 bg-black/70 px-2.5 py-1 text-[10px] font-medium uppercase tracking-[0.14em] text-white/90 backdrop-blur">
+          <span className="pointer-events-none absolute right-2 top-2 bg-black/70 px-2 py-0.5 text-[9px] font-medium uppercase tracking-[0.12em] text-white/90 backdrop-blur sm:right-3 sm:top-3 sm:px-2.5 sm:py-1 sm:text-[10px]">
             {typeLabel}
           </span>
         )}
@@ -87,7 +87,7 @@ export function ProductCard({
         <span className="text-[11px] font-medium uppercase tracking-widest text-mh-muted">
           {categoryName(product.categorySlug)}
         </span>
-        <h3 className="mt-1 text-[15px] font-medium leading-snug text-white">
+        <h3 className="mt-1 text-sm font-medium leading-snug text-white sm:text-[15px]">
           {product.name}
         </h3>
         <div className="mt-2 pt-0.5">
