@@ -19,27 +19,27 @@ export function SiteHeader() {
     <header className="sticky top-0 z-40 px-2.5 py-2.5 sm:px-5 sm:py-3">
       <div className="relative mx-auto flex h-14 max-w-5xl items-center gap-2 rounded-full border border-black/10 bg-mh-paper px-2.5 text-mh-paper-ink shadow-[0_14px_40px_-20px_rgba(0,0,0,.85)] sm:h-[60px] sm:gap-3 sm:px-4">
         <span className="absolute left-8 right-8 top-0 h-px bg-gradient-to-r from-transparent via-mh-red/70 to-transparent" aria-hidden="true" />
-        {/* Esquerda: menu mobile + logo */}
-        <div className="flex items-center gap-2">
+        {/* Marca e navegação formam uma única unidade visual. */}
+        <div className="flex min-w-0 items-center gap-2 md:gap-6">
           <MobileNav items={NAV} tone="light" />
-          <Logo priority size={38} />
+          <Logo priority size={42} />
+
+          <span className="hidden h-6 w-px bg-black/12 md:block" aria-hidden="true" />
+          <nav className="hidden items-center gap-1 md:flex">
+            {NAV.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="rounded-full px-3.5 py-2 text-sm font-medium text-mh-paper-muted transition-colors duration-200 hover:bg-black/[0.055] hover:text-mh-paper-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mh-red"
+              >
+                {item.label}
+              </Link>
+            ))}
+          </nav>
         </div>
 
-        {/* Centro: navegação (desktop) */}
-        <nav className="mx-auto hidden items-center gap-1 md:flex">
-          {NAV.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="rounded-full px-3.5 py-2 text-sm font-medium text-mh-paper-muted transition-colors duration-200 hover:bg-black/[0.055] hover:text-mh-paper-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mh-red"
-            >
-              {item.label}
-            </Link>
-          ))}
-        </nav>
-
         {/* Direita: ações */}
-        <div className="ml-auto flex items-center gap-0.5 md:ml-0">
+        <div className="ml-auto flex shrink-0 items-center gap-0.5">
           <HeaderSearch tone="light" />
           <Link
             href="/minha-area"
