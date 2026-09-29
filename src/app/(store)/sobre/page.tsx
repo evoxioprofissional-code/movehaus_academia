@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import { Dumbbell, HeartPulse, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { EditorialPageHero } from "@/components/ui/editorial-page-hero";
 import { whatsappLink } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -10,55 +10,54 @@ export const metadata: Metadata = {
 
 export default function SobrePage() {
   return (
-    <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6">
-      <span className="inline-flex items-center rounded-full border border-mh-border px-3 py-1 text-xs font-medium uppercase tracking-widest text-mh-muted">
-        A academia
-      </span>
-      <h1 className="mt-5 text-4xl font-bold uppercase leading-[0.95] tracking-tight sm:text-5xl">
-        MoveHaus <span className="text-mh-red">Training Club</span>
-      </h1>
-      <p className="mt-5 max-w-2xl text-lg text-mh-muted">
-        A MoveHaus é um clube de treino que une vestuário, programas e conteúdo
-        para quem leva o treino a sério. Esta é a loja oficial: aqui você
-        encontra o que a gente usa e recomenda no dia a dia.
-      </p>
+    <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
+      <EditorialPageHero
+        kicker="A academia"
+        title="Treino sério. Acompanhamento próximo."
+        description="A MoveHaus nasceu para quem busca evolução com método e uma comunidade que cresce junto. A loja reúne o que faz parte dessa rotina."
+        aside="MoveHaus Training Club • Colômbia, São Paulo"
+      />
 
-      <div className="mt-12 grid gap-4 sm:grid-cols-3">
+      <div className="grid border-y border-white/10 md:grid-cols-3 md:divide-x md:divide-white/10">
         {[
           {
-            icon: Dumbbell,
+            number: "01",
             title: "Treino com método",
             desc: "Programas estruturados, com progressão e orientação de execução.",
           },
           {
-            icon: HeartPulse,
+            number: "02",
             title: "Nutrição na prática",
             desc: "Conteúdo educativo para organizar a alimentação em torno do treino.",
           },
           {
-            icon: Users,
+            number: "03",
             title: "Comunidade",
             desc: "Um clube de gente que treina junto e evolui junto.",
           },
         ].map((item) => (
           <div
             key={item.title}
-            className="rounded-mh border border-mh-border bg-mh-surface p-6"
+            className="group border-b border-white/10 py-8 last:border-b-0 md:border-b-0 md:px-8 md:first:pl-0 md:last:pr-0"
           >
-            <item.icon className="size-6 text-mh-red" />
-            <h2 className="mt-4 font-display text-lg font-semibold uppercase tracking-wide text-white">
+            <span className="font-display text-4xl font-bold text-white/15 transition-colors group-hover:text-mh-red">
+              {item.number}
+            </span>
+            <h2 className="mt-5 text-xl font-semibold text-white">
               {item.title}
             </h2>
-            <p className="mt-1 text-sm text-mh-muted">{item.desc}</p>
+            <p className="mt-2 text-sm leading-relaxed text-mh-muted">{item.desc}</p>
           </div>
         ))}
       </div>
 
-      <div className="mt-12 rounded-mh border border-mh-border bg-[radial-gradient(90%_140%_at_0%_0%,rgba(229,18,28,0.14),transparent)] p-8 sm:p-10">
-        <h2 className="text-2xl font-bold uppercase tracking-tight text-white">
+      <div className="relative mt-12 overflow-hidden bg-mh-paper p-8 text-mh-paper-ink sm:p-12">
+        <div className="absolute right-0 top-0 h-2 w-1/3 bg-mh-red" aria-hidden="true" />
+        <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-mh-red">Comece por aqui</p>
+        <h2 className="mt-3 max-w-xl font-display text-4xl font-bold leading-none sm:text-5xl">
           Quer treinar com a gente?
         </h2>
-        <p className="mt-2 max-w-lg text-mh-muted">
+        <p className="mt-4 max-w-lg text-mh-paper-muted">
           Fale com a equipe no WhatsApp para saber sobre planos, horários e como
           começar.
         </p>

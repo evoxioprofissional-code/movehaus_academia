@@ -40,7 +40,7 @@ export function ProductCard({
   const typeLabel = TYPE_LABEL[product.type];
 
   return (
-    <article className="group relative flex flex-col">
+    <article className="group relative flex flex-col border-b border-white/10 pb-5 transition-colors duration-200 hover:border-mh-red/60">
       {/* Link que cobre o card inteiro */}
       <Link
         href={productHref(product)}
@@ -49,7 +49,7 @@ export function ProductCard({
       />
 
       {/* Mídia */}
-      <div className="relative overflow-hidden rounded-lg bg-mh-surface">
+      <div className="relative overflow-hidden bg-mh-surface">
         <ProductMedia
           product={product}
           priority={priority}
@@ -62,7 +62,7 @@ export function ProductCard({
         {/* Selos (não capturam clique) */}
         <div className="pointer-events-none absolute left-3 top-3 flex flex-col items-start gap-1.5">
           {discount > 0 && (
-            <span className="rounded-md bg-mh-red px-2 py-0.5 text-xs font-semibold text-white">
+            <span className="bg-mh-red px-2.5 py-1 text-xs font-semibold text-white">
               -{discount}%
             </span>
           )}
@@ -74,7 +74,7 @@ export function ProductCard({
         </div>
 
         {typeLabel && (
-          <span className="pointer-events-none absolute right-3 top-3 rounded-md bg-black/55 px-2 py-0.5 text-[11px] font-medium uppercase tracking-wide text-white/90 backdrop-blur">
+          <span className="pointer-events-none absolute right-3 top-3 bg-black/70 px-2.5 py-1 text-[10px] font-medium uppercase tracking-[0.14em] text-white/90 backdrop-blur">
             {typeLabel}
           </span>
         )}

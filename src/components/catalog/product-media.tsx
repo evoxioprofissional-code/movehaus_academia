@@ -22,7 +22,7 @@ export function ProductMedia({
       alt={product.name}
       tone={product.type === "ebook" ? "red" : "dark"}
       priority={priority}
-      sizes={sizes ?? "(max-width: 640px) 50vw, 320px"}
+      sizes={sizes ?? "(max-width: 429px) 100vw, (max-width: 640px) 50vw, 320px"}
       className={className}
     />
   );
