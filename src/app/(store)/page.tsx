@@ -14,6 +14,7 @@ import { accessDescription } from "@/components/catalog/billing-info";
 import { ScrollExpandHero } from "@/components/home/scroll-expand-hero";
 import { CommunityGallery } from "@/components/home/community-gallery";
 import { ReaderPreview } from "@/components/home/reader-preview";
+import { getHomeMedia } from "@/lib/home-media";
 import {
   getEbooks,
   getFeaturedProducts,
@@ -25,10 +26,11 @@ import { hasBilling, isPhysical } from "@/types/catalog";
 import { ABOUT, COMMUNITY, DIGITAL, HERO, OFFER } from "@/content/home";
 
 export default async function HomePage() {
-  const [featured, onSale, ebooks] = await Promise.all([
+  const [featured, onSale, ebooks, media] = await Promise.all([
     getFeaturedProducts(),
     getOnSaleProducts(),
     getEbooks(),
+    getHomeMedia(),
   ]);
 
   const featuredProducts = featured.filter((p) => p.type !== "ebook").slice(0, 4);
@@ -36,13 +38,19 @@ export default async function HomePage() {
   const otherEbooks = ebooks.slice(1, 4);
   const offer = onSale[0];
 
+  // Imagens da home enviadas pelo admin (com fallback para o placeholder).
+  const communityItems = COMMUNITY.items.map((item, i) => ({
+    ...item,
+    media: { ...item.media, src: media[`community_${i}`] ?? item.media.src },
+  }));
+
   return (
     <>
       {/* ================= HERO (expansão de mídia ao rolar) ================= */}
       <ScrollExpandHero
         media={
           <PhotoSlot
-            src={HERO.image.src}
+            src={media.hero ?? HERO.image.src}
             alt={HERO.image.alt}
             caption={HERO.image.caption}
             priority
@@ -90,7 +98,7 @@ export default async function HomePage() {
           />
           <p className="mt-3 text-mh-muted">{COMMUNITY.text}</p>
         </div>
-        <CommunityGallery items={COMMUNITY.items} />
+        <CommunityGallery items={communityItems} />
       </section>
 
       {/* ================= PRODUTOS EM DESTAQUE ================= */}
@@ -229,7 +237,7 @@ export default async function HomePage() {
         <section className="px-4 pb-16 sm:px-6 lg:pb-24">
           <div className="relative mx-auto max-w-6xl overflow-hidden rounded-lg">
             <PhotoSlot
-              src={OFFER.image.src}
+              src={media.offer ?? OFFER.image.src}
               alt={OFFER.image.alt}
               caption={OFFER.image.caption}
               tone="red"
@@ -299,7 +307,7 @@ export default async function HomePage() {
             </Button>
           </div>
           <PhotoSlot
-            src={ABOUT.image.src}
+            src={media.about ?? ABOUT.image.src}
             alt={ABOUT.image.alt}
             caption={ABOUT.image.caption}
             sizes="(max-width: 1024px) 100vw, 50vw"

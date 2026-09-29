@@ -70,6 +70,21 @@ export const OFFER = {
   image: { src: null, alt: "Produtos MoveHaus em oferta", caption: "Campanha de ofertas" } as MediaSlot,
 };
 
+/**
+ * Slots de imagem da home editáveis pelo admin (tabela home_media).
+ * A chave liga o upload do admin ao lugar certo na página.
+ */
+export const HOME_MEDIA_SLOTS: { key: string; label: string; hint: string }[] = [
+  { key: "hero", label: "Topo (hero)", hint: "Imagem/foto grande do topo. Horizontal, alta resolução." },
+  { key: "community_0", label: "Galeria 1 — Treino com acompanhamento", hint: "Vertical (retrato)." },
+  { key: "community_1", label: "Galeria 2 — Comunidade que evolui junta", hint: "Vertical (retrato)." },
+  { key: "community_2", label: "Galeria 3 — Estrutura para treinar", hint: "Vertical (retrato)." },
+  { key: "community_3", label: "Galeria 4 — Constância gera resultado", hint: "Vertical (retrato)." },
+  { key: "community_4", label: "Galeria 5 — MoveHaus Training Club", hint: "Vertical (retrato)." },
+  { key: "offer", label: "Faixa de ofertas", hint: "Horizontal, tom mais escuro." },
+  { key: "about", label: "Sobre a MoveHaus", hint: "Foto do ambiente/comunidade." },
+];
+
 export const ABOUT = {
   kicker: "Sobre a MoveHaus",
   title: "Evolução com treino sério e gente por perto",

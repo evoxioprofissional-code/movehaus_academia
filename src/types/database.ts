@@ -296,6 +296,12 @@ export type Database = {
         Update: { title?: string; description?: string; ingredients?: string; steps?: string; active?: boolean };
         Relationships: [];
       };
+      home_media: {
+        Row: { key: string; storage_path: string; updated_at: string };
+        Insert: { key: string; storage_path: string };
+        Update: { storage_path?: string };
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: {

@@ -10,6 +10,7 @@ import {
   ChevronRight,
   Dumbbell,
   ExternalLink,
+  Home,
   ImageIcon,
   LayoutDashboard,
   LogOut,
@@ -35,6 +36,7 @@ const sections = [
   { href: "/admin/acompanhamento", label: "Acompanhamento", icon: Dumbbell },
   { href: "/admin/promocoes", label: "Cupons e promoções", icon: BadgePercent },
   { href: "/admin/banners", label: "Banners", icon: ImageIcon },
+  { href: "/admin/home", label: "Página inicial", icon: Home },
   { href: "/admin/configuracoes", label: "Configurações", icon: Settings },
 ];
 
