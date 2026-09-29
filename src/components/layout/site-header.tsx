@@ -17,11 +17,11 @@ export const NAV = [
 export function SiteHeader() {
   return (
     <header className="sticky top-0 z-40 border-b border-white/10 bg-mh-black/80 backdrop-blur-md">
-      <div className="mx-auto flex h-16 max-w-6xl items-center gap-3 px-4 sm:px-6">
+      <div className="mx-auto flex h-16 max-w-6xl items-center gap-2 px-3 sm:gap-3 sm:px-6">
         {/* Esquerda: menu mobile + logo */}
         <div className="flex items-center gap-2">
           <MobileNav items={NAV} />
-          <Logo priority size={44} />
+          <Logo priority size={40} />
         </div>
 
         {/* Centro: navegação (desktop) */}

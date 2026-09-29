@@ -3,9 +3,9 @@
 import { useEffect, useRef } from "react";
 
 /**
- * Hero com expansão de mídia ao rolar (princípio do "scroll media expansion",
- * reimplementado de forma leve). A mídia começa levemente emoldurada e se
- * expande para full-bleed conforme a rolagem inicial avança.
+ * Hero editorial responsivo. No desktop a mídia ocupa uma coluna própria e
+ * recebe uma expansão curta ao rolar. No celular não há transformação: o
+ * conteúdo empilha naturalmente, evitando cortes e sobreposição.
  *
  * - Sem biblioteca de animação; usa um listener de scroll com rAF.
  * - Atualiza o estilo via ref (não re-renderiza a cada scroll).
@@ -34,20 +34,21 @@ export function ScrollExpandHero({
       return;
     }
 
-    const isMobile = window.matchMedia("(max-width: 640px)").matches;
-    const startScale = isMobile ? 0.95 : 0.9;
-    const maxRadius = isMobile ? 16 : 28;
+    const isMobile = window.matchMedia("(max-width: 767px)").matches;
+    if (isMobile) {
+      frame.style.transform = "scale(1)";
+      return;
+    }
+    const startScale = 0.965;
     let ticking = false;
 
     const apply = () => {
       ticking = false;
       const vh = window.innerHeight;
       const top = section.getBoundingClientRect().top;
-      // progresso: 0 no topo, 1 após ~55% da viewport rolada
-      const p = Math.min(Math.max(-top / (vh * 0.55), 0), 1);
+      const p = Math.min(Math.max(-top / (vh * 0.65), 0), 1);
       const scale = startScale + (1 - startScale) * p;
       frame.style.transform = `scale(${scale.toFixed(4)})`;
-      frame.style.borderRadius = `${(maxRadius * (1 - p)).toFixed(1)}px`;
     };
 
     const onScroll = () => {
@@ -67,22 +68,18 @@ export function ScrollExpandHero({
   }, []);
 
   return (
-    <section
-      ref={sectionRef}
-      className="relative isolate min-h-[72svh] sm:min-h-[80vh] lg:min-h-[88vh]"
-    >
-      <div className="absolute inset-0 overflow-hidden">
+    <section ref={sectionRef} className="relative isolate overflow-hidden bg-mh-black">
+      <div className="mx-auto grid max-w-6xl grid-cols-1 gap-7 px-4 pb-12 pt-6 sm:px-6 sm:pb-16 sm:pt-8 md:min-h-[38rem] md:grid-cols-2 md:items-center md:gap-10 lg:min-h-[42rem] lg:gap-14 lg:py-12">
         <div
           ref={frameRef}
-          className="absolute inset-0 overflow-hidden will-change-transform"
-          style={{ transform: "scale(0.9)", borderRadius: "28px" }}
+          className="relative order-1 aspect-[16/10] min-h-0 overflow-hidden rounded-2xl border border-white/10 bg-mh-surface shadow-mh will-change-transform md:order-2 md:aspect-[4/3] md:max-h-[34rem] lg:rounded-[1.75rem]"
+          style={{ transform: "scale(0.965)" }}
         >
           {media}
         </div>
-      </div>
-
-      <div className="relative z-10 flex min-h-[72svh] items-end sm:min-h-[80vh] lg:min-h-[88vh]">
-        {children}
+        <div className="relative z-10 order-2 flex min-w-0 items-center md:order-1">
+          {children}
+        </div>
       </div>
     </section>
   );

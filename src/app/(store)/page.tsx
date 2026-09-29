@@ -54,13 +54,13 @@ export default async function HomePage() {
             alt={HERO.image.alt}
             caption={HERO.image.caption}
             priority
-            overlay
-            sizes="100vw"
+            fit="contain"
+            sizes="(max-width: 767px) 100vw, 55vw"
             className="absolute inset-0"
           />
         }
       >
-        <div className="mx-auto w-full max-w-6xl px-4 pb-12 sm:px-6 sm:pb-16 lg:pb-20">
+        <div className="w-full min-w-0">
           <p className="text-xs font-semibold uppercase tracking-[0.22em] text-white/70">
             {HERO.eyebrow}
           </p>
@@ -68,12 +68,12 @@ export default async function HomePage() {
             as="h1"
             trigger="mount"
             text={HERO.title}
-            className="mt-4 max-w-2xl font-display text-[clamp(2.3rem,6.6vw,4.5rem)] font-bold uppercase leading-[0.94] text-white"
+            className="mt-3 max-w-xl font-display text-[clamp(2.35rem,10.5vw,4.5rem)] font-bold uppercase leading-[0.92] text-white md:text-[clamp(3rem,4.2vw,4rem)]"
           />
-          <p className="mt-5 max-w-lg text-base text-white/80 sm:text-lg">
+          <p className="mt-4 max-w-lg text-[15px] leading-relaxed text-white/75 sm:mt-5 sm:text-lg">
             {HERO.text}
           </p>
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+          <div className="mt-6 grid grid-cols-1 gap-3 sm:mt-8 sm:flex sm:flex-row">
             <CtaButton href={HERO.primary.href} variant="primary" size="lg">
               {HERO.primary.label}
             </CtaButton>

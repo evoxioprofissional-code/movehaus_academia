@@ -31,6 +31,7 @@ export function PhotoSlot({
   priority,
   sizes,
   overlay,
+  fit = "cover",
   className,
   children,
 }: {
@@ -42,11 +43,13 @@ export function PhotoSlot({
   sizes?: string;
   /** Escurece a base para dar legibilidade a textos sobrepostos. */
   overlay?: boolean;
+  /** `contain` preserva logos e artes; `cover` preenche fotos. */
+  fit?: "cover" | "contain";
   className?: string;
   children?: React.ReactNode;
 }) {
   return (
-    <div className={cn("relative overflow-hidden mh-noise", !src && toneBg[tone], className)}>
+    <div className={cn("relative overflow-hidden mh-noise", fit === "contain" ? "bg-[#101012]" : !src && toneBg[tone], className)}>
       {src ? (
         <Image
           src={src}
@@ -54,7 +57,11 @@ export function PhotoSlot({
           fill
           priority={priority}
           sizes={sizes ?? "100vw"}
-          className="object-cover"
+          className={cn(
+            fit === "contain"
+              ? "object-contain p-5 sm:p-8 lg:p-10"
+              : "object-cover",
+          )}
         />
       ) : (
         <>

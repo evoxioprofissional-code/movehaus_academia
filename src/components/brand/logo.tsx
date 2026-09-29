@@ -16,7 +16,7 @@ export function Logo({
     <Link
       href="/"
       aria-label="MoveHaus Training Club — início"
-      className={cn("inline-flex items-center", className)}
+      className={cn("inline-flex shrink-0 items-center", className)}
     >
       <Image
         src="/brand/movehaus-logo.jpg"
@@ -24,7 +24,7 @@ export function Logo({
         width={size}
         height={size}
         priority={priority}
-        className="rounded-lg"
+        className="h-auto max-w-full rounded-md object-contain"
       />
     </Link>
   );
