@@ -49,15 +49,46 @@ export default async function HomePage() {
       {/* ================= HERO (expansão de mídia ao rolar) ================= */}
       <ScrollExpandHero
         media={
-          <PhotoSlot
-            src={media.hero ?? HERO.image.src}
-            alt={HERO.image.alt}
-            caption={HERO.image.caption}
-            priority
-            fit="contain"
-            sizes="(max-width: 767px) 100vw, 55vw"
-            className="absolute inset-0"
-          />
+          <div className="absolute inset-0 overflow-hidden bg-[#101012]">
+            <div
+              aria-hidden="true"
+              className="absolute -right-[18%] -top-[26%] h-[72%] w-[58%] rotate-[18deg] bg-mh-red"
+            />
+            <div
+              aria-hidden="true"
+              className="absolute bottom-0 left-0 h-1/3 w-[7px] bg-mh-red sm:w-2"
+            />
+            <div
+              aria-hidden="true"
+              className="absolute inset-0 opacity-[0.08] [background-image:linear-gradient(rgba(255,255,255,.35)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.35)_1px,transparent_1px)] [background-size:32px_32px]"
+            />
+
+            <div className="absolute inset-x-[8%] top-[18%] bottom-[20%] overflow-hidden border border-white/10 bg-black/40 shadow-2xl sm:inset-x-[10%] md:top-[22%] md:bottom-[22%]">
+              <PhotoSlot
+                src={media.hero ?? HERO.image.src}
+                alt={HERO.image.alt}
+                caption={HERO.image.caption}
+                priority
+                fit="contain"
+                sizes="(max-width: 767px) 84vw, 46vw"
+                className="absolute inset-0"
+              />
+            </div>
+
+            <div className="absolute inset-x-[8%] bottom-[7%] flex items-end justify-between sm:inset-x-[10%]">
+              <div>
+                <p className="text-[9px] font-semibold uppercase tracking-[0.28em] text-white/45 sm:text-[10px]">
+                  Identidade MoveHaus
+                </p>
+                <p className="mt-1 text-xs font-semibold uppercase tracking-[0.16em] text-white sm:text-sm">
+                  Training Club
+                </p>
+              </div>
+              <span className="font-display text-3xl font-bold leading-none text-white/15 sm:text-4xl">
+                MH
+              </span>
+            </div>
+          </div>
         }
       >
         <div className="w-full min-w-0">
