@@ -11,7 +11,7 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[];
 
-export type AppRole = "admin" | "customer";
+export type AppRole = "admin" | "customer" | "professor" | "nutricionista";
 export type ProductType = "physical" | "digital" | "ebook";
 export type BillingModel = "one_time" | "subscription";
 export type EbookStatus = "draft" | "published";
@@ -302,6 +302,7 @@ export type Database = {
       is_admin: { Args: Record<string, never>; Returns: boolean };
       has_coaching_access: { Args: { uid?: string }; Returns: boolean };
       points_balance: { Args: { uid?: string }; Returns: number };
+      is_staff: { Args: Record<string, never>; Returns: boolean };
     };
     Enums: {
       app_role: AppRole;

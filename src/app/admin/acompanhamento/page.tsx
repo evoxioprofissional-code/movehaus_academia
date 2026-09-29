@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { listCoachingMembers } from "@/lib/coaching/admin-data";
-import { grantCoachingAccess, revokeCoachingAccess } from "@/lib/coaching/actions";
+import { grantCoachingAccess, revokeCoachingAccess, setUserRole } from "@/lib/coaching/actions";
 
 export const metadata = { title: "Acompanhamento | MoveHaus Admin" };
 
@@ -19,6 +19,9 @@ export default async function AdminCoachingPage() {
         description={`Libere o acesso à área do aluno. ${withAccess} com acesso ativo. (Na Fase 5, a assinatura fará isso automaticamente.)`}
         action={
           <div className="flex gap-2">
+            <Button asChild>
+              <a href="/equipe">Painel da equipe</a>
+            </Button>
             <Button asChild variant="outline">
               <a href="/admin/acompanhamento/receitas">Receitas</a>
             </Button>
@@ -46,6 +49,7 @@ export default async function AdminCoachingPage() {
                 <th>Contato</th>
                 <th>Acesso</th>
                 <th>Origem</th>
+                <th>Papel</th>
                 <th className="text-right">Ação</th>
               </tr>
             </thead>
@@ -71,6 +75,18 @@ export default async function AdminCoachingPage() {
                   </td>
                   <td className="text-mh-muted">
                     {m.hasAccess ? (m.source === "subscription" ? "Assinatura" : "Manual") : "—"}
+                  </td>
+                  <td>
+                    <form action={setUserRole} className="flex items-center gap-1">
+                      <input type="hidden" name="user_id" value={m.id} />
+                      <select name="role" defaultValue={m.role} className="h-8 rounded border border-white/10 bg-[#0d0d0f] px-2 text-xs text-white">
+                        <option value="customer">Cliente</option>
+                        <option value="professor">Professor</option>
+                        <option value="nutricionista">Nutri</option>
+                        <option value="admin">Admin</option>
+                      </select>
+                      <button type="submit" className="rounded border border-white/10 px-2 py-1 text-xs text-mh-muted hover:text-white">ok</button>
+                    </form>
                   </td>
                   <td className="text-right">
                     <div className="flex items-center justify-end gap-2">

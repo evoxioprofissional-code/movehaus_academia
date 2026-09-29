@@ -67,3 +67,25 @@ export async function requireAdmin(): Promise<User> {
   if (!(await isAdmin())) redirect("/");
   return user;
 }
+
+/** True se o usuário é da equipe (admin, professor ou nutricionista). */
+export const isStaff = cache(async (): Promise<boolean> => {
+  const user = await getUser();
+  if (!user) return false;
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase.rpc("is_staff");
+    if (error) return false;
+    return data === true;
+  } catch {
+    return false;
+  }
+});
+
+/** Exige que o usuário seja da equipe; senão vai para /login ou home. */
+export async function requireStaff(): Promise<User> {
+  const user = await getUser();
+  if (!user) redirect("/login?next=/equipe");
+  if (!(await isStaff())) redirect("/");
+  return user;
+}
