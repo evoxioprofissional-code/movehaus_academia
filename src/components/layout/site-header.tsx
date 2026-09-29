@@ -1,4 +1,8 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { UserRound } from "lucide-react";
 import { Logo } from "@/components/brand/logo";
 import { CartButton } from "@/components/cart/cart-button";
@@ -15,40 +19,54 @@ export const NAV = [
 // Sem getUser aqui: o header é público e não deve depender do serviço de auth
 // a cada acesso. A conta leva a /minha-area, que é protegida no servidor.
 export function SiteHeader() {
+  const pathname = usePathname();
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const update = () => setScrolled(window.scrollY > 24);
+    update();
+    window.addEventListener("scroll", update, { passive: true });
+    return () => window.removeEventListener("scroll", update);
+  }, []);
+
   return (
-    <header className="sticky top-0 z-40 px-2.5 py-2.5 sm:px-5 sm:py-3">
-      <div className="relative mx-auto flex h-14 max-w-5xl items-center gap-2 rounded-full border border-black/10 bg-mh-paper px-2.5 text-mh-paper-ink shadow-[0_14px_40px_-20px_rgba(0,0,0,.85)] sm:h-[60px] sm:gap-3 sm:px-4">
-        <span className="absolute left-8 right-8 top-0 h-px bg-gradient-to-r from-transparent via-mh-red/70 to-transparent" aria-hidden="true" />
+    <header className={`sticky top-0 z-40 px-2.5 transition-[padding] duration-300 sm:px-5 ${scrolled ? "py-1.5 sm:py-2" : "py-2.5 sm:py-3"}`}>
+      <div className={`relative mx-auto flex max-w-5xl animate-[mh-navbar-enter_.45s_ease-out_both] items-center gap-2 rounded-full border px-2.5 text-white backdrop-blur-xl transition-[height,background-color,border-color,box-shadow] duration-300 sm:gap-3 sm:px-4 ${scrolled ? "h-12 border-white/10 bg-black/75 shadow-[0_12px_38px_-18px_rgba(0,0,0,.9)] sm:h-13" : "h-14 border-white/[0.07] bg-black/35 shadow-none sm:h-[58px]"}`}>
+        <span className={`absolute left-8 right-8 top-0 h-px bg-gradient-to-r from-transparent via-mh-red to-transparent transition-opacity duration-300 ${scrolled ? "opacity-70" : "opacity-35"}`} aria-hidden="true" />
         {/* Marca e navegação formam uma única unidade visual. */}
         <div className="flex min-w-0 items-center gap-2 md:gap-6">
-          <MobileNav items={NAV} tone="light" />
+          <MobileNav items={NAV} />
           <Logo priority size={42} />
 
-          <span className="hidden h-6 w-px bg-black/12 md:block" aria-hidden="true" />
+          <span className="hidden h-6 w-px bg-white/12 md:block" aria-hidden="true" />
           <nav className="hidden items-center gap-1 md:flex">
-            {NAV.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="rounded-full px-3.5 py-2 text-sm font-medium text-mh-paper-muted transition-colors duration-200 hover:bg-black/[0.055] hover:text-mh-paper-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mh-red"
-              >
-                {item.label}
-              </Link>
-            ))}
+            {NAV.map((item) => {
+              const active = pathname === item.href;
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`relative rounded-full px-3.5 py-2 text-sm font-medium transition-colors duration-200 hover:bg-white/[0.07] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mh-red ${active ? "text-white" : "text-white/62"}`}
+                >
+                  {item.label}
+                  <span className={`absolute inset-x-3.5 -bottom-px h-0.5 origin-left bg-mh-red transition-transform duration-200 ${active ? "scale-x-100" : "scale-x-0"}`} aria-hidden="true" />
+                </Link>
+              );
+            })}
           </nav>
         </div>
 
         {/* Direita: ações */}
         <div className="ml-auto flex shrink-0 items-center gap-0.5">
-          <HeaderSearch tone="light" />
+          <HeaderSearch />
           <Link
             href="/minha-area"
             aria-label="Minha conta"
-            className="grid size-10 place-items-center rounded-full text-mh-paper-ink transition-all duration-200 hover:bg-black/[0.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mh-red active:scale-95"
+            className="grid size-10 place-items-center rounded-full text-white/85 transition-all duration-200 hover:bg-white/[0.08] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mh-red active:scale-95"
           >
             <UserRound className="size-[22px]" strokeWidth={1.75} />
           </Link>
-          <CartButton tone="light" />
+          <CartButton />
         </div>
       </div>
     </header>

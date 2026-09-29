@@ -107,6 +107,11 @@ h1, h2, h3, h4, h5 {
   to { transform: translateX(0); opacity: 1; }
 }
 
+@keyframes mh-navbar-enter {
+  from { transform: translateY(-14px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
 /* Scrollbar discreta */
 ::-webkit-scrollbar {
   width: 10px;
