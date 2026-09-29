@@ -18,8 +18,10 @@ import { whatsappLink } from "@/lib/site";
 
 export function MobileNav({
   items,
+  tone = "dark",
 }: {
   items: { href: string; label: string }[];
+  tone?: "dark" | "light";
 }) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
@@ -38,19 +40,19 @@ export function MobileNav({
         type="button"
         onClick={() => setOpen(true)}
         aria-label="Abrir menu"
-        className="-ml-1 grid size-10 place-items-center rounded-full text-mh-text hover:bg-white/5 hover:text-white"
+        className={`-ml-1 grid size-10 place-items-center rounded-full transition-all active:scale-95 ${tone === "light" ? "text-mh-paper-ink hover:bg-black/[0.06]" : "text-mh-text hover:bg-white/5 hover:text-white"}`}
       >
         <Menu className="size-6" />
       </button>
 
       {open && (
-        <div className="fixed inset-0 z-50">
+        <div className="fixed inset-0 z-[60]">
           <button
             aria-label="Fechar menu"
             className="absolute inset-0 bg-black/75 backdrop-blur-sm"
             onClick={close}
           />
-          <nav className="absolute left-0 top-0 flex h-full w-[85%] max-w-sm flex-col bg-mh-ink">
+          <nav className="absolute left-0 top-0 flex h-full w-[88%] max-w-sm animate-[mh-slide-in_.26s_ease-out] flex-col border-r border-white/10 bg-mh-ink shadow-2xl">
             <div className="flex items-center justify-between px-5 py-4">
               <Logo size={40} />
               <button
