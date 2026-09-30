@@ -1,22 +1,41 @@
+/**
+ * Conteúdo e mídia da página inicial — ponto único de edição.
+ *
+ * COMO TROCAR AS FOTOS
+ * 1. Coloque a imagem em /public/images (ex.: /public/images/hero.jpg).
+ * 2. Aponte o `src` do slot para o caminho ("/images/hero.jpg").
+ * 3. Enquanto `src` for null, aparece um placeholder de marca elegante.
+ *
+ * Nada aqui depende do banco. Na Fase 4, textos e banners podem passar a vir
+ * das Configurações do painel; a estrutura já está isolada para isso.
+ */
+
 export interface MediaSlot {
+  /** Caminho em /public (ex.: "/images/hero.jpg") ou null para placeholder. */
   src: string | null;
   alt: string;
+  /** Rótulo discreto do que a foto deve mostrar (aparece só no placeholder). */
   caption?: string;
 }
 
 export const HERO = {
   eyebrow: "MoveHaus Training Club — Colômbia/SP",
   title: "Seu próximo nível\ncomeça aqui.",
-  text: "Treino, produtos e conteúdo para evoluir todos os dias.",
+  text: "Treino, produtos e conteúdos para transformar constância em resultado.",
   primary: { label: "Explorar a loja", href: "/loja" },
-  secondary: { label: "Conhecer o clube", href: "/sobre" },
-  image: { src: null, alt: "Treino na MoveHaus Training Club", caption: "Foto de treino" } as MediaSlot,
+  secondary: { label: "Conhecer a MoveHaus", href: "/sobre" },
+  image: {
+    src: null,
+    alt: "Treino na MoveHaus Training Club",
+    caption: "Foto ou vídeo de treino",
+  } as MediaSlot,
 };
 
+/** Seção "Isso é MoveHaus." — narrativa visual da comunidade (carrossel). */
 export const COMMUNITY = {
   kicker: "Comunidade",
   title: "Isso é MoveHaus.",
-  text: "Gente treinando, evoluindo e fazendo parte de algo maior que um treino.",
+  text: "Gente de verdade treinando, evoluindo e fazendo parte de algo maior que um treino.",
   items: [
     { caption: "Treino com acompanhamento", tone: "dark", media: { src: null, alt: "Treino com acompanhamento", caption: "Treino" } },
     { caption: "Uma comunidade que evolui junta", tone: "red", media: { src: null, alt: "Comunidade MoveHaus", caption: "Comunidade" } },
@@ -26,33 +45,49 @@ export const COMMUNITY = {
   ] as { caption: string; tone: "dark" | "red"; media: MediaSlot }[],
 };
 
+export const BRAND = {
+  kicker: "A academia",
+  title: "Feita por quem treina de verdade",
+  text: "Um espaço para evoluir com método, acompanhamento próximo e uma comunidade que puxa junto. Aqui, cada treino tem propósito.",
+  pillars: ["Treino guiado", "Acompanhamento próximo", "Comunidade que evolui junto"],
+  images: {
+    main: { src: null, alt: "Ambiente da MoveHaus", caption: "Ambiente da academia" } as MediaSlot,
+    top: { src: null, alt: "Aluno treinando", caption: "Aluno em treino" } as MediaSlot,
+    bottom: { src: null, alt: "Professor acompanhando o treino", caption: "Professor" } as MediaSlot,
+  },
+};
+
 export const DIGITAL = {
   kicker: "Conteúdos",
-  title: "Seu treino continua fora da academia.",
-  text: "Materiais de nutrição e organização de rotina, lidos no leitor interno com acompanhamento e exclusividade.",
+  title: "Conhecimento que acompanha o seu treino",
+  text: "Materiais de nutrição e organização de rotina, lidos no leitor interno — com acompanhamento e exclusividade.",
 };
 
 export const OFFER = {
   kicker: "Campanha",
   title: "Ofertas da semana",
-  text: "Condições especiais nos itens selecionados da loja.",
+  text: "Condições especiais por tempo limitado nos itens selecionados da loja.",
   image: { src: null, alt: "Produtos MoveHaus em oferta", caption: "Campanha de ofertas" } as MediaSlot,
 };
 
+/**
+ * Slots de imagem da home editáveis pelo admin (tabela home_media).
+ * A chave liga o upload do admin ao lugar certo na página.
+ */
 export const HOME_MEDIA_SLOTS: { key: string; label: string; hint: string }[] = [
-  { key: "hero", label: "Topo (hero)", hint: "Fotografia horizontal de treino, ambiente ou aluno. Não envie a logo neste campo." },
-  { key: "community_0", label: "Galeria 1 — Treino com acompanhamento", hint: "Foto de aluno ou professor em treino." },
-  { key: "community_1", label: "Galeria 2 — Comunidade", hint: "Foto de alunos, equipe ou evento." },
-  { key: "community_2", label: "Galeria 3 — Estrutura", hint: "Foto horizontal da academia ou equipamentos." },
-  { key: "community_3", label: "Galeria 4 — Constância", hint: "Foto de rotina ou evolução." },
-  { key: "community_4", label: "Galeria 5 — Clube", hint: "Foto institucional da MoveHaus." },
-  { key: "offer", label: "Faixa de ofertas", hint: "Fotografia horizontal de produto, em ambiente escuro." },
-  { key: "about", label: "Sobre a MoveHaus", hint: "Foto da equipe, alunos ou comunidade." },
+  { key: "hero", label: "Topo (hero)", hint: "Imagem/foto grande do topo. Horizontal, alta resolução." },
+  { key: "community_0", label: "Galeria 1 — Treino com acompanhamento", hint: "Vertical (retrato)." },
+  { key: "community_1", label: "Galeria 2 — Comunidade que evolui junta", hint: "Vertical (retrato)." },
+  { key: "community_2", label: "Galeria 3 — Estrutura para treinar", hint: "Vertical (retrato)." },
+  { key: "community_3", label: "Galeria 4 — Constância gera resultado", hint: "Vertical (retrato)." },
+  { key: "community_4", label: "Galeria 5 — MoveHaus Training Club", hint: "Vertical (retrato)." },
+  { key: "offer", label: "Faixa de ofertas", hint: "Horizontal, tom mais escuro." },
+  { key: "about", label: "Sobre a MoveHaus", hint: "Foto do ambiente/comunidade." },
 ];
 
 export const ABOUT = {
   kicker: "Sobre a MoveHaus",
   title: "Evolução com treino sério e gente por perto",
-  text: "Treino, acompanhamento próximo e uma comunidade que cresce junto.",
-  image: { src: null, alt: "Comunidade MoveHaus", caption: "Comunidade e equipe" } as MediaSlot,
+  text: "A MoveHaus nasceu para quem busca evolução com treino sério, acompanhamento próximo e uma comunidade que cresce junto.",
+  image: { src: null, alt: "Comunidade MoveHaus", caption: "Comunidade / alunos" } as MediaSlot,
 };

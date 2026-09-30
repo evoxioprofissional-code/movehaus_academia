@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Check, ShoppingCart } from "lucide-react";
+import { Check, Plus } from "lucide-react";
 import { useCart } from "@/components/cart/cart-provider";
 import { isPhysical, type Product } from "@/types/catalog";
 import { cn } from "@/lib/utils";
@@ -31,13 +31,13 @@ export function QuickAdd({ product }: { product: Product }) {
         setTimeout(() => setAdded(false), 1800);
       }}
       className={cn(
-        "relative z-20 grid size-9 place-items-center rounded-md border transition-colors",
-        "" ,
-        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mh-red",
-        added ? "border-emerald-500 bg-emerald-500 text-white" : "border-white/25 bg-transparent text-white hover:border-mh-red hover:bg-mh-red",
+        "absolute bottom-3 right-3 z-20 grid size-10 place-items-center rounded-full shadow-soft transition-all",
+        "opacity-100 sm:translate-y-1 sm:opacity-0 sm:group-hover:translate-y-0 sm:group-hover:opacity-100",
+        "focus-visible:translate-y-0 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mh-red",
+        added ? "bg-emerald-500 text-white" : "bg-white text-mh-black hover:bg-white/90",
       )}
     >
-      {added ? <Check className="size-5" /> : <ShoppingCart className="size-4" />}
+      {added ? <Check className="size-5" /> : <Plus className="size-5" />}
     </button>
   );
 }
