@@ -491,3 +491,19 @@ export async function deleteBanner(fd: FormData) {
   revalidatePath("/admin/banners");
   revalidatePath("/");
 }
+
+export async function updateOrderStatus(fd: FormData): Promise<void> {
+  await requireAdmin();
+  const id = String(fd.get("id") ?? "");
+  const status = String(fd.get("status") ?? "pending") as "pending" | "paid" | "preparing" | "shipped" | "delivered" | "cancelled";
+  const paymentStatus = String(fd.get("payment_status") ?? "pending") as "pending" | "approved" | "failed" | "refunded" | "cancelled";
+  const notes = String(fd.get("notes") ?? "").trim().slice(0, 2000);
+  const allowedStatus = ["pending", "paid", "preparing", "shipped", "delivered", "cancelled"];
+  const allowedPayment = ["pending", "approved", "failed", "refunded", "cancelled"];
+  if (!id || !allowedStatus.includes(status) || !allowedPayment.includes(paymentStatus)) return;
+  const { error } = await (await createClient()).from("orders").update({ status, payment_status: paymentStatus, notes }).eq("id", id);
+  if (error) throw new Error("Não foi possível atualizar o pedido.");
+  revalidatePath("/admin/pedidos");
+  revalidatePath("/admin");
+  revalidatePath("/minha-area");
+}

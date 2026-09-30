@@ -6,12 +6,12 @@ type Variant = "primary" | "outline" | "ghost" | "light" | "onDark";
 type Size = "sm" | "md" | "lg";
 
 const base =
-  "inline-flex items-center justify-center gap-2 rounded-mh font-medium transition-all duration-200 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mh-red focus-visible:ring-offset-2 focus-visible:ring-offset-mh-black disabled:pointer-events-none disabled:opacity-50";
+  "inline-flex items-center justify-center gap-2 rounded-lg font-semibold transition-colors duration-200 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mh-red focus-visible:ring-offset-2 focus-visible:ring-offset-mh-black disabled:pointer-events-none disabled:opacity-50";
 
 const variants: Record<Variant, string> = {
-  primary: "bg-mh-red text-white shadow-soft hover:bg-mh-red-hover",
+  primary: "bg-admin-red text-white hover:bg-admin-red-hover",
   outline:
-    "border border-mh-border bg-transparent text-mh-text hover:border-white/40 hover:bg-white/5",
+    "border border-admin-border bg-transparent text-mh-text hover:border-[#444955] hover:bg-white/[0.035]",
   ghost: "bg-transparent text-mh-muted hover:text-white hover:bg-white/5",
   // Botão claro (para blocos sobre superfície escura ou dentro de fotos)
   light: "bg-white text-mh-black hover:bg-white/90",

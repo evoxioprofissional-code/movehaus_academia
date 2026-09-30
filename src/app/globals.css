@@ -8,20 +8,30 @@
 
 @theme {
   /* Marca */
-  --color-mh-red: #e5121c;
-  --color-mh-red-hover: #c00f18;
+  --color-mh-red: #f50019;
+  --color-mh-red-hover: #d90017;
   --color-mh-red-deep: #9d0d14;
   --color-mh-red-soft: #ff4b54;
 
   /* Neutros / grafite */
-  --color-mh-black: #0a0a0b;
+  --color-mh-black: #090a0c;
   --color-mh-ink: #050506;
-  --color-mh-surface: #131316;
+  --color-mh-surface: #111216;
   --color-mh-surface-2: #1b1b1f;
   --color-mh-elevated: #242429;
   --color-mh-border: #2a2a2e;
   --color-mh-muted: #9a9aa2;
   --color-mh-text: #f4f4f5;
+
+  /* Painel administrativo */
+  --color-admin-bg: #090a0c;
+  --color-admin-sidebar: #0c0d10;
+  --color-admin-card: #111216;
+  --color-admin-card-hover: #15171c;
+  --color-admin-border: #272a31;
+  --color-admin-red: #f50019;
+  --color-admin-red-hover: #d90017;
+  --color-admin-muted: #9aa0ad;
 
   /* Superfície clara (blocos pontuais / editorial) */
   --color-mh-paper: #f2efe9;
@@ -140,4 +150,46 @@ h1, h2, h3, h4, h5 {
     animation-duration: 0.001ms !important;
     transition-duration: 0.001ms !important;
   }
+}
+
+/* Superfícies compartilhadas do painel */
+.admin-panel {
+  border: 1px solid var(--color-admin-border);
+  border-radius: 10px;
+  background: var(--color-admin-card);
+}
+.admin-control {
+  border: 1px solid var(--color-admin-border);
+  border-radius: 8px;
+  background: #0d0f12;
+  color: #fff;
+}
+.admin-control:focus {
+  border-color: var(--color-admin-red);
+  outline: 2px solid color-mix(in srgb, var(--color-admin-red) 25%, transparent);
+  outline-offset: 1px;
+}
+.admin-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #30333b transparent;
+}
+
+.admin-app .rounded-lg.bg-mh-surface,
+.admin-app .rounded-xl.bg-mh-surface {
+  border: 1px solid var(--color-admin-border);
+  background: var(--color-admin-card);
+}
+.admin-app table thead {
+  background: #0d0f12;
+}
+.admin-app table tbody tr {
+  transition: background-color 160ms ease;
+}
+.admin-app table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.025);
+}
+.admin-app input:not([type="checkbox"]):not([type="radio"]),
+.admin-app select,
+.admin-app textarea {
+  color-scheme: dark;
 }

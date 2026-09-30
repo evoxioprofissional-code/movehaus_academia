@@ -26,3 +26,15 @@ export const getHomeMedia = unstable_cache(
   ["home-media"],
   { revalidate: 300, tags: ["home-media"] },
 );
+
+export const getPublicBanners = unstable_cache(async () => {
+  try {
+    const now = new Date().toISOString();
+    const { data } = await supabaseAnon.from("banners").select("*").eq("active", true).order("position");
+    return (data ?? []).filter((banner) => (!banner.starts_at || banner.starts_at <= now) && (!banner.ends_at || banner.ends_at >= now)).map((banner) => ({
+      ...banner,
+      desktopUrl: banner.desktop_image_path ? supabaseAnon.storage.from("catalog").getPublicUrl(banner.desktop_image_path).data.publicUrl : null,
+      mobileUrl: banner.mobile_image_path ? supabaseAnon.storage.from("catalog").getPublicUrl(banner.mobile_image_path).data.publicUrl : null,
+    }));
+  } catch { return []; }
+}, ["public-banners"], { revalidate: 300, tags: ["banners"] });

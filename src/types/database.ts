@@ -18,6 +18,8 @@ export type EbookStatus = "draft" | "published";
 export type OrderStatus = "pending" | "paid" | "preparing" | "shipped" | "delivered" | "cancelled";
 export type PaymentStatus = "pending" | "approved" | "failed" | "refunded" | "cancelled";
 export type DiscountType = "percentage" | "fixed";
+export type SubscriptionStatus = "pending" | "active" | "past_due" | "cancelled" | "expired";
+export type AccessStatus = "active" | "revoked" | "expired";
 
 /** Grupo de variação armazenado em products.variants (jsonb). */
 export type VariantGroup = { label: string; options: string[] };
@@ -153,8 +155,8 @@ export type Database = {
         Relationships: [];
       };
       orders: {
-        Row: { id: string; order_number: number; customer_id: string | null; status: OrderStatus; payment_status: PaymentStatus; subtotal: number; discount: number; shipping: number; total: number; payment_method: string | null; shipping_address: Json; notes: string; source: string; created_at: string; updated_at: string };
-        Insert: { id?: string; customer_id?: string | null; status?: OrderStatus; payment_status?: PaymentStatus; subtotal?: number; discount?: number; shipping?: number; total?: number; payment_method?: string | null; shipping_address?: Json; notes?: string; source?: string };
+        Row: { id: string; order_number: number; customer_id: string | null; status: OrderStatus; payment_status: PaymentStatus; subtotal: number; discount: number; shipping: number; total: number; payment_method: string | null; shipping_address: Json; notes: string; source: string; idempotency_key: string | null; coupon_id: string | null; customer_email: string | null; customer_name: string | null; customer_phone: string | null; created_at: string; updated_at: string };
+        Insert: { id?: string; customer_id?: string | null; status?: OrderStatus; payment_status?: PaymentStatus; subtotal?: number; discount?: number; shipping?: number; total?: number; payment_method?: string | null; shipping_address?: Json; notes?: string; source?: string; idempotency_key?: string | null; coupon_id?: string | null; customer_email?: string | null; customer_name?: string | null; customer_phone?: string | null };
         Update: Partial<Database["public"]["Tables"]["orders"]["Row"]>;
         Relationships: [];
       };
@@ -174,6 +176,48 @@ export type Database = {
         Row: { id: string; title: string; subtitle: string; desktop_image_path: string | null; mobile_image_path: string | null; button_label: string | null; link: string | null; starts_at: string | null; ends_at: string | null; active: boolean; position: number; created_at: string; updated_at: string };
         Insert: { id?: string; title: string; subtitle?: string; desktop_image_path?: string | null; mobile_image_path?: string | null; button_label?: string | null; link?: string | null; starts_at?: string | null; ends_at?: string | null; active?: boolean; position?: number };
         Update: Partial<Database["public"]["Tables"]["banners"]["Row"]>;
+        Relationships: [];
+      };
+      payments: {
+        Row: { id: string; order_id: string; provider: string; provider_payment_id: string | null; status: PaymentStatus; amount: number; method: string | null; idempotency_key: string; provider_payload: Json; created_at: string; updated_at: string };
+        Insert: { id?: string; order_id: string; provider: string; provider_payment_id?: string | null; status?: PaymentStatus; amount: number; method?: string | null; idempotency_key: string; provider_payload?: Json };
+        Update: { provider_payment_id?: string | null; status?: PaymentStatus; method?: string | null; provider_payload?: Json };
+        Relationships: [];
+      };
+      subscriptions: {
+        Row: { id: string; user_id: string; product_id: string; provider: string | null; provider_subscription_id: string | null; status: SubscriptionStatus; monthly_amount: number; grace_days: number; current_period_start: string | null; current_period_end: string | null; cancelled_at: string | null; created_at: string; updated_at: string };
+        Insert: { id?: string; user_id: string; product_id: string; provider?: string | null; provider_subscription_id?: string | null; status?: SubscriptionStatus; monthly_amount: number; grace_days?: number; current_period_start?: string | null; current_period_end?: string | null; cancelled_at?: string | null };
+        Update: { provider_subscription_id?: string | null; status?: SubscriptionStatus; monthly_amount?: number; grace_days?: number; current_period_start?: string | null; current_period_end?: string | null; cancelled_at?: string | null };
+        Relationships: [];
+      };
+      digital_access: {
+        Row: { id: string; user_id: string; product_id: string; order_id: string | null; subscription_id: string | null; status: AccessStatus; permanent: boolean; starts_at: string; expires_at: string | null; revoked_at: string | null; revoked_by: string | null; reason: string; created_at: string; updated_at: string };
+        Insert: { id?: string; user_id: string; product_id: string; order_id?: string | null; subscription_id?: string | null; status?: AccessStatus; permanent?: boolean; starts_at?: string; expires_at?: string | null; revoked_at?: string | null; revoked_by?: string | null; reason?: string };
+        Update: { status?: AccessStatus; permanent?: boolean; expires_at?: string | null; revoked_at?: string | null; revoked_by?: string | null; reason?: string };
+        Relationships: [];
+      };
+      reading_progress: {
+        Row: { user_id: string; product_id: string; chapter_id: string | null; progress_percent: number; updated_at: string };
+        Insert: { user_id: string; product_id: string; chapter_id?: string | null; progress_percent?: number };
+        Update: { chapter_id?: string | null; progress_percent?: number };
+        Relationships: [];
+      };
+      coupon_redemptions: {
+        Row: { id: string; coupon_id: string; user_id: string | null; order_id: string; discount: number; created_at: string };
+        Insert: { id?: string; coupon_id: string; user_id?: string | null; order_id: string; discount: number };
+        Update: never;
+        Relationships: [];
+      };
+      customer_devices: {
+        Row: { id: string; user_id: string; device_hash: string; label: string; last_seen_at: string; revoked_at: string | null; created_at: string };
+        Insert: { id?: string; user_id: string; device_hash: string; label?: string; last_seen_at?: string; revoked_at?: string | null };
+        Update: { label?: string; last_seen_at?: string; revoked_at?: string | null };
+        Relationships: [];
+      };
+      access_logs: {
+        Row: { id: number; user_id: string | null; product_id: string | null; device_id: string | null; action: string; metadata: Json; created_at: string };
+        Insert: { user_id?: string | null; product_id?: string | null; device_id?: string | null; action: string; metadata?: Json };
+        Update: never;
         Relationships: [];
       };
       coaching_access: {
@@ -318,6 +362,8 @@ export type Database = {
       order_status: OrderStatus;
       payment_status: PaymentStatus;
       discount_type: DiscountType;
+      subscription_status: SubscriptionStatus;
+      access_status: AccessStatus;
     };
     CompositeTypes: Record<string, never>;
   };

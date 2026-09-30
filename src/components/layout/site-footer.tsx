@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { MapPin, Mail, MessageCircle } from "lucide-react";
 import { Logo } from "@/components/brand/logo";
-import { SITE, whatsappLink } from "@/lib/site";
+import { whatsappLink } from "@/lib/site";
+import { getPublicSettings } from "@/lib/settings";
 
 /** Glyph do Instagram (lucide não distribui ícones de marca). */
 function InstagramIcon({ className }: { className?: string }) {
@@ -23,9 +24,10 @@ function InstagramIcon({ className }: { className?: string }) {
   );
 }
 
-const PAYMENTS = ["Pix", "Visa", "Master", "Elo", "Amex", "Boleto"];
+const PAYMENTS = ["Pix", "Visa", "Mastercard", "Elo"];
 
-export function SiteFooter() {
+export async function SiteFooter() {
+  const settings = await getPublicSettings();
   return (
     <footer className="mt-auto border-t border-white/10 bg-mh-ink">
       <div className="mx-auto grid max-w-6xl gap-10 px-4 py-14 sm:px-6 md:grid-cols-12">
@@ -38,7 +40,7 @@ export function SiteFooter() {
           </p>
           <div className="mt-5 flex gap-2">
             <a
-              href={whatsappLink()}
+              href={whatsappLink(undefined, settings.whatsapp)}
               target="_blank"
               rel="noopener noreferrer"
               aria-label="WhatsApp"
@@ -47,7 +49,7 @@ export function SiteFooter() {
               <MessageCircle className="size-5" />
             </a>
             <a
-              href={SITE.instagram}
+              href={settings.instagram}
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Instagram"
@@ -85,26 +87,26 @@ export function SiteFooter() {
           <ul className="mt-4 space-y-3 text-sm text-mh-muted">
             <li className="flex items-start gap-2.5">
               <MapPin className="mt-0.5 size-4 shrink-0 text-mh-muted" />
-              <span>{SITE.address}</span>
+              <span>{settings.address || settings.city}</span>
             </li>
             <li>
               <a
-                href={whatsappLink()}
+                href={whatsappLink(undefined, settings.whatsapp)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-2.5 hover:text-white"
               >
                 <MessageCircle className="size-4 shrink-0" />
-                {SITE.whatsappLabel}
+                {settings.whatsappLabel}
               </a>
             </li>
             <li>
               <a
-                href={`mailto:${SITE.email}`}
+                href={`mailto:${settings.email}`}
                 className="flex items-center gap-2.5 hover:text-white"
               >
                 <Mail className="size-4 shrink-0" />
-                {SITE.email}
+                {settings.email}
               </a>
             </li>
           </ul>
@@ -135,7 +137,7 @@ export function SiteFooter() {
       {/* Base legal */}
       <div className="border-t border-white/10">
         <div className="mx-auto flex max-w-6xl flex-col gap-2 px-4 py-5 text-xs text-mh-muted sm:flex-row sm:items-center sm:justify-between sm:px-6">
-          <p>© {new Date().getFullYear()} {SITE.name}. Todos os direitos reservados.</p>
+          <p>© {new Date().getFullYear()} {settings.academyName}. Todos os direitos reservados.</p>
           <div className="flex gap-5">
             <Link className="hover:text-white" href="/termos">Termos de uso</Link>
             <Link className="hover:text-white" href="/privacidade">Privacidade</Link>

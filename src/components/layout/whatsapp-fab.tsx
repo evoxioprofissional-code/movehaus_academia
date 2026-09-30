@@ -1,12 +1,14 @@
 import { MessageCircle } from "lucide-react";
-import { SITE, whatsappLink } from "@/lib/site";
+import { whatsappLink } from "@/lib/site";
+import { getPublicSettings } from "@/lib/settings";
 
 /** Botão flutuante de WhatsApp — círculo no mobile, pílula com rótulo no desktop. */
-export function WhatsappFab() {
-  if (!SITE.whatsapp) return null;
+export async function WhatsappFab() {
+  const settings = await getPublicSettings();
+  if (!settings.whatsapp) return null;
   return (
     <a
-      href={whatsappLink("Olá! Vim pela loja da MoveHaus e gostaria de tirar uma dúvida.")}
+      href={whatsappLink("Olá! Vim pela loja da MoveHaus e gostaria de tirar uma dúvida.", settings.whatsapp)}
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Falar no WhatsApp"

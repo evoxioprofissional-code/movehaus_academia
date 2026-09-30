@@ -1,7 +1,4 @@
-/**
- * Constantes do site. Valores placeholder — na Fase 4 passam a vir da tabela
- * `site_settings` (painel de Configurações). Fáceis de editar aqui por enquanto.
- */
+/** Fallbacks usados somente quando as configurações públicas estão indisponíveis. */
 export const SITE = {
   name: "MoveHaus Training Club",
   shortName: "MoveHaus",
@@ -17,7 +14,7 @@ export const SITE = {
 };
 
 /** Monta um link wa.me com mensagem pré-preenchida. */
-export function whatsappLink(message?: string) {
-  const base = `https://wa.me/${SITE.whatsapp}`;
+export function whatsappLink(message?: string, number = SITE.whatsapp) {
+  const base = `https://wa.me/${number.replace(/\D/g, "")}`;
   return message ? `${base}?text=${encodeURIComponent(message)}` : base;
 }

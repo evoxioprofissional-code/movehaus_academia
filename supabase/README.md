@@ -49,3 +49,13 @@ where user_id = (select id from auth.users where email = 'SEU_EMAIL_AQUI');
 supabase gen types typescript --project-id twwheefndelbacqzpgto --schema public > src/types/database.ts
 ```
 Enquanto isso, `src/types/database.ts` é mantido à mão e corresponde às migrations.
+
+## Fundação comercial e conteúdo protegido
+
+A migration `20260929160000_commerce_access_foundation.sql` adiciona pedidos
+idempotentes, pagamentos desacoplados do provedor, assinaturas, acessos digitais,
+progresso de leitura, dispositivos, logs e resgates de cupom. O bucket
+`protected-content` é privado e deve ser usado para imagens internas dos capítulos.
+
+O utilitário local `_db.mjs` nunca contém senha. Para usá-lo, defina
+`SUPABASE_DB_PASSWORD` apenas no ambiente da sessão.

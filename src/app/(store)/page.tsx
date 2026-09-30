@@ -14,7 +14,8 @@ import { accessDescription } from "@/components/catalog/billing-info";
 import { ScrollExpandHero } from "@/components/home/scroll-expand-hero";
 import { CommunityGallery } from "@/components/home/community-gallery";
 import { ReaderPreview } from "@/components/home/reader-preview";
-import { getHomeMedia } from "@/lib/home-media";
+import { getHomeMedia, getPublicBanners } from "@/lib/home-media";
+import { getPublicSettings } from "@/lib/settings";
 import {
   getEbooks,
   getFeaturedProducts,
@@ -26,17 +27,20 @@ import { hasBilling, isPhysical } from "@/types/catalog";
 import { ABOUT, COMMUNITY, DIGITAL, HERO, OFFER } from "@/content/home";
 
 export default async function HomePage() {
-  const [featured, onSale, ebooks, media] = await Promise.all([
+  const [featured, onSale, ebooks, media, banners, settings] = await Promise.all([
     getFeaturedProducts(),
     getOnSaleProducts(),
     getEbooks(),
     getHomeMedia(),
+    getPublicBanners(),
+    getPublicSettings(),
   ]);
 
   const featuredProducts = featured.filter((p) => p.type !== "ebook").slice(0, 4);
   const mainEbook = ebooks[0];
   const otherEbooks = ebooks.slice(1, 4);
   const offer = onSale[0];
+  const campaign = banners[0];
 
   // Imagens da home enviadas pelo admin (com fallback para o placeholder).
   const communityItems = COMMUNITY.items.map((item, i) => ({
@@ -114,6 +118,16 @@ export default async function HomePage() {
           </div>
         </div>
       </ScrollExpandHero>
+
+      {campaign && (campaign.desktopUrl || campaign.mobileUrl) && (
+        <section className="mx-auto w-full max-w-6xl px-4 pt-8 sm:px-6">
+          <Link href={campaign.link || "/ofertas"} className="group relative block min-h-52 overflow-hidden rounded-xl bg-mh-surface sm:min-h-72">
+            <picture>{campaign.mobileUrl && <source media="(max-width: 639px)" srcSet={campaign.mobileUrl} />}<img src={campaign.desktopUrl || campaign.mobileUrl || ""} alt="" className="absolute inset-0 size-full object-cover transition-transform duration-300 group-hover:scale-[1.02]" /></picture>
+            <div className="absolute inset-0 bg-black/50" />
+            <div className="relative flex min-h-52 max-w-xl flex-col justify-end p-6 sm:min-h-72 sm:p-9"><p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/70">Campanha MoveHaus</p><h2 className="mt-2 text-3xl font-semibold text-white sm:text-4xl">{campaign.title}</h2>{campaign.subtitle && <p className="mt-2 text-white/75">{campaign.subtitle}</p>}<span className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-white">{campaign.button_label || "Conhecer oferta"}<ArrowRight className="size-4 transition-transform group-hover:translate-x-1" /></span></div>
+          </Link>
+        </section>
+      )}
 
       {/* ================= ISSO É MOVEHAUS (comunidade) ================= */}
       <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:py-24">
@@ -360,7 +374,7 @@ export default async function HomePage() {
             </p>
           </div>
           <CtaButton
-            href={whatsappLink("Olá! Quero ajuda para escolher um produto da MoveHaus.")}
+            href={whatsappLink("Olá! Quero ajuda para escolher um produto da MoveHaus.", settings.whatsapp)}
             external
             variant="whatsapp"
             size="lg"

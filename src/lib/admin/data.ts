@@ -24,7 +24,7 @@ export async function dashboardStats() {
       supabase.from("products").select("*", { count: "exact", head: true }).eq("type", "physical").lte("stock", 5),
       supabase.from("orders").select("*", { count: "exact", head: true }),
       supabase.from("orders").select("total", { count: "exact" }).eq("payment_status", "approved"),
-      supabase.from("products").select("*", { count: "exact", head: true }).eq("billing_model", "subscription").eq("active", true),
+      supabase.from("subscriptions").select("*", { count: "exact", head: true }).eq("status", "active"),
     ]);
 
   const revenue = (approvedOrders.data ?? []).reduce((sum, order) => sum + order.total, 0);
@@ -181,6 +181,31 @@ export async function listOrders(): Promise<OrderRow[]> {
   return data ?? [];
 }
 
+export async function listOrdersDetailed() {
+  const supabase = await createClient();
+  const { data: orders } = await supabase.from("orders").select("*").order("created_at", { ascending: false }).limit(100);
+  const ids = (orders ?? []).map((order) => order.id);
+  const { data: items } = ids.length ? await supabase.from("order_items").select("*").in("order_id", ids) : { data: [] };
+  return (orders ?? []).map((order) => ({ ...order, items: (items ?? []).filter((item) => item.order_id === order.id) }));
+}
+
+export async function dashboardOperationalData() {
+  const supabase = await createClient();
+  const [{ data: orders }, { data: items }] = await Promise.all([
+    supabase.from("orders").select("id,order_number,total,status,payment_status,created_at").order("created_at", { ascending: false }).limit(8),
+    supabase.from("order_items").select("product_id,product_name,quantity,total"),
+  ]);
+  const totals = new Map<string, { name: string; quantity: number; revenue: number }>();
+  for (const item of items ?? []) {
+    const key = item.product_id ?? item.product_name;
+    const current = totals.get(key) ?? { name: item.product_name, quantity: 0, revenue: 0 };
+    current.quantity += item.quantity;
+    current.revenue += item.total;
+    totals.set(key, current);
+  }
+  return { recentOrders: orders ?? [], bestSellers: [...totals.values()].sort((a, b) => b.quantity - a.quantity).slice(0, 5) };
+}
+
 export async function listCoupons(): Promise<CouponRow[]> {
   const supabase = await createClient();
   const { data } = await supabase.from("coupons").select("*").order("created_at", { ascending: false });
@@ -191,4 +216,42 @@ export async function listBanners(): Promise<BannerRow[]> {
   const supabase = await createClient();
   const { data } = await supabase.from("banners").select("*").order("position");
   return data ?? [];
+}
+
+
+export async function dashboardPeriodData(days: number) {
+  const safeDays = [1, 7, 30, 90].includes(days) ? days : 30;
+  const since = new Date(Date.now() - safeDays * 86400000).toISOString();
+  const supabase = await createClient();
+  const [ordersResult, customerRoles, activeProducts, lowStock, subscriptions] = await Promise.all([
+    supabase.from("orders").select("id,order_number,total,status,payment_status,created_at").gte("created_at", since).order("created_at", { ascending: true }),
+    supabase.from("user_roles").select("*", { count: "exact", head: true }).eq("role", "customer"),
+    supabase.from("products").select("*", { count: "exact", head: true }).eq("active", true),
+    supabase.from("products").select("*", { count: "exact", head: true }).eq("type", "physical").eq("track_inventory", true).lte("stock", 5),
+    supabase.from("subscriptions").select("*", { count: "exact", head: true }).eq("status", "active"),
+  ]);
+  const orders = ordersResult.data ?? [];
+  const approved = orders.filter((order) => order.payment_status === "approved");
+  const revenue = approved.reduce((sum, order) => sum + order.total, 0);
+  const points = new Map<string, number>();
+  for (let offset = safeDays - 1; offset >= 0; offset--) {
+    const date = new Date(Date.now() - offset * 86400000);
+    points.set(date.toISOString().slice(0, 10), 0);
+  }
+  for (const order of approved) {
+    const key = order.created_at.slice(0, 10);
+    if (points.has(key)) points.set(key, (points.get(key) ?? 0) + order.total);
+  }
+  return {
+    days: safeDays,
+    revenue,
+    orderCount: orders.length,
+    approvedCount: approved.length,
+    customers: customerRoles.count ?? 0,
+    subscriptions: subscriptions.count ?? 0,
+    activeProducts: activeProducts.count ?? 0,
+    lowStock: lowStock.count ?? 0,
+    recentOrders: [...orders].reverse().slice(0, 5),
+    salesByDay: [...points.entries()].map(([date, total]) => ({ date, total })),
+  };
 }

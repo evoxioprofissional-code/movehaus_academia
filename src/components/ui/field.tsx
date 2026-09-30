@@ -21,7 +21,7 @@ export function Field({
       <input
         id={id}
         className={cn(
-          "h-11 w-full rounded-mh border border-mh-border bg-mh-surface px-3 text-sm text-white placeholder:text-mh-muted focus:border-mh-red focus:outline-none focus:ring-1 focus:ring-mh-red",
+          "h-11 w-full rounded-lg border border-admin-border bg-[#0d0f12] px-3 text-sm text-white placeholder:text-mh-muted focus:border-admin-red focus:outline-none focus:ring-1 focus:ring-mh-red",
           className,
         )}
         {...props}
