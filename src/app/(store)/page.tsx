@@ -1,389 +1,157 @@
+import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, ArrowUpRight, BookOpen, MessageCircle } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { CtaButton } from "@/components/ui/cta-button";
-import { PhotoSlot } from "@/components/ui/photo-slot";
-import { SectionHeading } from "@/components/ui/section-heading";
-import { TextEffect } from "@/components/ui/text-effect";
-import { Reveal } from "@/components/ui/reveal";
+import { ArrowRight, BookOpen, Dumbbell, MessageCircle, Shirt } from "lucide-react";
+import { CommunityGallery } from "@/components/home/community-gallery";
 import { ProductGrid } from "@/components/catalog/product-grid";
 import { ProductMedia } from "@/components/catalog/product-media";
-import { productHref } from "@/components/catalog/product-card";
 import { Price } from "@/components/catalog/price";
-import { accessDescription } from "@/components/catalog/billing-info";
-import { ScrollExpandHero } from "@/components/home/scroll-expand-hero";
-import { CommunityGallery } from "@/components/home/community-gallery";
-import { ReaderPreview } from "@/components/home/reader-preview";
+import { QuickAdd } from "@/components/catalog/quick-add";
+import { productHref } from "@/components/catalog/product-card";
+import { CtaButton } from "@/components/ui/cta-button";
+import { PhotoSlot } from "@/components/ui/photo-slot";
+import { ABOUT, COMMUNITY, DIGITAL, HERO, OFFER } from "@/content/home";
+import { getEbooks, getOnSaleProducts, getProducts } from "@/lib/catalog";
 import { getHomeMedia, getPublicBanners } from "@/lib/home-media";
 import { getPublicSettings } from "@/lib/settings";
-import {
-  getEbooks,
-  getFeaturedProducts,
-  getOnSaleProducts,
-} from "@/lib/catalog";
-import { formatBRL } from "@/lib/utils";
 import { whatsappLink } from "@/lib/site";
-import { hasBilling, isPhysical } from "@/types/catalog";
-import { ABOUT, COMMUNITY, DIGITAL, HERO, OFFER } from "@/content/home";
+import { formatBRL } from "@/lib/utils";
+import { hasBilling, isPhysical, type Product } from "@/types/catalog";
+
+const INVALID_HERO_MEDIA = "hero-56b0d9a7-3c2e-45b5-8f51-a6630cabe6cf.png";
+
+const SHORTCUTS = [
+  { label: "Vestuário", href: "/loja?categoria=vestuario", icon: Shirt },
+  { label: "Programas de treino", href: "/loja?categoria=programas", icon: Dumbbell },
+  { label: "Conteúdos", href: "/ebooks", icon: BookOpen },
+];
+
+function SectionHeading({ kicker, title, text, href, linkLabel }: { kicker: string; title: string; text?: string; href?: string; linkLabel?: string }) {
+  return (
+    <div className="mb-7 flex items-end justify-between gap-5">
+      <div>
+        <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-mh-red">{kicker}</p>
+        <h2 className="mt-2 text-3xl font-semibold leading-tight tracking-[-0.03em] text-white sm:text-4xl">{title}</h2>
+        {text && <p className="mt-2 max-w-2xl text-sm leading-relaxed text-mh-muted sm:text-[15px]">{text}</p>}
+      </div>
+      {href && linkLabel && <Link href={href} className="hidden shrink-0 items-center gap-2 text-sm font-medium text-white/80 transition-colors hover:text-white sm:inline-flex">{linkLabel}<ArrowRight className="size-4" /></Link>}
+    </div>
+  );
+}
+
+function BillingLabel({ product }: { product: Product }) {
+  if (!hasBilling(product)) return null;
+  return <span>{product.billingModel === "subscription" ? "Assinatura mensal" : product.accessDurationDays ? "Pagamento único · acesso por " + product.accessDurationDays + " dias" : "Pagamento único · acesso permanente"}</span>;
+}
 
 export default async function HomePage() {
-  const [featured, onSale, ebooks, media, banners, settings] = await Promise.all([
-    getFeaturedProducts(),
-    getOnSaleProducts(),
+  const [products, ebooks, saleProducts, media, banners, settings] = await Promise.all([
+    getProducts(),
     getEbooks(),
+    getOnSaleProducts(),
     getHomeMedia(),
     getPublicBanners(),
     getPublicSettings(),
   ]);
 
-  const featuredProducts = featured.filter((p) => p.type !== "ebook").slice(0, 4);
-  const mainEbook = ebooks[0];
-  const otherEbooks = ebooks.slice(1, 4);
-  const offer = onSale[0];
+  const preferred = products.filter((product) => product.type !== "ebook").sort((a, b) => Number(b.featured) - Number(a.featured));
+  const featuredProducts = preferred.slice(0, 4);
+  const contentProducts = ebooks.slice(0, 3);
+  const offer = saleProducts[0];
   const campaign = banners[0];
-
-  // Imagens da home enviadas pelo admin (com fallback para o placeholder).
-  const communityItems = COMMUNITY.items.map((item, i) => ({
-    ...item,
-    media: { ...item.media, src: media[`community_${i}`] ?? item.media.src },
-  }));
+  const heroMedia = media.hero && !media.hero.includes(INVALID_HERO_MEDIA) ? media.hero : null;
+  const communityItems = COMMUNITY.items.slice(0, 3).map((item, index) => ({ ...item, media: { ...item.media, src: media["community_" + index] ?? item.media.src } }));
+  const hasWhatsapp = Boolean(settings.whatsapp);
 
   return (
-    <>
-      {/* ================= HERO (expansão de mídia ao rolar) ================= */}
-      <ScrollExpandHero
-        media={
-          <div className="absolute inset-0 overflow-hidden bg-[#101012]">
-            <div
-              aria-hidden="true"
-              className="absolute -right-[18%] -top-[26%] h-[72%] w-[58%] rotate-[18deg] bg-mh-red"
-            />
-            <div
-              aria-hidden="true"
-              className="absolute bottom-0 left-0 h-1/3 w-[7px] bg-mh-red sm:w-2"
-            />
-            <div
-              aria-hidden="true"
-              className="absolute inset-0 opacity-[0.08] [background-image:linear-gradient(rgba(255,255,255,.35)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.35)_1px,transparent_1px)] [background-size:32px_32px]"
-            />
-
-            <div className="absolute inset-x-[8%] top-[18%] bottom-[20%] overflow-hidden border border-white/10 bg-black/40 shadow-2xl sm:inset-x-[10%] md:top-[22%] md:bottom-[22%]">
-              <PhotoSlot
-                src={media.hero ?? HERO.image.src}
-                alt={HERO.image.alt}
-                caption={HERO.image.caption}
-                priority
-                fit="contain"
-                sizes="(max-width: 767px) 84vw, 46vw"
-                className="absolute inset-0"
-              />
-            </div>
-
-            <div className="absolute inset-x-[8%] bottom-[7%] flex items-end justify-between sm:inset-x-[10%]">
-              <div>
-                <p className="text-[9px] font-semibold uppercase tracking-[0.28em] text-white/45 sm:text-[10px]">
-                  Identidade MoveHaus
-                </p>
-                <p className="mt-1 text-xs font-semibold uppercase tracking-[0.16em] text-white sm:text-sm">
-                  Training Club
-                </p>
-              </div>
-              <span className="font-display text-3xl font-bold leading-none text-white/15 sm:text-4xl">
-                MH
-              </span>
+    <div className="overflow-hidden bg-[#08090b]">
+      <section className="relative min-h-[690px] border-b border-white/10 sm:min-h-[650px] lg:min-h-[620px]">
+        <PhotoSlot src={heroMedia} alt={HERO.image.alt} tone="dark" priority sizes="100vw" className="absolute inset-0" />
+        <div aria-hidden className="absolute inset-0 bg-[linear-gradient(90deg,rgba(6,7,9,0.98)_0%,rgba(6,7,9,0.9)_38%,rgba(6,7,9,0.34)_72%,rgba(6,7,9,0.2)_100%)] max-lg:bg-[linear-gradient(180deg,rgba(6,7,9,0.3)_0%,rgba(6,7,9,0.78)_42%,rgba(6,7,9,0.98)_78%)]" />
+        <div aria-hidden className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-[#08090b] to-transparent" />
+        <div className="relative mx-auto flex min-h-[690px] max-w-[1280px] items-end px-4 pb-24 pt-28 sm:min-h-[650px] sm:items-center sm:px-6 sm:pb-16 sm:pt-24 lg:min-h-[620px] lg:px-8">
+          <div className="max-w-[650px]">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-white/65 sm:text-[11px]">{HERO.eyebrow}</p>
+            <h1 className="mt-4 max-w-[760px] whitespace-pre-line font-display text-[9vw] min-[430px]:text-[3rem] sm:text-[4.5rem] lg:text-[5rem] font-bold uppercase leading-[0.88] tracking-[-0.035em] text-white">{HERO.title}</h1>
+            <p className="mt-5 max-w-lg text-base leading-relaxed text-white/75 sm:text-lg">{HERO.text}</p>
+            <div className="mt-7 flex flex-col gap-3 min-[430px]:flex-row">
+              <CtaButton href={HERO.primary.href} size="lg" className="w-full min-[430px]:w-auto">{HERO.primary.label}</CtaButton>
+              <CtaButton href={HERO.secondary.href} variant="outline" size="lg" className="w-full min-[430px]:w-auto">{HERO.secondary.label}</CtaButton>
             </div>
           </div>
-        }
-      >
-        <div className="w-full min-w-0">
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-white/70">
-            {HERO.eyebrow}
-          </p>
-          <TextEffect
-            as="h1"
-            trigger="mount"
-            text={HERO.title}
-            className="mt-3 max-w-xl font-display text-[clamp(2.35rem,10.5vw,4.5rem)] font-bold uppercase leading-[0.92] text-white md:text-[clamp(3rem,4.2vw,4rem)]"
-          />
-          <p className="mt-4 max-w-lg text-[15px] leading-relaxed text-white/75 sm:mt-5 sm:text-lg">
-            {HERO.text}
-          </p>
-          <div className="mt-6 grid grid-cols-1 gap-3 sm:mt-8 sm:flex sm:flex-row">
-            <CtaButton href={HERO.primary.href} variant="primary" size="lg">
-              {HERO.primary.label}
-            </CtaButton>
-            <CtaButton href={HERO.secondary.href} variant="outline" size="lg">
-              {HERO.secondary.label}
-            </CtaButton>
-          </div>
         </div>
-      </ScrollExpandHero>
+      </section>
 
-      {campaign && (campaign.desktopUrl || campaign.mobileUrl) && (
-        <section className="mx-auto w-full max-w-6xl px-4 pt-8 sm:px-6">
-          <Link href={campaign.link || "/ofertas"} className="group relative block min-h-52 overflow-hidden rounded-xl bg-mh-surface sm:min-h-72">
-            <picture>{campaign.mobileUrl && <source media="(max-width: 639px)" srcSet={campaign.mobileUrl} />}<img src={campaign.desktopUrl || campaign.mobileUrl || ""} alt="" className="absolute inset-0 size-full object-cover transition-transform duration-300 group-hover:scale-[1.02]" /></picture>
-            <div className="absolute inset-0 bg-black/50" />
-            <div className="relative flex min-h-52 max-w-xl flex-col justify-end p-6 sm:min-h-72 sm:p-9"><p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/70">Campanha MoveHaus</p><h2 className="mt-2 text-3xl font-semibold text-white sm:text-4xl">{campaign.title}</h2>{campaign.subtitle && <p className="mt-2 text-white/75">{campaign.subtitle}</p>}<span className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-white">{campaign.button_label || "Conhecer oferta"}<ArrowRight className="size-4 transition-transform group-hover:translate-x-1" /></span></div>
-          </Link>
-        </section>
-      )}
-
-      {/* ================= ISSO É MOVEHAUS (comunidade) ================= */}
-      <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:py-24">
-        <div className="mb-8 max-w-2xl">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-mh-red">
-            {COMMUNITY.kicker}
-          </p>
-          <TextEffect
-            as="h2"
-            trigger="inView"
-            text={COMMUNITY.title}
-            className="mt-2 text-3xl font-semibold tracking-tight text-white sm:text-[34px]"
-          />
-          <p className="mt-3 text-mh-muted">{COMMUNITY.text}</p>
+      <nav aria-label="Atalhos da loja" className="border-b border-white/10 bg-[#0a0b0d]">
+        <div className="mx-auto grid max-w-[1200px] grid-cols-1 divide-y divide-white/10 px-4 sm:grid-cols-3 sm:divide-x sm:divide-y-0 sm:px-6 lg:px-8">
+          {SHORTCUTS.map(({ label, href, icon: Icon }) => <Link key={label} href={href} className="group flex min-h-16 items-center justify-between gap-4 px-1 py-4 text-sm font-medium text-white/85 transition-colors hover:text-white sm:px-7"><span className="flex items-center gap-3"><Icon className="size-5 text-white" strokeWidth={1.8} />{label}</span><ArrowRight className="size-4 transition-transform group-hover:translate-x-1" /></Link>)}
         </div>
+      </nav>
+
+      {featuredProducts.length > 0 && <section className="mx-auto max-w-[1200px] px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
+        <SectionHeading kicker="Loja" title="Vista o seu próximo nível." text="Vestuário, acessórios e programas selecionados para acompanhar a sua jornada." href="/loja" linkLabel="Ver todos os produtos" />
+        <ProductGrid products={featuredProducts} priorityCount={4} />
+        <Link href="/loja" className="mt-8 inline-flex items-center gap-2 text-sm font-medium text-white sm:hidden">Ver todos os produtos<ArrowRight className="size-4" /></Link>
+      </section>}
+
+      <section className="mx-auto max-w-[1200px] px-4 pb-16 sm:px-6 lg:px-8 lg:pb-20">
+        <SectionHeading kicker="Comunidade" title="Isso é MoveHaus." text="Gente treinando, evoluindo e fazendo parte de algo maior que um treino." href="/sobre" linkLabel="Conheça o clube" />
         <CommunityGallery items={communityItems} />
       </section>
 
-      {/* ================= PRODUTOS EM DESTAQUE ================= */}
-      {featuredProducts.length > 0 && (
-        <section className="border-t border-white/5 bg-mh-ink/40">
-          <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:py-20">
-            <SectionHeading
-              kicker="Loja"
-              title="Produtos em destaque"
-              description="Vestuário e itens de treino selecionados."
-              href="/loja"
-              linkLabel="Ver a loja"
-            />
-            <ProductGrid products={featuredProducts} reveal />
+      {contentProducts.length > 0 && <section className="mx-auto max-w-[1200px] px-4 pb-16 sm:px-6 lg:px-8 lg:pb-20">
+        <SectionHeading kicker={DIGITAL.kicker} title={DIGITAL.title} text={DIGITAL.text} href="/ebooks" linkLabel="Ver todos os conteúdos" />
+        <div className="grid gap-4 lg:grid-cols-3">
+          {contentProducts.map((product, index) => <article key={product.id} className="group relative overflow-hidden rounded-lg border border-white/[0.08] bg-[#121316] sm:grid sm:grid-cols-[minmax(150px,0.85fr)_1.15fr] lg:block">
+            <Link href={productHref(product)} aria-label={product.name} className="absolute inset-0 z-10 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-mh-red" />
+            <ProductMedia product={product} priority={index === 0} sizes="(max-width: 639px) 100vw, (max-width: 1023px) 40vw, 33vw" className="aspect-[4/3] transition-transform duration-300 group-hover:scale-[1.025] sm:h-full sm:aspect-auto lg:h-auto lg:aspect-[16/10]" />
+            <div className="pointer-events-none flex min-h-[190px] flex-col p-5">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.17em] text-mh-red">{index === 0 ? "Conteúdo em destaque" : "Conteúdo"}</p>
+              <h3 className="mt-2 text-lg font-semibold leading-tight text-white">{product.name}</h3>
+              {product.type === "ebook" && product.author && <p className="mt-1 text-xs text-mh-muted">por {product.author}</p>}
+              <p className="mt-3 line-clamp-2 text-sm leading-relaxed text-mh-muted">{product.shortDescription || product.description}</p>
+              <div className="mt-3 flex flex-wrap gap-x-3 gap-y-1 text-xs text-white/65">{product.type === "ebook" && product.chaptersCount ? <span>{product.chaptersCount} capítulos</span> : null}<BillingLabel product={product} /></div>
+              <div className="mt-auto flex items-end justify-between gap-4 pt-5"><Price product={product} size="sm" /><div className="pointer-events-auto relative z-20"><QuickAdd product={product} /></div></div>
+            </div>
+          </article>)}
+        </div>
+        <Link href="/ebooks" className="mt-8 inline-flex items-center gap-2 text-sm font-medium text-white sm:hidden">Ver todos os conteúdos<ArrowRight className="size-4" /></Link>
+      </section>}
+
+      {(campaign || offer) && <section className="mx-auto max-w-[1280px] px-4 pb-16 sm:px-6 lg:px-8 lg:pb-20">
+        <div className="relative min-h-[430px] overflow-hidden rounded-xl border border-white/10 bg-[#17090b]">
+          {campaign?.desktopUrl ? <><Image src={campaign.desktopUrl} alt="" fill sizes="100vw" className="hidden object-cover sm:block" />{campaign.mobileUrl ? <Image src={campaign.mobileUrl} alt="" fill sizes="100vw" className="object-cover sm:hidden" /> : <Image src={campaign.desktopUrl} alt="" fill sizes="100vw" className="object-cover sm:hidden" />}</> : <PhotoSlot src={media.offer ?? OFFER.image.src} alt={OFFER.image.alt} tone="red" sizes="100vw" className="absolute inset-0" />}
+          <div aria-hidden className="absolute inset-0 bg-[linear-gradient(90deg,rgba(26,4,7,0.97)_0%,rgba(26,4,7,0.82)_43%,rgba(10,10,12,0.12)_100%)] max-sm:bg-[linear-gradient(180deg,rgba(20,4,6,0.68)_0%,rgba(20,4,6,0.94)_75%)]" />
+          <div className="relative z-10 flex min-h-[430px] max-w-[620px] flex-col justify-center p-7 sm:p-10 lg:p-12">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-mh-red">Campanha</p>
+            <h2 className="mt-3 font-display text-4xl font-bold uppercase leading-[0.95] text-white sm:text-5xl">{campaign?.title || OFFER.title}</h2>
+            <p className="mt-4 max-w-lg text-white/75">{campaign?.subtitle || OFFER.text}</p>
+            {offer && isPhysical(offer) && <div className="mt-7 flex max-w-md items-center gap-4 rounded-lg border border-white/15 bg-black/45 p-3 backdrop-blur-sm">
+              <ProductMedia product={offer} sizes="72px" className="size-16 shrink-0 rounded-md" />
+              <div className="min-w-0 flex-1"><p className="truncate text-sm font-semibold text-white">{offer.name}</p><div className="mt-1 flex items-baseline gap-2"><span className="text-xl font-semibold text-white">{formatBRL(offer.price)}</span>{offer.compareAtPrice && <span className="text-sm text-white/55 line-through">{formatBRL(offer.compareAtPrice)}</span>}</div></div>
+            </div>}
+            {(campaign?.link || offer) && <CtaButton href={campaign?.link || (offer ? productHref(offer) : "/ofertas")} className="mt-7 w-fit">{campaign?.button_label || "Aproveitar oferta"}</CtaButton>}
           </div>
-        </section>
-      )}
+        </div>
+      </section>}
 
-      {/* ================= CONTEÚDOS DIGITAIS (editorial) ================= */}
-      {mainEbook && (
-        <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:py-24">
-          <SectionHeading
-            kicker={DIGITAL.kicker}
-            title={DIGITAL.title}
-            description={DIGITAL.text}
-            href="/ebooks"
-          />
-
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
-            {/* Destaque principal */}
-            <Reveal className="lg:col-span-7">
-              <article className="group relative h-full overflow-hidden rounded-lg">
-                <Link
-                  href={productHref(mainEbook)}
-                  aria-label={mainEbook.name}
-                  className="absolute inset-0 z-10"
-                />
-                <div className="grid h-full grid-cols-1 sm:grid-cols-2">
-                  <ProductMedia
-                    product={mainEbook}
-                    sizes="(max-width: 640px) 100vw, 40vw"
-                    className="aspect-[4/3] sm:aspect-auto sm:h-full sm:min-h-[24rem]"
-                  />
-                  <div className="flex flex-col justify-center gap-3 bg-mh-surface p-6 sm:p-8">
-                    <span className="text-[11px] font-medium uppercase tracking-widest text-mh-red">
-                      E-book em destaque
-                    </span>
-                    <h3 className="text-2xl font-semibold leading-tight text-white">
-                      {mainEbook.name}
-                    </h3>
-                    {"author" in mainEbook && mainEbook.author && (
-                      <p className="text-sm text-mh-muted">por {mainEbook.author}</p>
-                    )}
-                    <p className="line-clamp-2 text-sm text-mh-muted">
-                      {mainEbook.description}
-                    </p>
-                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-mh-muted">
-                      {"chaptersCount" in mainEbook && mainEbook.chaptersCount && (
-                        <span>{mainEbook.chaptersCount} capítulos</span>
-                      )}
-                      <span className="text-white">
-                        {accessDescription(mainEbook)}
-                      </span>
-                    </div>
-
-                    <ReaderPreview
-                      chapters={
-                        "chaptersCount" in mainEbook
-                          ? mainEbook.chaptersCount
-                          : undefined
-                      }
-                    />
-
-                    <div className="mt-1 flex items-center justify-between">
-                      <Price product={mainEbook} />
-                      <span className="relative z-20 inline-flex items-center gap-1 text-sm font-medium text-white">
-                        Conhecer
-                        <ArrowRight className="size-4" />
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </article>
-            </Reveal>
-
-            {/* Outros conteúdos */}
-            <Reveal delay={120} className="lg:col-span-5">
-              <div className="flex h-full flex-col gap-3">
-                {otherEbooks.length > 0 ? (
-                  otherEbooks.map((eb) => (
-                    <Link
-                      key={eb.id}
-                      href={productHref(eb)}
-                      className="group flex flex-1 items-center gap-4 rounded-lg bg-mh-surface p-3 transition-colors hover:bg-mh-surface-2"
-                    >
-                      <ProductMedia
-                        product={eb}
-                        sizes="80px"
-                        className="size-20 shrink-0 rounded-md"
-                      />
-                      <div className="min-w-0 flex-1">
-                        <h4 className="truncate text-[15px] font-medium text-white">
-                          {eb.name}
-                        </h4>
-                        <p className="mt-0.5 truncate text-xs text-mh-muted">
-                          {hasBilling(eb) && eb.billingModel === "subscription"
-                            ? "Assinatura mensal"
-                            : "Pagamento único"}
-                        </p>
-                        <div className="mt-1.5">
-                          <Price product={eb} size="sm" />
-                        </div>
-                      </div>
-                      <ArrowUpRight className="size-5 shrink-0 text-mh-muted transition-colors group-hover:text-white" />
-                    </Link>
-                  ))
-                ) : (
-                  <div className="flex h-full flex-col items-start justify-center gap-3 rounded-lg bg-mh-surface p-6">
-                    <BookOpen className="size-6 text-mh-red" />
-                    <p className="text-sm text-mh-muted">
-                      Novos conteúdos estão a caminho.
-                    </p>
-                    <Button asChild variant="outline" size="sm">
-                      <Link href="/ebooks">Ver todos os conteúdos</Link>
-                    </Button>
-                  </div>
-                )}
-              </div>
-            </Reveal>
+      <section className="bg-[#f2efe8] text-[#111214]">
+        <div className="mx-auto grid max-w-[1280px] items-center gap-10 px-4 py-16 sm:px-6 lg:grid-cols-2 lg:px-8 lg:py-20">
+          <div className="max-w-xl">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-mh-red">{ABOUT.kicker}</p>
+            <h2 className="mt-3 text-4xl font-semibold leading-[1.05] tracking-[-0.035em] sm:text-5xl">{ABOUT.title}</h2>
+            <p className="mt-5 max-w-md text-lg leading-relaxed text-black/60">{ABOUT.text}</p>
+            <CtaButton href="/sobre" variant="outline" className="mt-7 !border-[#111214] !bg-[#111214] !text-white">Conhecer a MoveHaus</CtaButton>
           </div>
-        </section>
-      )}
-
-      {/* ================= OFERTAS (campanha) ================= */}
-      {offer && isPhysical(offer) && offer.compareAtPrice && (
-        <section className="px-4 pb-16 sm:px-6 lg:pb-24">
-          <div className="relative mx-auto max-w-6xl overflow-hidden rounded-lg">
-            <PhotoSlot
-              src={media.offer ?? OFFER.image.src}
-              alt={OFFER.image.alt}
-              caption={OFFER.image.caption}
-              tone="red"
-              overlay
-              sizes="100vw"
-              className="min-h-[22rem] sm:min-h-[24rem]"
-            >
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full max-w-xl px-6 py-10 sm:px-10">
-                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/80">
-                    {OFFER.kicker}
-                  </p>
-                  <h2 className="mt-3 font-display text-3xl font-bold uppercase leading-none text-white sm:text-5xl">
-                    {OFFER.title}
-                  </h2>
-                  <p className="mt-3 text-white/80">{OFFER.text}</p>
-
-                  <div className="mt-6 flex items-center gap-4 rounded-lg bg-black/40 p-4 backdrop-blur-sm">
-                    <ProductMedia
-                      product={offer}
-                      sizes="80px"
-                      className="size-20 shrink-0 rounded-md"
-                    />
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-medium text-white">
-                        {offer.name}
-                      </p>
-                      <div className="mt-1 flex items-baseline gap-2">
-                        <span className="text-2xl font-semibold tabular-nums text-white">
-                          {formatBRL(offer.price)}
-                        </span>
-                        <span className="text-sm text-white/60 line-through">
-                          {formatBRL(offer.compareAtPrice)}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <CtaButton
-                    href={productHref(offer)}
-                    variant="light"
-                    size="lg"
-                    className="mt-6"
-                  >
-                    Aproveitar oferta
-                  </CtaButton>
-                </div>
-              </div>
-            </PhotoSlot>
-          </div>
-        </section>
-      )}
-
-      {/* ================= SOBRE (bloco claro) ================= */}
-      <section className="bg-mh-paper text-mh-paper-ink">
-        <div className="mx-auto grid max-w-6xl grid-cols-1 items-center gap-10 px-4 py-16 sm:px-6 lg:grid-cols-2 lg:py-24">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-mh-red">
-              {ABOUT.kicker}
-            </p>
-            <h2 className="mt-3 text-3xl font-semibold leading-tight tracking-tight sm:text-4xl">
-              {ABOUT.title}
-            </h2>
-            <p className="mt-4 max-w-md text-mh-paper-muted">{ABOUT.text}</p>
-            <Button asChild size="lg" variant="onDark" className="mt-7">
-              <Link href="/sobre">Conhecer a MoveHaus</Link>
-            </Button>
-          </div>
-          <PhotoSlot
-            src={media.about ?? ABOUT.image.src}
-            alt={ABOUT.image.alt}
-            caption={ABOUT.image.caption}
-            sizes="(max-width: 1024px) 100vw, 50vw"
-            className="h-72 w-full rounded-lg sm:h-96"
-          />
+          <PhotoSlot src={media.about ?? ABOUT.image.src} alt={ABOUT.image.alt} tone="paper" sizes="(max-width: 1023px) 100vw, 50vw" className="aspect-[4/3] rounded-xl" />
         </div>
       </section>
 
-      {/* ================= CTA WHATSAPP ================= */}
-      <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
-        <div className="flex flex-col items-start justify-between gap-6 rounded-lg border border-white/10 bg-mh-surface p-8 sm:flex-row sm:items-center sm:p-10">
-          <div>
-            <h2 className="text-2xl font-semibold tracking-tight text-white sm:text-3xl">
-              Ficou com alguma dúvida?
-            </h2>
-            <p className="mt-2 max-w-md text-mh-muted">
-              Fale com a equipe da MoveHaus no WhatsApp. A gente ajuda a escolher
-              o que faz sentido para o seu momento.
-            </p>
-          </div>
-          <CtaButton
-            href={whatsappLink("Olá! Quero ajuda para escolher um produto da MoveHaus.", settings.whatsapp)}
-            external
-            variant="whatsapp"
-            size="lg"
-            leadingIcon={<MessageCircle className="size-5" />}
-          >
-            Chamar no WhatsApp
-          </CtaButton>
+      {hasWhatsapp && <section className="mx-auto max-w-[1200px] px-4 py-14 sm:px-6 lg:px-8 lg:py-16">
+        <div className="flex flex-col items-start justify-between gap-7 rounded-xl border border-white/10 bg-[#111216] p-7 sm:flex-row sm:items-center sm:p-10">
+          <div><h2 className="text-2xl font-semibold tracking-tight text-white sm:text-3xl">Ficou com alguma dúvida?</h2><p className="mt-2 max-w-xl text-sm leading-relaxed text-mh-muted sm:text-base">Fale com a equipe e encontre o que faz sentido para o seu momento.</p></div>
+          <CtaButton href={whatsappLink("Olá! Quero falar com a equipe MoveHaus.", settings.whatsapp)} external variant="whatsapp" leadingIcon={<MessageCircle className="size-5" />} className="w-full shrink-0 sm:w-auto">Chamar no WhatsApp</CtaButton>
         </div>
-      </section>
-    </>
+      </section>}
+    </div>
   );
 }
