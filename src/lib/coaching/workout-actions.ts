@@ -122,6 +122,50 @@ export async function deleteExercise(fd: FormData): Promise<void> {
   adminRevalidate(S(fd.get("user_id")));
 }
 
+export async function publishPlan(fd: FormData): Promise<void> {
+  await requireAdmin();
+  const planId = S(fd.get("plan_id"));
+  const userId = S(fd.get("user_id"));
+  if (!planId) return;
+  const supabase = await createClient();
+  await supabase.from("workout_plans").update({ active: true }).eq("id", planId);
+  adminRevalidate(userId);
+  revalidatePath("/acompanhamento");
+}
+
+export async function duplicateDay(fd: FormData): Promise<void> {
+  await requireAdmin();
+  const dayId = S(fd.get("day_id"));
+  const userId = S(fd.get("user_id"));
+  if (!dayId) return;
+  const supabase = await createClient();
+  const { data: source } = await supabase.from("workout_days").select("*").eq("id", dayId).maybeSingle();
+  if (!source) return;
+  const [{ data: exercises }, { data: last }] = await Promise.all([
+    supabase.from("workout_exercises").select("*").eq("day_id", dayId).order("position"),
+    supabase.from("workout_days").select("position").eq("plan_id", source.plan_id).order("position", { ascending: false }).limit(1).maybeSingle(),
+  ]);
+  const { data: copy } = await supabase.from("workout_days").insert({
+    plan_id: source.plan_id,
+    name: source.name + " — cópia",
+    weekday: null,
+    position: (last?.position ?? source.position) + 1,
+  }).select("id").single();
+  if (copy && exercises?.length) {
+    await supabase.from("workout_exercises").insert(exercises.map((exercise) => ({
+      day_id: copy.id,
+      name: exercise.name,
+      sets: exercise.sets,
+      reps: exercise.reps,
+      target_load: exercise.target_load,
+      rest_seconds: exercise.rest_seconds,
+      video_url: exercise.video_url,
+      notes: exercise.notes,
+      position: exercise.position,
+    })));
+  }
+  adminRevalidate(userId);
+}
 // ============ ALUNO: modo treino ============
 export async function startSession(fd: FormData): Promise<void> {
   const user = await requireUser();
