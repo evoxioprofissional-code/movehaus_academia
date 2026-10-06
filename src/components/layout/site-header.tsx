@@ -17,7 +17,7 @@ export const NAV = [
 ];
 
 // Sem getUser aqui: o header é público e não deve depender do serviço de auth
-// a cada acesso. A conta leva a /minha-area, que é protegida no servidor.
+// a cada acesso. /conta resolve o destino sem bloquear o primeiro feedback.
 export function SiteHeader() {
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
@@ -75,7 +75,7 @@ export function SiteHeader() {
         <div className="ml-auto flex shrink-0 items-center gap-0.5">
           <HeaderSearch />
           <Link
-            href="/minha-area"
+            href="/conta"
             aria-label="Minha conta"
             className="grid size-10 place-items-center rounded-full text-white/85 transition-all duration-200 hover:bg-white/[0.08] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mh-red active:scale-95"
           >

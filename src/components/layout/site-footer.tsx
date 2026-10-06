@@ -75,7 +75,7 @@ export async function SiteFooter() {
         <div className="md:col-span-2">
           <h4 className="text-sm font-semibold text-white">Conta</h4>
           <ul className="mt-4 space-y-2.5 text-sm text-mh-muted">
-            <li><Link className="hover:text-white" href="/minha-area">Minha área</Link></li>
+            <li><Link className="hover:text-white" href="/conta">Minha área</Link></li>
             <li><Link className="hover:text-white" href="/login">Entrar</Link></li>
             <li><Link className="hover:text-white" href="/carrinho">Carrinho</Link></li>
           </ul>

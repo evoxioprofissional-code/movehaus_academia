@@ -109,7 +109,7 @@ export function MobileNav({
 
             <div className="space-y-1 border-t border-mh-border px-3 py-3">
               <Link
-                href="/minha-area"
+                href="/conta"
                 onClick={close}
                 className="flex items-center gap-3 rounded-mh px-4 py-3 text-sm font-medium text-mh-text hover:bg-mh-surface"
               >
