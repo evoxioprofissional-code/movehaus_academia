@@ -8,7 +8,7 @@ export default function AuthLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="grid min-h-full bg-mh-black lg:grid-cols-[minmax(22rem,0.85fr)_1.15fr]">
+    <div className="grid min-h-svh w-full flex-1 bg-mh-black lg:grid-cols-[minmax(22rem,0.85fr)_1.15fr]">
       <aside className="relative hidden overflow-hidden border-r border-white/10 bg-[#101012] p-12 lg:flex lg:flex-col lg:justify-between">
         <div aria-hidden="true" className="absolute -right-24 -top-24 size-80 rotate-12 bg-mh-red" />
         <div aria-hidden="true" className="absolute inset-0 opacity-[0.07] [background-image:linear-gradient(rgba(255,255,255,.35)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.35)_1px,transparent_1px)] [background-size:36px_36px]" />
