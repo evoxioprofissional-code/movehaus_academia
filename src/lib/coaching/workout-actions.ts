@@ -180,6 +180,17 @@ export async function startSession(fd: FormData): Promise<void> {
     .maybeSingle();
   if (!day) redirect("/acompanhamento");
 
+  const { data: openSession } = await supabase
+    .from("workout_sessions")
+    .select("id")
+    .eq("user_id", user.id)
+    .eq("day_id", day!.id)
+    .is("finished_at", null)
+    .order("started_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (openSession) redirect(`/acompanhamento/treino/${openSession.id}`);
+
   const { data: session, error } = await supabase
     .from("workout_sessions")
     .insert({ user_id: user.id, day_id: day!.id, day_name: day!.name })

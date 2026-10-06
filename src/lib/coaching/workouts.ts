@@ -94,6 +94,22 @@ export async function getRecentSessions(userId: string, limit = 5) {
   return data ?? [];
 }
 
+/** Sessão ainda não finalizada do aluno, usada para retomar sem duplicar treino. */
+export async function getOpenSession(userId: string, dayId?: string | null) {
+  const supabase = await createClient();
+  let query = supabase
+    .from("workout_sessions")
+    .select("*")
+    .eq("user_id", userId)
+    .is("finished_at", null)
+    .order("started_at", { ascending: false })
+    .limit(1);
+
+  if (dayId) query = query.eq("day_id", dayId);
+  const { data } = await query.maybeSingle();
+  return data ?? null;
+}
+
 /** Cargas registradas por exercício (evolução) — últimos registros. */
 export async function getLoadHistory(userId: string, limit = 30) {
   const supabase = await createClient();
