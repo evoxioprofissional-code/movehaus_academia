@@ -1,14 +1,18 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, BookOpen, Download, Dumbbell, LogOut, Package, RefreshCw } from "lucide-react";
+import { BookOpen, Download, LogOut, Package, RefreshCw } from "lucide-react";
 import { requireUser, getProfile } from "@/lib/auth/user";
 import { hasCoachingAccess } from "@/lib/coaching/access";
+import { getPlanTree, getOpenSession, todayWeekday } from "@/lib/coaching/workouts";
+import { getProgress } from "@/lib/coaching/gamification";
 import { signOut } from "@/lib/auth/actions";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ProfileForm } from "@/components/customer/profile-form";
+import { CoachingEntry } from "@/components/customer/coaching-entry";
 import { getCustomerOverview } from "@/lib/customer/data";
 import { cancelSubscription } from "@/lib/customer/actions";
+import { whatsappLink } from "@/lib/site";
 import { formatBRL } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Minha área" };
@@ -20,6 +24,24 @@ export default async function MinhaAreaPage() {
   const firstName = displayName.split(" ")[0];
   const productById = new Map(overview.products.map((product) => [product.id, product]));
   const progressById = new Map(overview.progress.map((progress) => [progress.product_id, progress]));
+
+  // Dados do treino para o painel de Acompanhamento (só se o aluno tem acesso).
+  let coachingEntry = { todayLabel: null as string | null, todayExercises: 0, points: 0, hasOpenSession: false };
+  if (coaching) {
+    const [tree, progress, openSession] = await Promise.all([
+      getPlanTree(user.id),
+      getProgress(user.id),
+      getOpenSession(user.id),
+    ]);
+    const today = todayWeekday();
+    const todayDay = tree.days.find((day) => day.weekday === today) ?? null;
+    coachingEntry = {
+      todayLabel: todayDay?.name ?? null,
+      todayExercises: todayDay?.exercises.length ?? 0,
+      points: progress.points,
+      hasOpenSession: Boolean(openSession),
+    };
+  }
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-12 sm:px-6">
@@ -44,23 +66,14 @@ export default async function MinhaAreaPage() {
       </div>
 
       {/* Acompanhamento */}
-      <Link
-        href="/acompanhamento"
-        className="group mt-6 flex items-center justify-between gap-4 rounded-lg border border-mh-red/30 bg-[radial-gradient(90%_140%_at_0%_0%,rgba(229,18,28,0.14),transparent)] p-5 transition-colors hover:border-mh-red/60"
-      >
-        <div className="flex items-center gap-3">
-          <Dumbbell className="size-6 shrink-0 text-mh-red" />
-          <div>
-            <p className="font-semibold text-white">MoveHaus Acompanhamento</p>
-            <p className="text-sm text-mh-muted">
-              {coaching
-                ? "Seu treino, evolução e metas — entrar na área."
-                : "Treino, nutrição e evolução com a equipe. Conhecer."}
-            </p>
-          </div>
-        </div>
-        <ArrowRight className="size-5 shrink-0 text-mh-muted transition-transform group-hover:translate-x-0.5" />
-      </Link>
+      <CoachingEntry
+        hasAccess={coaching}
+        todayLabel={coachingEntry.todayLabel}
+        todayExercises={coachingEntry.todayExercises}
+        points={coachingEntry.points}
+        hasOpenSession={coachingEntry.hasOpenSession}
+        joinHref={whatsappLink("Olá! Quero assinar o MoveHaus Acompanhamento.")}
+      />
 
       <section className="mt-10">
         <div className="flex items-center gap-2"><BookOpen className="size-5 text-mh-red" /><h2 className="text-xl font-semibold text-white">Sua biblioteca</h2></div>
