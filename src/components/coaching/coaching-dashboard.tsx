@@ -16,6 +16,7 @@ import type { DayWithExercises, Session } from "@/lib/coaching/workouts";
 import type { Progress } from "@/lib/coaching/gamification";
 import { startSession } from "@/lib/coaching/workout-actions";
 import { redeemReward } from "@/lib/coaching/gamification-actions";
+import { WorkoutSubmit } from "@/components/coaching/workout-submit";
 import { cn } from "@/lib/utils";
 
 type Reward = Database["public"]["Tables"]["rewards"]["Row"];
@@ -159,12 +160,10 @@ export function CoachingDashboard({
                   <form action={startSession} className="mt-2">
                     <input type="hidden" name="day_id" value={featuredDay.id} />
                     <input type="hidden" name="day_name" value={featuredDay.name} />
-                    <button
-                      type="submit"
+                    <WorkoutSubmit
+                      label="Iniciar treino"
                       className="flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-mh-red text-xs font-semibold text-white transition-colors hover:bg-mh-red-hover"
-                    >
-                      <Play className="size-4 fill-white" /> Iniciar treino
-                    </button>
+                    />
                   </form>
                 )
               )}
@@ -226,9 +225,12 @@ export function CoachingDashboard({
                       <form action={startSession}>
                         <input type="hidden" name="day_id" value={day.id} />
                         <input type="hidden" name="day_name" value={day.name} />
-                        <button type="submit" disabled={day.exercises.length === 0} className="h-9 w-full rounded-md border border-mh-red/60 text-[10px] font-semibold text-mh-red disabled:opacity-40">
-                          Iniciar este treino
-                        </button>
+                        <WorkoutSubmit
+                          label="Iniciar este treino"
+                          withIcon={false}
+                          disabled={day.exercises.length === 0}
+                          className="flex h-9 w-full items-center justify-center gap-1.5 rounded-md border border-mh-red/60 text-[10px] font-semibold text-mh-red disabled:opacity-40"
+                        />
                       </form>
                     </div>
                   </details>

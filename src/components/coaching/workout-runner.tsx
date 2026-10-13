@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useFormStatus } from "react-dom";
 import Link from "next/link";
-import { Check, ChevronDown, Dumbbell, Frown, Meh, Pause, Play, Smile, Timer, TrendingUp, UserRound } from "lucide-react";
+import { Check, ChevronDown, Dumbbell, Frown, Loader2, Meh, Pause, Play, Smile, Timer, TrendingUp, UserRound } from "lucide-react";
 import { finishSession } from "@/lib/coaching/workout-actions";
 import { methodInfo } from "@/lib/coaching/training-methods";
 import { cn } from "@/lib/utils";
@@ -11,6 +12,15 @@ type Exercise = { id: string; name: string; sets: number; reps: string; target_l
 type Entry = { reps: string; load: string; done: boolean };
 
 const fmtKg = (value: number) => new Intl.NumberFormat("pt-BR").format(Math.round(value));
+
+function FinishButton({ disabled }: { disabled: boolean }) {
+  const { pending } = useFormStatus();
+  return (
+    <button type="submit" disabled={pending || disabled} className="flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-mh-red text-sm font-semibold text-white disabled:opacity-50">
+      {pending ? <><Loader2 className="size-5 animate-spin" />Finalizando…</> : <><Check className="size-5" />Finalizar treino</>}
+    </button>
+  );
+}
 
 /** Faixa da PSE (0-10): cor, rótulo e ícone de rosto. */
 function rpeBucket(value: number) {
@@ -146,7 +156,7 @@ export function WorkoutRunner({ sessionId, dayName, exercises, athleteName, date
       </main>
 
       <footer className="shrink-0 border-t border-white/10 bg-[#090a0c] px-3 pt-2">
-        <form id="finish-workout" action={finishSession}><input type="hidden" name="session_id" value={sessionId} /><input type="hidden" name="logs" value={JSON.stringify(logs)} /><input type="hidden" name="rpe" value={rpe ?? ""} /><button type="submit" disabled={exercises.length === 0} className="flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-mh-red text-sm font-semibold text-white disabled:opacity-40"><Check className="size-5" />Finalizar treino</button></form>
+        <form id="finish-workout" action={finishSession}><input type="hidden" name="session_id" value={sessionId} /><input type="hidden" name="logs" value={JSON.stringify(logs)} /><input type="hidden" name="rpe" value={rpe ?? ""} /><FinishButton disabled={exercises.length === 0} /></form>
         <nav className="grid grid-cols-3 py-2 text-[9px]"><Link href="/acompanhamento" className="flex flex-col items-center gap-1 text-mh-red"><Dumbbell className="size-5" />Treino</Link><Link href="/acompanhamento/corpo" className="flex flex-col items-center gap-1 text-[#9298a4]"><TrendingUp className="size-5" />Evolução</Link><Link href="/acompanhamento" className="flex flex-col items-center gap-1 text-[#9298a4]"><UserRound className="size-5" />Professor</Link></nav>
       </footer>
     </div>
