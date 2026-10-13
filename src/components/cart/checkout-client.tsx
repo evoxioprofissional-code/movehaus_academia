@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { CheckCircle2, CreditCard, ShieldCheck } from "lucide-react";
 import { useCart } from "@/components/cart/cart-provider";
 import { Button } from "@/components/ui/button";
@@ -13,7 +13,13 @@ import { formatBRL } from "@/lib/utils";
 export function CheckoutClient({ whatsapp }: { whatsapp: string }) {
   const { items, ready } = useCart();
   const [state, action, pending] = useActionState<CheckoutState, FormData>(prepareOrder, {});
-  const [idempotencyKey] = useState(() => crypto.randomUUID());
+  // Gerado só no cliente após montar: usar crypto.randomUUID() no initializer do
+  // useState causava mismatch de hidratação (valor diferente no servidor x cliente),
+  // deixando o CheckoutClient sem hidratar (carrinho vazio, botão inerte).
+  const [idempotencyKey, setIdempotencyKey] = useState("");
+  useEffect(() => {
+    setIdempotencyKey(crypto.randomUUID());
+  }, []);
   const upfront = items.filter((item) => item.billingModel !== "subscription").reduce((sum, item) => sum + item.unitPrice * item.qty, 0);
   const monthly = items.filter((item) => item.billingModel === "subscription").reduce((sum, item) => sum + item.unitPrice * item.qty, 0);
   const payload = JSON.stringify(items.map((item) => ({ productId: item.productId, quantity: item.qty, variant: item.variant })));
