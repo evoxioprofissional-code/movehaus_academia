@@ -271,8 +271,10 @@ export function CoachingDashboard({
                 {sessions.slice(0, 3).map((session) => (
                   <div key={session.id} className="flex items-center justify-between gap-3 py-2.5 text-[10px]">
                     <span className="truncate text-white">{session.day_name || "Treino"}</span>
-                    <span className="shrink-0 text-[#9298a4]">
-                      {session.finished_at && new Intl.DateTimeFormat("pt-BR").format(new Date(session.finished_at))}
+                    <span className="flex shrink-0 items-center gap-2 text-[#9298a4]">
+                      {session.total_volume_load > 0 && <span className="tabular-nums text-[#c9cdd5]">{new Intl.NumberFormat("pt-BR").format(Math.round(session.total_volume_load))} kg</span>}
+                      {session.rpe != null && <span className="rounded bg-white/10 px-1.5 py-0.5 font-semibold text-white">PSE {session.rpe}</span>}
+                      {session.finished_at && <span>{new Intl.DateTimeFormat("pt-BR").format(new Date(session.finished_at))}</span>}
                     </span>
                   </div>
                 ))}

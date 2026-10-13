@@ -11,6 +11,11 @@ const N = (v: FormDataEntryValue | null) => {
   const n = parseInt(String(v ?? ""), 10);
   return Number.isFinite(n) ? n : null;
 };
+const VALID_METHODS = ["normal", "biset", "triset", "superset", "dropset", "rest_pause", "piramide"];
+const METHOD = (v: FormDataEntryValue | null) => {
+  const m = S(v);
+  return VALID_METHODS.includes(m) ? m : "normal";
+};
 
 function adminRevalidate(userId: string) {
   if (userId) revalidatePath(`/admin/acompanhamento/${userId}/treino`);
@@ -92,6 +97,8 @@ export async function addExercise(fd: FormData): Promise<void> {
     rest_seconds: N(fd.get("rest_seconds")) ?? 60,
     video_url: S(fd.get("video_url")) || null,
     notes: S(fd.get("notes")),
+    method: METHOD(fd.get("method")),
+    group_label: S(fd.get("group_label")),
     position: (last?.position ?? 0) + 1,
   });
   adminRevalidate(S(fd.get("user_id")));
@@ -110,6 +117,8 @@ export async function updateExercise(fd: FormData): Promise<void> {
       rest_seconds: N(fd.get("rest_seconds")) ?? 60,
       video_url: S(fd.get("video_url")) || null,
       notes: S(fd.get("notes")),
+      method: METHOD(fd.get("method")),
+      group_label: S(fd.get("group_label")),
     })
     .eq("id", S(fd.get("id")));
   adminRevalidate(S(fd.get("user_id")));
@@ -161,6 +170,8 @@ export async function duplicateDay(fd: FormData): Promise<void> {
       rest_seconds: exercise.rest_seconds,
       video_url: exercise.video_url,
       notes: exercise.notes,
+      method: exercise.method,
+      group_label: exercise.group_label,
       position: exercise.position,
     })));
   }
@@ -213,32 +224,48 @@ export async function finishSession(fd: FormData): Promise<void> {
     .maybeSingle();
   if (!session || session.user_id !== user.id) redirect("/acompanhamento");
 
-  // Logs vêm como JSON do cliente.
+  // Logs vêm como JSON do cliente. Calcula o volume load total (Σ reps × carga).
+  let totalVolume = 0;
   try {
     const raw = S(fd.get("logs"));
     const logs = raw ? (JSON.parse(raw) as Array<Record<string, unknown>>) : [];
     const rows = logs
       .filter((l) => l && (l.load_used != null || l.reps_done != null))
-      .map((l) => ({
-        session_id: sessionId,
-        exercise_id: (l.exercise_id as string) || null,
-        exercise_name: String(l.exercise_name ?? ""),
-        set_number: Number(l.set_number ?? 1),
-        reps_done: l.reps_done != null ? Number(l.reps_done) : null,
-        load_used: l.load_used != null ? Number(l.load_used) : null,
-      }));
+      .map((l) => {
+        const reps = l.reps_done != null ? Number(l.reps_done) : null;
+        const load = l.load_used != null ? Number(l.load_used) : null;
+        if (reps != null && load != null && Number.isFinite(reps) && Number.isFinite(load)) {
+          totalVolume += reps * load;
+        }
+        return {
+          session_id: sessionId,
+          exercise_id: (l.exercise_id as string) || null,
+          exercise_name: String(l.exercise_name ?? ""),
+          set_number: Number(l.set_number ?? 1),
+          reps_done: reps,
+          load_used: load,
+        };
+      });
     if (rows.length) await supabase.from("exercise_logs").insert(rows);
   } catch {
     // ignora logs malformados
+    totalVolume = 0;
   }
+
+  // PSE (0-10). Deriva o "como foi" (leve/adequado/pesado) a partir da PSE.
+  const rpeRaw = N(fd.get("rpe"));
+  const rpe = rpeRaw != null && rpeRaw >= 0 && rpeRaw <= 10 ? rpeRaw : null;
+  const feelingFromRpe = rpe == null ? null : rpe <= 3 ? "leve" : rpe <= 6 ? "adequado" : "pesado";
 
   await supabase
     .from("workout_sessions")
     .update({
       finished_at: new Date().toISOString(),
-      feeling: S(fd.get("feeling")) || null,
+      feeling: feelingFromRpe ?? (S(fd.get("feeling")) || null),
       discomfort: S(fd.get("discomfort")),
       notes: S(fd.get("notes")),
+      rpe,
+      total_volume_load: Math.round(totalVolume * 100) / 100,
     })
     .eq("id", sessionId);
 

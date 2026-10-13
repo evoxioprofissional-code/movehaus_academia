@@ -49,3 +49,16 @@ Regra de acesso válido: `active = true AND (expires_at IS NULL OR expires_at > 
   cronômetro de descanso, feedback pós-treino). Migrations
   `*_coaching_foundation.sql` e `*_coaching_workouts.sql`.
 - **Próximo**: Sub-fase C (engajamento: metas, pontos, recompensas) — aguardando.
+
+## Métodos de treino, volume load e PSE (migration `*_coaching_training_methods.sql`)
+- **Métodos de treino** por exercício (`workout_exercises.method` + `group_label`):
+  `normal`, `biset`, `triset`, `superset`, `dropset`, `rest_pause`, `piramide`.
+  O professor escolhe no builder; o aluno vê um selo e a explicação de como executar
+  (definições em `src/lib/coaching/training-methods.ts`). `group_label` (ex.: "A")
+  agrupa os exercícios de um bi/tri/super-set.
+- **Volume load** = Σ (reps × carga) das séries concluídas. Calculado ao vivo no Modo
+  Treino (total e por exercício) e gravado por sessão em
+  `workout_sessions.total_volume_load`.
+- **PSE (percepção de esforço) 0–10** (`workout_sessions.rpe`): o aluno marca no fim do
+  treino (carinha + cor: 0-3 leve, 4-6 moderado, 7-10 pesado). O `feeling` legado é
+  derivado da PSE. Volume e PSE aparecem no histórico "Últimos treinos".

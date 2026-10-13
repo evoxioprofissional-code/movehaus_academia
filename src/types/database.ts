@@ -239,15 +239,15 @@ export type Database = {
         Relationships: [];
       };
       workout_exercises: {
-        Row: { id: string; day_id: string; name: string; sets: number; reps: string; target_load: string; rest_seconds: number; video_url: string | null; notes: string; position: number; created_at: string };
-        Insert: { id?: string; day_id: string; name: string; sets?: number; reps?: string; target_load?: string; rest_seconds?: number; video_url?: string | null; notes?: string; position?: number };
-        Update: { name?: string; sets?: number; reps?: string; target_load?: string; rest_seconds?: number; video_url?: string | null; notes?: string; position?: number };
+        Row: { id: string; day_id: string; name: string; sets: number; reps: string; target_load: string; rest_seconds: number; video_url: string | null; notes: string; method: string; group_label: string; position: number; created_at: string };
+        Insert: { id?: string; day_id: string; name: string; sets?: number; reps?: string; target_load?: string; rest_seconds?: number; video_url?: string | null; notes?: string; method?: string; group_label?: string; position?: number };
+        Update: { name?: string; sets?: number; reps?: string; target_load?: string; rest_seconds?: number; video_url?: string | null; notes?: string; method?: string; group_label?: string; position?: number };
         Relationships: [];
       };
       workout_sessions: {
-        Row: { id: string; user_id: string; day_id: string | null; day_name: string; started_at: string; finished_at: string | null; feeling: string | null; discomfort: string; notes: string; created_at: string };
+        Row: { id: string; user_id: string; day_id: string | null; day_name: string; started_at: string; finished_at: string | null; feeling: string | null; discomfort: string; notes: string; rpe: number | null; total_volume_load: number; created_at: string };
         Insert: { id?: string; user_id: string; day_id?: string | null; day_name?: string };
-        Update: { finished_at?: string | null; feeling?: string | null; discomfort?: string; notes?: string };
+        Update: { finished_at?: string | null; feeling?: string | null; discomfort?: string; notes?: string; rpe?: number | null; total_volume_load?: number };
         Relationships: [];
       };
       exercise_logs: {
