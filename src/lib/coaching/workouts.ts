@@ -12,9 +12,12 @@ export type PlanTree = { plan: Plan | null; days: DayWithExercises[] };
 
 export const WEEKDAYS = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"];
 
-/** 1=seg .. 7=dom para a data atual. */
+/** 1=seg .. 7=dom para a data atual, no fuso de São Paulo (evita virar o dia à
+ *  noite por causa do UTC do servidor, que desalinhava o "treino de hoje"). */
 export function todayWeekday(): number {
-  return ((new Date().getDay() + 6) % 7) + 1;
+  const short = new Intl.DateTimeFormat("en-US", { weekday: "short", timeZone: "America/Sao_Paulo" }).format(new Date());
+  const map: Record<string, number> = { Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6, Sun: 7 };
+  return map[short] ?? 1;
 }
 
 /** Plano ativo de um usuário + dias e exercícios ordenados. */

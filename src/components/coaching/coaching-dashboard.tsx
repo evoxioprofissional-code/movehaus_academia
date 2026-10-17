@@ -17,6 +17,7 @@ import type { Progress } from "@/lib/coaching/gamification";
 import { startSession } from "@/lib/coaching/workout-actions";
 import { redeemReward } from "@/lib/coaching/gamification-actions";
 import { WorkoutSubmit } from "@/components/coaching/workout-submit";
+import { loadLabel } from "@/lib/coaching/format";
 import { cn } from "@/lib/utils";
 
 type Reward = Database["public"]["Tables"]["rewards"]["Row"];
@@ -141,7 +142,7 @@ export function CoachingDashboard({
                     <p className="truncate text-[11px] font-semibold text-white">{exercise.name}</p>
                     <p className="truncate text-[8px] text-[#9298a4]">
                       {exercise.sets} séries · {exercise.reps}
-                      {exercise.target_load ? ` · ${exercise.target_load} kg` : ""}
+                      {exercise.target_load ? ` · ${loadLabel(exercise.target_load)}` : ""}
                     </p>
                   </div>
                   <ChevronDown className="size-3.5 -rotate-90 text-[#6f7682]" />
