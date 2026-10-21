@@ -4,6 +4,10 @@
 do topo. Não mostra a academia nem uma aluna real da MoveHaus. Substitua-a por
 uma foto autorizada no painel da página inicial assim que estiver disponível.
 
+`community-group.webp` e `community-plates.webp` também são imagens conceituais.
+Os dois espaços da seção de comunidade podem ser trocados no mesmo painel;
+as pessoas e o ambiente atuais não representam a MoveHaus real.
+
 Coloque aqui as fotos reais da academia (treino, alunos, professores,
 ambiente, produtos). Depois é só apontar o caminho no arquivo de conteúdo.
 

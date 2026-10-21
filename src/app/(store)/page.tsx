@@ -5,14 +5,13 @@ import { Button } from "@/components/ui/button";
 import { CtaButton } from "@/components/ui/cta-button";
 import { PhotoSlot } from "@/components/ui/photo-slot";
 import { SectionHeading } from "@/components/ui/section-heading";
-import { TextEffect } from "@/components/ui/text-effect";
 import { Reveal } from "@/components/ui/reveal";
 import { ProductGrid } from "@/components/catalog/product-grid";
 import { ProductMedia } from "@/components/catalog/product-media";
 import { productHref } from "@/components/catalog/product-card";
 import { Price } from "@/components/catalog/price";
 import { accessDescription } from "@/components/catalog/billing-info";
-import { CommunityGallery } from "@/components/home/community-gallery";
+import { CommunityFeature } from "@/components/home/community-feature";
 import { ReaderPreview } from "@/components/home/reader-preview";
 import { getHomeMedia, getPublicBanners } from "@/lib/home-media";
 import { getHomeText } from "@/lib/home-content";
@@ -52,12 +51,8 @@ export default async function HomePage() {
   const heroImage = media.hero && !legacyLogoHero ? media.hero : HERO.image.src!;
   const heroTitle = t("hero.title", HERO.title).split("\n");
 
-  // Imagens da home enviadas pelo admin (com fallback para o placeholder).
-  const communityItems = COMMUNITY.items.map((item, i) => ({
-    ...item,
-    caption: t(`community.item${i}`, item.caption),
-    media: { ...item.media, src: media[`community_${i}`] ?? item.media.src },
-  }));
+  const communityMain = media.community_0 ?? COMMUNITY.items[0].media.src!;
+  const communityDetail = media.community_1 ?? COMMUNITY.items[1].media.src!;
 
   return (
     <>
@@ -105,22 +100,14 @@ export default async function HomePage() {
         </section>
       )}
 
-      {/* ================= ISSO É MOVEHAUS (comunidade) ================= */}
-      <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:py-24">
-        <div className="mb-8 max-w-2xl">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-mh-red">
-            {t("community.kicker", COMMUNITY.kicker)}
-          </p>
-          <TextEffect
-            as="h2"
-            trigger="inView"
-            text={t("community.title", COMMUNITY.title)}
-            className="mt-2 text-3xl font-semibold tracking-tight text-white sm:text-[34px]"
-          />
-          <p className="mt-3 text-mh-muted">{t("community.text", COMMUNITY.text)}</p>
-        </div>
-        <CommunityGallery items={communityItems} />
-      </section>
+      <CommunityFeature
+        kicker={t("community.kicker", COMMUNITY.kicker)}
+        title={t("community.title", COMMUNITY.title)}
+        text={t("community.text", COMMUNITY.text)}
+        caption={t("community.item1", COMMUNITY.items[1].caption)}
+        mainSrc={communityMain}
+        detailSrc={communityDetail}
+      />
 
       {/* ================= PRODUTOS EM DESTAQUE ================= */}
       {featuredProducts.length > 0 && (

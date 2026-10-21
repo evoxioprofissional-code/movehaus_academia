@@ -31,17 +31,14 @@ export const HERO = {
   } as MediaSlot,
 };
 
-/** Seção "Isso é MoveHaus." — narrativa visual da comunidade (carrossel). */
+/** Seção editorial da comunidade. Fotos conceituais até chegar mídia do clube. */
 export const COMMUNITY = {
   kicker: "Comunidade",
-  title: "Isso é MoveHaus.",
-  text: "Gente de verdade treinando, evoluindo e fazendo parte de algo maior que um treino.",
+  title: "Isso é\nMoveHaus.",
+  text: "Treino sério, acompanhamento próximo e gente que evolui junto.",
   items: [
-    { caption: "Treino com acompanhamento", tone: "dark", media: { src: null, alt: "Treino com acompanhamento", caption: "Treino" } },
-    { caption: "Uma comunidade que evolui junta", tone: "red", media: { src: null, alt: "Comunidade MoveHaus", caption: "Comunidade" } },
-    { caption: "Estrutura para treinar de verdade", tone: "dark", media: { src: null, alt: "Estrutura da academia", caption: "Estrutura" } },
-    { caption: "Constância gera resultado", tone: "dark", media: { src: null, alt: "Aluno em evolução", caption: "Resultado" } },
-    { caption: "MoveHaus Training Club", tone: "red", media: { src: null, alt: "Ambiente MoveHaus", caption: "Ambiente" } },
+    { caption: "Pessoas juntas depois do treino", tone: "dark", media: { src: "/images/community-group.webp", alt: "Pessoas conversando depois de treinar" } },
+    { caption: "Treinar junto muda tudo.", tone: "dark", media: { src: "/images/community-plates.webp", alt: "Mãos preparando anilhas para treino" } },
   ] as { caption: string; tone: "dark" | "red"; media: MediaSlot }[],
 };
 
@@ -76,11 +73,8 @@ export const OFFER = {
  */
 export const HOME_MEDIA_SLOTS: { key: string; label: string; hint: string }[] = [
   { key: "hero", label: "Topo (hero)", hint: "Imagem/foto grande do topo. Horizontal, alta resolução." },
-  { key: "community_0", label: "Galeria 1 — Treino com acompanhamento", hint: "Vertical (retrato)." },
-  { key: "community_1", label: "Galeria 2 — Comunidade que evolui junta", hint: "Vertical (retrato)." },
-  { key: "community_2", label: "Galeria 3 — Estrutura para treinar", hint: "Vertical (retrato)." },
-  { key: "community_3", label: "Galeria 4 — Constância gera resultado", hint: "Vertical (retrato)." },
-  { key: "community_4", label: "Galeria 5 — MoveHaus Training Club", hint: "Vertical (retrato)." },
+  { key: "community_0", label: "Comunidade — foto principal", hint: "Foto horizontal de pessoas no ambiente de treino." },
+  { key: "community_1", label: "Comunidade — detalhe do treino", hint: "Foto vertical de equipamento ou rotina." },
   { key: "offer", label: "Faixa de ofertas", hint: "Horizontal, tom mais escuro." },
   { key: "about", label: "Sobre a MoveHaus", hint: "Foto do ambiente/comunidade." },
 ];
@@ -106,9 +100,9 @@ export const HOME_TEXT_FIELDS: HomeTextField[] = [
   { key: "hero.secondary", group: "Topo", label: "Texto do botão secundário", default: HERO.secondary.label },
 
   { key: "community.kicker", group: "Comunidade", label: "Selo", default: COMMUNITY.kicker },
-  { key: "community.title", group: "Comunidade", label: "Título", default: COMMUNITY.title },
+  { key: "community.title", group: "Comunidade", label: "Título", multiline: true, default: COMMUNITY.title },
   { key: "community.text", group: "Comunidade", label: "Descrição", multiline: true, default: COMMUNITY.text },
-  ...COMMUNITY.items.map((item, index) => ({ key: `community.item${index}`, group: "Comunidade", label: `Legenda da foto ${index + 1}`, default: item.caption })),
+  { key: "community.item1", group: "Comunidade", label: "Legenda do detalhe", default: COMMUNITY.items[1].caption },
 
   { key: "digital.kicker", group: "Conteúdos", label: "Selo", default: DIGITAL.kicker },
   { key: "digital.title", group: "Conteúdos", label: "Título", default: DIGITAL.title },
