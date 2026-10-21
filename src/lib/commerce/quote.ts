@@ -45,7 +45,9 @@ export async function createCartQuote(items: QuoteInputItem[], couponCode?: stri
     if (product.type === "physical" && product.track_inventory && !product.allow_backorder && product.stock < quantity) {
       errors.push(`${product.name} possui apenas ${Math.max(product.stock, 0)} unidade(s) disponível(is).`); continue;
     }
-    const unitPrice = promotionActive(product.promotion_starts_at, product.promotion_ends_at) && product.price != null ? product.price : basePrice;
+    // Promoção (product.price no período promocional) vale só para itens de pagamento
+    // único; assinaturas cobram sempre o monthly_price.
+    const unitPrice = !recurring && promotionActive(product.promotion_starts_at, product.promotion_ends_at) && product.price != null ? product.price : basePrice;
     lines.push({ productId: product.id, slug: product.slug, name: product.name, type: product.type, billingModel: product.billing_model, quantity, unitPrice, total: unitPrice * quantity, sku: product.sku, variant: item.variant ?? {} });
   }
 

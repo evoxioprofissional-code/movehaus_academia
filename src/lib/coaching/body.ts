@@ -9,7 +9,9 @@ export type Photo = Database["public"]["Tables"]["progress_photos"]["Row"] & {
 };
 
 export function todayISO(): string {
-  return new Date().toISOString().slice(0, 10);
+  // Data de hoje no fuso de São Paulo. Com UTC, à noite (BRT = UTC-3) a data
+  // virava o dia seguinte e os registros (hidratação, medidas) caíam no dia errado.
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "America/Sao_Paulo" }).format(new Date());
 }
 
 export async function getBodyData(userId: string) {

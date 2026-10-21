@@ -135,7 +135,7 @@ export async function toggleMealDone(fd: FormData): Promise<void> {
   const done = S(fd.get("done")) === "true";
   if (!mealId) return;
   const supabase = await createClient();
-  const today = new Date().toISOString().slice(0, 10);
+  const today = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Sao_Paulo" }).format(new Date());
   if (done) {
     await supabase.from("meal_logs").upsert(
       { user_id: user.id, meal_id: mealId, day: today },

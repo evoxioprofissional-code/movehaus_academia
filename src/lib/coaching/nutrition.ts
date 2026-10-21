@@ -10,7 +10,8 @@ export type MealWithItems = Meal & { items: MealItem[] };
 export type MealPlanTree = { plan: MealPlan | null; meals: MealWithItems[] };
 
 function todayISO() {
-  return new Date().toISOString().slice(0, 10);
+  // Fuso de São Paulo (UTC virava o dia à noite — ver body.ts).
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "America/Sao_Paulo" }).format(new Date());
 }
 
 export async function getMealPlanTree(userId: string): Promise<MealPlanTree> {
