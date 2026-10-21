@@ -17,6 +17,7 @@ export function Logo({
   return (
     <Link
       href={href}
+      prefetch={false}
       aria-label="MoveHaus Training Club — início"
       className={cn("inline-flex shrink-0 items-center", className)}
     >

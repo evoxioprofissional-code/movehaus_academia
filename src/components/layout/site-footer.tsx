@@ -64,10 +64,10 @@ export async function SiteFooter() {
         <div className="md:col-span-2">
           <h4 className="text-sm font-semibold text-white">Loja</h4>
           <ul className="mt-4 space-y-2.5 text-sm text-mh-muted">
-            <li><Link className="hover:text-white" href="/loja">Produtos</Link></li>
-            <li><Link className="hover:text-white" href="/ebooks">Conteúdos</Link></li>
-            <li><Link className="hover:text-white" href="/ofertas">Ofertas</Link></li>
-            <li><Link className="hover:text-white" href="/sobre">Sobre a MoveHaus</Link></li>
+            <li><Link prefetch={false} className="hover:text-white" href="/loja">Produtos</Link></li>
+            <li><Link prefetch={false} className="hover:text-white" href="/ebooks">Conteúdos</Link></li>
+            <li><Link prefetch={false} className="hover:text-white" href="/ofertas">Ofertas</Link></li>
+            <li><Link prefetch={false} className="hover:text-white" href="/sobre">Sobre a MoveHaus</Link></li>
           </ul>
         </div>
 
@@ -75,9 +75,9 @@ export async function SiteFooter() {
         <div className="md:col-span-2">
           <h4 className="text-sm font-semibold text-white">Conta</h4>
           <ul className="mt-4 space-y-2.5 text-sm text-mh-muted">
-            <li><Link className="hover:text-white" href="/conta">Minha área</Link></li>
-            <li><Link className="hover:text-white" href="/login">Entrar</Link></li>
-            <li><Link className="hover:text-white" href="/carrinho">Carrinho</Link></li>
+            <li><Link prefetch={false} className="hover:text-white" href="/conta">Minha área</Link></li>
+            <li><Link prefetch={false} className="hover:text-white" href="/login">Entrar</Link></li>
+            <li><Link prefetch={false} className="hover:text-white" href="/carrinho">Carrinho</Link></li>
           </ul>
         </div>
 
@@ -139,8 +139,8 @@ export async function SiteFooter() {
         <div className="mx-auto flex max-w-6xl flex-col gap-2 px-4 py-5 text-xs text-mh-muted sm:flex-row sm:items-center sm:justify-between sm:px-6">
           <p>© {new Date().getFullYear()} {settings.academyName}. Todos os direitos reservados.</p>
           <div className="flex gap-5">
-            <Link className="hover:text-white" href="/termos">Termos de uso</Link>
-            <Link className="hover:text-white" href="/privacidade">Privacidade</Link>
+            <Link prefetch={false} className="hover:text-white" href="/termos">Termos de uso</Link>
+            <Link prefetch={false} className="hover:text-white" href="/privacidade">Privacidade</Link>
           </div>
         </div>
       </div>

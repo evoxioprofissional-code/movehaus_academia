@@ -76,6 +76,7 @@ export function SiteHeader() {
           <HeaderSearch />
           <Link
             href="/conta"
+            prefetch={false}
             aria-label="Minha conta"
             className="grid size-10 place-items-center rounded-full text-white/85 transition-all duration-200 hover:bg-white/[0.08] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mh-red active:scale-95"
           >

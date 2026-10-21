@@ -26,6 +26,7 @@ export function CategoryFilter({
     <Link
       key={slug ?? "all"}
       href={build(slug)}
+      prefetch={false}
       className={cn(
         "whitespace-nowrap rounded-full border px-4 py-1.5 text-sm font-medium transition-colors",
         isActive

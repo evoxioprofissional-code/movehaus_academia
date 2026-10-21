@@ -9,6 +9,7 @@ export function CartButton({ tone = "dark" }: { tone?: "dark" | "light" }) {
   return (
     <Link
       href="/carrinho"
+      prefetch={false}
       aria-label={`Carrinho${count ? ` — ${count} ${count === 1 ? "item" : "itens"}` : ""}`}
       className={`relative grid size-10 place-items-center rounded-full transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mh-red active:scale-95 ${tone === "light" ? "text-mh-paper-ink hover:bg-black/[0.06]" : "text-mh-text hover:bg-white/5 hover:text-white"}`}
     >

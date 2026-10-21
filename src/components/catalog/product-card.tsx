@@ -44,6 +44,7 @@ export function ProductCard({
       {/* Link que cobre o card inteiro */}
       <Link
         href={productHref(product)}
+        prefetch={false}
         aria-label={product.name}
         className="absolute inset-0 z-10 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mh-red focus-visible:ring-offset-2 focus-visible:ring-offset-mh-black"
       />

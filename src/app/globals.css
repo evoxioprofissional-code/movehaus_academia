@@ -128,6 +128,15 @@ h1, h2, h3, h4, h5 {
 }
 
 /* Scrollbar discreta */
+.mh-soft-enter {
+  animation: mh-soft-enter 420ms ease-out both;
+}
+
+@keyframes mh-soft-enter {
+  from { opacity: 0.88; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 ::-webkit-scrollbar {
   width: 10px;
   height: 10px;

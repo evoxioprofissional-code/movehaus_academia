@@ -42,10 +42,9 @@ export function NavigationFeedback() {
       const destination = new URL(anchor.href, window.location.href);
       if (destination.origin !== window.location.origin) return;
       if (destination.href === window.location.href) return;
-      if (
-        destination.pathname === window.location.pathname &&
-        destination.search === window.location.search
-      ) {
+      // A troca de filtros altera apenas a query. `pathname` não muda e o
+      // indicador ficaria ligado por 10 segundos mesmo depois da atualização.
+      if (destination.pathname === window.location.pathname) {
         return;
       }
 
