@@ -4,8 +4,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { requireAdmin, requireUser } from "@/lib/auth/user";
-import { hasCoachingAccess } from "@/lib/coaching/access";
-import { getPointsBalance, POINTS } from "@/lib/coaching/gamification";
+import { POINTS } from "@/lib/coaching/gamification";
 
 const S = (v: FormDataEntryValue | null) => String(v ?? "").trim();
 const NUM = (v: FormDataEntryValue | null) => {
@@ -120,37 +119,17 @@ export async function decideRedemption(fd: FormData): Promise<void> {
 
 // ============ ALUNO: resgatar recompensa ============
 export async function redeemReward(fd: FormData): Promise<void> {
-  const user = await requireUser("/acompanhamento");
-  if (!(await hasCoachingAccess())) redirect("/acompanhamento");
+  await requireUser("/acompanhamento");
   const rewardId = S(fd.get("reward_id"));
   if (!rewardId) return;
 
-  const adminDb = createAdminClient();
-  const { data: reward } = await adminDb
-    .from("rewards")
-    .select("id, title, cost_points, active")
-    .eq("id", rewardId)
-    .maybeSingle();
-  if (!reward || !reward.active) redirect("/acompanhamento");
-
-  const balance = await getPointsBalance(user.id);
-  if (balance < reward!.cost_points) {
-    redirect("/acompanhamento?resgate=saldo");
-  }
-
-  await adminDb.from("reward_redemptions").insert({
-    user_id: user.id,
-    reward_id: reward!.id,
-    reward_title: reward!.title,
-    points_spent: reward!.cost_points,
-    status: "pending",
-  });
-  await adminDb.from("points_ledger").insert({
-    user_id: user.id,
-    points: -reward!.cost_points,
-    reason: `Resgate: ${reward!.title}`,
-  });
+  // Resgate atômico no banco (confere saldo/acesso/recompensa e debita os pontos
+  // numa transação com lock por usuário — sem risco de gasto-duplo).
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("redeem_reward", { p_reward_id: rewardId });
 
   revalidatePath("/acompanhamento");
+  if (error || data === "invalid") redirect("/acompanhamento");
+  if (data === "saldo") redirect("/acompanhamento?resgate=saldo");
   redirect("/acompanhamento?resgate=ok");
 }

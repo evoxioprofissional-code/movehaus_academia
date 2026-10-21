@@ -14,6 +14,15 @@ export function todayISO(): string {
   return new Intl.DateTimeFormat("en-CA", { timeZone: "America/Sao_Paulo" }).format(new Date());
 }
 
+/** Segunda-feira da semana atual (fuso de São Paulo), como YYYY-MM-DD. */
+export function weekStartISO(): string {
+  const [y, m, d] = todayISO().split("-").map(Number);
+  const date = new Date(Date.UTC(y, m - 1, d));
+  const diff = (date.getUTCDay() + 6) % 7; // dias desde a segunda-feira
+  date.setUTCDate(date.getUTCDate() - diff);
+  return date.toISOString().slice(0, 10);
+}
+
 export async function getBodyData(userId: string) {
   const supabase = await createClient();
   const [{ data: metrics }, { data: hyd }, { data: checkins }, { data: photoRows }] =

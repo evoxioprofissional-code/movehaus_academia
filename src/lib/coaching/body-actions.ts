@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { requireUser } from "@/lib/auth/user";
 import { hasCoachingAccess } from "@/lib/coaching/access";
-import { todayISO } from "@/lib/coaching/body";
+import { todayISO, weekStartISO } from "@/lib/coaching/body";
 
 const S = (v: FormDataEntryValue | null) => String(v ?? "").trim();
 const num = (v: FormDataEntryValue | null): number | null => {
@@ -86,7 +86,7 @@ export async function submitCheckin(fd: FormData): Promise<void> {
   const supabase = await createClient();
   await supabase.from("checkins").insert({
     user_id: user.id,
-    week_start: todayISO(),
+    week_start: weekStartISO(),
     energy: int(fd.get("energy")),
     sleep: int(fd.get("sleep")),
     nutrition: int(fd.get("nutrition")),

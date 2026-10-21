@@ -353,6 +353,7 @@ export type Database = {
       has_coaching_access: { Args: { uid?: string }; Returns: boolean };
       points_balance: { Args: { uid?: string }; Returns: number };
       is_staff: { Args: Record<string, never>; Returns: boolean };
+      redeem_reward: { Args: { p_reward_id: string }; Returns: string };
     };
     Enums: {
       app_role: AppRole;

@@ -233,13 +233,14 @@ export async function dashboardPeriodData(days: number) {
   const orders = ordersResult.data ?? [];
   const approved = orders.filter((order) => order.payment_status === "approved");
   const revenue = approved.reduce((sum, order) => sum + order.total, 0);
+  // Agrupa por data no fuso de São Paulo (não em UTC, que viraria o dia à noite).
+  const spDate = (d: Date) => new Intl.DateTimeFormat("en-CA", { timeZone: "America/Sao_Paulo" }).format(d);
   const points = new Map<string, number>();
   for (let offset = safeDays - 1; offset >= 0; offset--) {
-    const date = new Date(Date.now() - offset * 86400000);
-    points.set(date.toISOString().slice(0, 10), 0);
+    points.set(spDate(new Date(Date.now() - offset * 86400000)), 0);
   }
   for (const order of approved) {
-    const key = order.created_at.slice(0, 10);
+    const key = spDate(new Date(order.created_at));
     if (points.has(key)) points.set(key, (points.get(key) ?? 0) + order.total);
   }
   return {
