@@ -7,14 +7,16 @@ export function Logo({
   className,
   priority,
   size = 44,
+  href = "/",
 }: {
   className?: string;
   priority?: boolean;
   size?: number;
+  href?: string;
 }) {
   return (
     <Link
-      href="/"
+      href={href}
       aria-label="MoveHaus Training Club — início"
       className={cn("inline-flex shrink-0 items-center", className)}
     >

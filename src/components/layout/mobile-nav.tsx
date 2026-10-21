@@ -20,9 +20,11 @@ import { whatsappLink } from "@/lib/site";
 export function MobileNav({
   items,
   tone = "dark",
+  mode = "store",
 }: {
   items: { href: string; label: string }[];
   tone?: "dark" | "light";
+  mode?: "store" | "member";
 }) {
   const [open, setOpen] = useState(false);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
@@ -63,7 +65,7 @@ export function MobileNav({
           />
           <nav className="absolute inset-y-0 left-0 flex h-dvh w-[min(88vw,22rem)] animate-[mh-slide-in_.26s_ease-out] flex-col overflow-hidden border-r border-white/10 bg-[#08090b] shadow-[24px_0_70px_rgba(0,0,0,.7)]">
             <div className="flex shrink-0 items-center justify-between border-b border-white/[0.08] px-5 pb-4 pt-[max(1rem,env(safe-area-inset-top))]">
-              <Logo size={42} />
+              <Logo size={42} href={mode === "member" ? "/minha-area" : "/"} />
               <button
                 ref={closeButtonRef}
                 type="button"
@@ -75,20 +77,22 @@ export function MobileNav({
               </button>
             </div>
 
-            <form
-              action="/loja"
-              onSubmit={close}
-              className="mx-4 mt-4 flex shrink-0 items-center gap-2 rounded-xl border border-white/10 bg-[#111318] px-3"
-            >
-              <Search className="size-4 shrink-0 text-mh-muted" />
-              <input
-                type="search"
-                name="q"
-                placeholder="Buscar na MoveHaus"
-                aria-label="Buscar"
-                className="h-12 w-full bg-transparent text-sm text-white placeholder:text-mh-muted focus:outline-none"
-              />
-            </form>
+            {mode === "store" && (
+              <form
+                action="/loja"
+                onSubmit={close}
+                className="mx-4 mt-4 flex shrink-0 items-center gap-2 rounded-xl border border-white/10 bg-[#111318] px-3"
+              >
+                <Search className="size-4 shrink-0 text-mh-muted" />
+                <input
+                  type="search"
+                  name="q"
+                  placeholder="Buscar na MoveHaus"
+                  aria-label="Buscar"
+                  className="h-12 w-full bg-transparent text-sm text-white placeholder:text-mh-muted focus:outline-none"
+                />
+              </form>
+            )}
 
             <div className="flex-1 overflow-y-auto overscroll-contain px-3 py-4">
               {items.map((item) => {
@@ -112,6 +116,13 @@ export function MobileNav({
               })}
             </div>
 
+            {mode === "member" ? (
+              <div className="shrink-0 border-t border-white/[0.08] px-3 pb-[max(.75rem,env(safe-area-inset-bottom))] pt-3">
+                <Link href="/loja" onClick={close} className="flex min-h-12 items-center justify-between rounded-xl px-4 text-sm font-medium text-white/80 hover:bg-white/[0.05] hover:text-white">
+                  Voltar à loja <ArrowUpRight className="size-4 text-white/45" />
+                </Link>
+              </div>
+            ) : (
             <div className="shrink-0 space-y-1 border-t border-white/[0.08] px-3 pb-[max(.75rem,env(safe-area-inset-bottom))] pt-3">
               <Link
                 href="/conta"
@@ -140,6 +151,7 @@ export function MobileNav({
                 Falar no WhatsApp
               </a>
             </div>
+            )}
           </nav>
         </div>,
         document.body,

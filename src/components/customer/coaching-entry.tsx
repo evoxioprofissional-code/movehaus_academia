@@ -1,75 +1,77 @@
+import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Dumbbell, Star } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
 type Props = {
   hasAccess: boolean;
-  todayLabel: string | null; // nome do treino de hoje, ou null (descanso)
+  hasPlan: boolean;
+  todayLabel: string | null;
   todayExercises: number;
-  points: number;
   hasOpenSession: boolean;
-  joinHref: string; // WhatsApp para quem ainda não tem acesso
+  joinHref: string;
 };
 
-export function CoachingEntry({ hasAccess, todayLabel, todayExercises, points, hasOpenSession, joinHref }: Props) {
-  // --- Aluno com acesso: cockpit do treino ---
-  if (hasAccess) {
-    return (
-      <section className="relative mt-6 overflow-hidden rounded-2xl border border-mh-red/40 bg-[radial-gradient(120%_160%_at_100%_0%,rgba(229,18,28,0.22),transparent_60%),linear-gradient(180deg,#141416,#0c0c0d)]">
-        <Dumbbell className="pointer-events-none absolute -right-6 -top-6 size-40 rotate-12 text-white/[0.04]" />
-        <div className="relative flex flex-col gap-5 p-6 sm:flex-row sm:items-center sm:justify-between sm:p-7">
-          <div className="min-w-0">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-mh-red">MoveHaus Acompanhamento</p>
-            <h2 className="mt-2 text-2xl font-bold leading-tight tracking-tight text-white sm:text-[28px]">
-              {todayLabel ? <>Hoje: {todayLabel}</> : "Hoje é dia de descanso"}
-            </h2>
-            <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
-              {todayLabel && (
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-white/[0.06] px-3 py-1 font-medium text-white">
-                  <Dumbbell className="size-3.5 text-mh-red" />
-                  {todayExercises} {todayExercises === 1 ? "exercício" : "exercícios"}
-                </span>
-              )}
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-white/[0.06] px-3 py-1 font-medium text-white">
-                <Star className="size-3.5 text-mh-red" />
-                {points} {points === 1 ? "ponto" : "pontos"}
-              </span>
-            </div>
-          </div>
-          <Link
-            href="/acompanhamento"
-            className="group inline-flex h-12 shrink-0 items-center justify-center gap-2 rounded-xl bg-mh-red px-6 text-sm font-semibold text-white shadow-[0_8px_24px_-8px_rgba(229,18,28,0.6)] transition-colors hover:bg-mh-red-hover"
-          >
-            {hasOpenSession ? "Continuar treino" : todayLabel ? "Começar o treino de hoje" : "Entrar na área"}
-            <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
-          </Link>
-        </div>
-      </section>
-    );
-  }
+export function CoachingEntry({
+  hasAccess,
+  hasPlan,
+  todayLabel,
+  todayExercises,
+  hasOpenSession,
+  joinHref,
+}: Props) {
+  const title = !hasAccess
+    ? "Seu treino começa aqui"
+    : hasOpenSession
+      ? "Treino em andamento"
+      : !hasPlan
+        ? "Seu plano está chegando"
+        : todayLabel
+          ? todayLabel
+          : "Hoje é dia de descanso";
+  const description = !hasAccess
+    ? "Treino acompanhado pela equipe MoveHaus, no seu ritmo."
+    : hasOpenSession
+      ? "Sua sessão está pronta para continuar."
+      : !hasPlan
+        ? "Acompanhe a preparação do seu plano com a equipe."
+        : todayLabel
+          ? `${todayExercises} ${todayExercises === 1 ? "exercício" : "exercícios"} no plano de hoje.`
+          : "Recuperar também faz parte do treino.";
+  const actionLabel = !hasAccess
+    ? "Conhecer acompanhamento"
+    : hasOpenSession
+      ? "Continuar treino"
+      : todayLabel
+        ? "Ver treino de hoje"
+        : "Ver meu plano";
 
-  // --- Sem acesso: convite concreto ---
   return (
-    <section className="relative mt-6 overflow-hidden rounded-2xl border border-white/10 bg-[radial-gradient(120%_160%_at_100%_0%,rgba(229,18,28,0.18),transparent_60%),linear-gradient(180deg,#141416,#0c0c0d)]">
-      <Dumbbell className="pointer-events-none absolute -right-6 -top-6 size-40 rotate-12 text-white/[0.04]" />
-      <div className="relative flex flex-col gap-5 p-6 sm:flex-row sm:items-center sm:justify-between sm:p-7">
-        <div className="min-w-0">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-mh-red">MoveHaus Acompanhamento</p>
-          <h2 className="mt-2 text-2xl font-bold leading-tight tracking-tight text-white sm:text-[28px]">
-            Treine com método, não no escuro.
-          </h2>
-          <p className="mt-2 max-w-md text-sm leading-relaxed text-mh-muted">
-            Plano semanal montado pra você, modo treino no celular, evolução de carga e a equipe acompanhando de perto.
-          </p>
-        </div>
-        <a
-          href={joinHref}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="group inline-flex h-12 shrink-0 items-center justify-center gap-2 rounded-xl bg-mh-red px-6 text-sm font-semibold text-white shadow-[0_8px_24px_-8px_rgba(229,18,28,0.6)] transition-colors hover:bg-mh-red-hover"
-        >
-          Quero fazer parte
-          <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
-        </a>
+    <section className="relative isolate flex min-h-[325px] overflow-hidden rounded-[22px] border border-mh-red/40 bg-[#111216] sm:min-h-[355px]">
+      <Image
+        src="/images/member-training-plates.png"
+        alt=""
+        fill
+        priority
+        sizes="(max-width: 767px) 100vw, 52vw"
+        className="object-cover object-center"
+      />
+      <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-r from-[#08090b]/95 via-[#08090b]/72 to-[#08090b]/15" />
+      <div aria-hidden="true" className="absolute -top-[20%] right-[20%] h-[92%] w-5 rotate-[28deg] bg-mh-red/85 sm:right-[28%] sm:w-7" />
+      <div className="relative z-10 flex w-full max-w-md flex-col items-start justify-end p-6 sm:p-8">
+        <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-mh-red">MoveHaus Acompanhamento</p>
+        <h2 className="mt-3 max-w-[11ch] font-display text-[clamp(2.25rem,9vw,3.25rem)] font-bold uppercase leading-[0.98] text-white sm:text-[3.25rem]">
+          {title}
+        </h2>
+        <p className="mt-3 max-w-[26ch] text-[15px] leading-snug text-white/90 sm:text-base">{description}</p>
+        {hasAccess ? (
+          <Link href="/acompanhamento" className="mt-6 inline-flex min-h-12 w-full max-w-[245px] items-center justify-center gap-2 rounded-2xl bg-mh-red px-5 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(245,0,25,.25)] transition-colors hover:bg-mh-red-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white sm:w-auto sm:min-w-[230px]">
+            {actionLabel}<ArrowRight className="size-4" />
+          </Link>
+        ) : (
+          <a href={joinHref} target="_blank" rel="noopener noreferrer" className="mt-6 inline-flex min-h-12 w-full max-w-[270px] items-center justify-center gap-2 rounded-2xl bg-mh-red px-5 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(245,0,25,.25)] transition-colors hover:bg-mh-red-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white sm:w-auto">
+            {actionLabel}<ArrowRight className="size-4" />
+          </a>
+        )}
       </div>
     </section>
   );
