@@ -91,3 +91,34 @@ export const ABOUT = {
   text: "A MoveHaus nasceu para quem busca evolução com treino sério, acompanhamento próximo e uma comunidade que cresce junto.",
   image: { src: null, alt: "Comunidade MoveHaus", caption: "Comunidade / alunos" } as MediaSlot,
 };
+
+/**
+ * Textos da home editáveis pelo admin (tabela home_content). `key` liga o campo
+ * ao lugar na página; `default` é o texto atual, usado quando não há override.
+ */
+export type HomeTextField = { key: string; group: string; label: string; multiline?: boolean; default: string };
+
+export const HOME_TEXT_FIELDS: HomeTextField[] = [
+  { key: "hero.eyebrow", group: "Topo", label: "Selo (linha fina acima do título)", default: HERO.eyebrow },
+  { key: "hero.title", group: "Topo", label: "Título", multiline: true, default: HERO.title },
+  { key: "hero.text", group: "Topo", label: "Descrição", multiline: true, default: HERO.text },
+  { key: "hero.primary", group: "Topo", label: "Texto do botão principal", default: HERO.primary.label },
+  { key: "hero.secondary", group: "Topo", label: "Texto do botão secundário", default: HERO.secondary.label },
+
+  { key: "community.kicker", group: "Comunidade", label: "Selo", default: COMMUNITY.kicker },
+  { key: "community.title", group: "Comunidade", label: "Título", default: COMMUNITY.title },
+  { key: "community.text", group: "Comunidade", label: "Descrição", multiline: true, default: COMMUNITY.text },
+  ...COMMUNITY.items.map((item, index) => ({ key: `community.item${index}`, group: "Comunidade", label: `Legenda da foto ${index + 1}`, default: item.caption })),
+
+  { key: "digital.kicker", group: "Conteúdos", label: "Selo", default: DIGITAL.kicker },
+  { key: "digital.title", group: "Conteúdos", label: "Título", default: DIGITAL.title },
+  { key: "digital.text", group: "Conteúdos", label: "Descrição", multiline: true, default: DIGITAL.text },
+
+  { key: "offer.kicker", group: "Ofertas", label: "Selo", default: OFFER.kicker },
+  { key: "offer.title", group: "Ofertas", label: "Título", default: OFFER.title },
+  { key: "offer.text", group: "Ofertas", label: "Descrição", multiline: true, default: OFFER.text },
+
+  { key: "about.kicker", group: "Sobre", label: "Selo", default: ABOUT.kicker },
+  { key: "about.title", group: "Sobre", label: "Título", default: ABOUT.title },
+  { key: "about.text", group: "Sobre", label: "Descrição", multiline: true, default: ABOUT.text },
+];

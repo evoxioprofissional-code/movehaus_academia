@@ -15,6 +15,7 @@ import { ScrollExpandHero } from "@/components/home/scroll-expand-hero";
 import { CommunityGallery } from "@/components/home/community-gallery";
 import { ReaderPreview } from "@/components/home/reader-preview";
 import { getHomeMedia, getPublicBanners } from "@/lib/home-media";
+import { getHomeText } from "@/lib/home-content";
 import { getPublicSettings } from "@/lib/settings";
 import {
   getEbooks,
@@ -27,14 +28,17 @@ import { hasBilling, isPhysical } from "@/types/catalog";
 import { ABOUT, COMMUNITY, DIGITAL, HERO, OFFER } from "@/content/home";
 
 export default async function HomePage() {
-  const [featured, onSale, ebooks, media, banners, settings] = await Promise.all([
+  const [featured, onSale, ebooks, media, banners, settings, text] = await Promise.all([
     getFeaturedProducts(),
     getOnSaleProducts(),
     getEbooks(),
     getHomeMedia(),
     getPublicBanners(),
     getPublicSettings(),
+    getHomeText(),
   ]);
+  // Texto da home: valor editado no admin, com fallback para o padrão.
+  const t = (key: string, fallback: string) => text[key] ?? fallback;
 
   const featuredProducts = featured.filter((p) => p.type !== "ebook").slice(0, 4);
   const mainEbook = ebooks[0];
@@ -45,6 +49,7 @@ export default async function HomePage() {
   // Imagens da home enviadas pelo admin (com fallback para o placeholder).
   const communityItems = COMMUNITY.items.map((item, i) => ({
     ...item,
+    caption: t(`community.item${i}`, item.caption),
     media: { ...item.media, src: media[`community_${i}`] ?? item.media.src },
   }));
 
@@ -97,23 +102,23 @@ export default async function HomePage() {
       >
         <div className="w-full min-w-0">
           <p className="text-xs font-semibold uppercase tracking-[0.22em] text-white/70">
-            {HERO.eyebrow}
+            {t("hero.eyebrow", HERO.eyebrow)}
           </p>
           <TextEffect
             as="h1"
             trigger="mount"
-            text={HERO.title}
+            text={t("hero.title", HERO.title)}
             className="mt-3 max-w-xl font-display text-[clamp(2.35rem,10.5vw,4.5rem)] font-bold uppercase leading-[0.92] text-white md:text-[clamp(3rem,4.2vw,4rem)]"
           />
           <p className="mt-4 max-w-lg text-[15px] leading-relaxed text-white/75 sm:mt-5 sm:text-lg">
-            {HERO.text}
+            {t("hero.text", HERO.text)}
           </p>
           <div className="mt-6 grid grid-cols-1 gap-3 sm:mt-8 sm:flex sm:flex-row">
             <CtaButton href={HERO.primary.href} variant="primary" size="lg">
-              {HERO.primary.label}
+              {t("hero.primary", HERO.primary.label)}
             </CtaButton>
             <CtaButton href={HERO.secondary.href} variant="outline" size="lg">
-              {HERO.secondary.label}
+              {t("hero.secondary", HERO.secondary.label)}
             </CtaButton>
           </div>
         </div>
@@ -133,15 +138,15 @@ export default async function HomePage() {
       <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:py-24">
         <div className="mb-8 max-w-2xl">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-mh-red">
-            {COMMUNITY.kicker}
+            {t("community.kicker", COMMUNITY.kicker)}
           </p>
           <TextEffect
             as="h2"
             trigger="inView"
-            text={COMMUNITY.title}
+            text={t("community.title", COMMUNITY.title)}
             className="mt-2 text-3xl font-semibold tracking-tight text-white sm:text-[34px]"
           />
-          <p className="mt-3 text-mh-muted">{COMMUNITY.text}</p>
+          <p className="mt-3 text-mh-muted">{t("community.text", COMMUNITY.text)}</p>
         </div>
         <CommunityGallery items={communityItems} />
       </section>
@@ -166,9 +171,9 @@ export default async function HomePage() {
       {mainEbook && (
         <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:py-24">
           <SectionHeading
-            kicker={DIGITAL.kicker}
-            title={DIGITAL.title}
-            description={DIGITAL.text}
+            kicker={t("digital.kicker", DIGITAL.kicker)}
+            title={t("digital.title", DIGITAL.title)}
+            description={t("digital.text", DIGITAL.text)}
             href="/ebooks"
           />
 
@@ -293,12 +298,12 @@ export default async function HomePage() {
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full max-w-xl px-6 py-10 sm:px-10">
                   <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/80">
-                    {OFFER.kicker}
+                    {t("offer.kicker", OFFER.kicker)}
                   </p>
                   <h2 className="mt-3 font-display text-3xl font-bold uppercase leading-none text-white sm:text-5xl">
-                    {OFFER.title}
+                    {t("offer.title", OFFER.title)}
                   </h2>
-                  <p className="mt-3 text-white/80">{OFFER.text}</p>
+                  <p className="mt-3 text-white/80">{t("offer.text", OFFER.text)}</p>
 
                   <div className="mt-6 flex items-center gap-4 rounded-lg bg-black/40 p-4 backdrop-blur-sm">
                     <ProductMedia
@@ -341,12 +346,12 @@ export default async function HomePage() {
         <div className="mx-auto grid max-w-6xl grid-cols-1 items-center gap-10 px-4 py-16 sm:px-6 lg:grid-cols-2 lg:py-24">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-mh-red">
-              {ABOUT.kicker}
+              {t("about.kicker", ABOUT.kicker)}
             </p>
             <h2 className="mt-3 text-3xl font-semibold leading-tight tracking-tight sm:text-4xl">
-              {ABOUT.title}
+              {t("about.title", ABOUT.title)}
             </h2>
-            <p className="mt-4 max-w-md text-mh-paper-muted">{ABOUT.text}</p>
+            <p className="mt-4 max-w-md text-mh-paper-muted">{t("about.text", ABOUT.text)}</p>
             <Button asChild size="lg" variant="onDark" className="mt-7">
               <Link href="/sobre">Conhecer a MoveHaus</Link>
             </Button>

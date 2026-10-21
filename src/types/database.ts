@@ -346,6 +346,12 @@ export type Database = {
         Update: { storage_path?: string };
         Relationships: [];
       };
+      home_content: {
+        Row: { key: string; value: string; updated_at: string };
+        Insert: { key: string; value: string };
+        Update: { value?: string };
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: {
