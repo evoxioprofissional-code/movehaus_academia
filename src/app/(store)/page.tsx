@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowRight, ArrowUpRight, BookOpen, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CtaButton } from "@/components/ui/cta-button";
@@ -11,7 +12,6 @@ import { ProductMedia } from "@/components/catalog/product-media";
 import { productHref } from "@/components/catalog/product-card";
 import { Price } from "@/components/catalog/price";
 import { accessDescription } from "@/components/catalog/billing-info";
-import { ScrollExpandHero } from "@/components/home/scroll-expand-hero";
 import { CommunityGallery } from "@/components/home/community-gallery";
 import { ReaderPreview } from "@/components/home/reader-preview";
 import { getHomeMedia, getPublicBanners } from "@/lib/home-media";
@@ -46,6 +46,12 @@ export default async function HomePage() {
   const offer = onSale[0];
   const campaign = banners[0];
 
+  // O upload antigo do topo é uma arte da logo, não uma fotografia. Novos
+  // uploads do painel continuam substituindo normalmente a imagem conceitual.
+  const legacyLogoHero = media.hero?.includes("hero-56b0d9a7-3c2e-45b5-8f51-a6630cabe6cf.png");
+  const heroImage = media.hero && !legacyLogoHero ? media.hero : HERO.image.src!;
+  const heroTitle = t("hero.title", HERO.title).split("\n");
+
   // Imagens da home enviadas pelo admin (com fallback para o placeholder).
   const communityItems = COMMUNITY.items.map((item, i) => ({
     ...item,
@@ -55,74 +61,39 @@ export default async function HomePage() {
 
   return (
     <>
-      {/* ================= HERO (expansão de mídia ao rolar) ================= */}
-      <ScrollExpandHero
-        media={
-          <div className="absolute inset-0 overflow-hidden bg-[#101012]">
-            <div
-              aria-hidden="true"
-              className="absolute -right-[18%] -top-[26%] h-[72%] w-[58%] rotate-[18deg] bg-mh-red"
-            />
-            <div
-              aria-hidden="true"
-              className="absolute bottom-0 left-0 h-1/3 w-[7px] bg-mh-red sm:w-2"
-            />
-            <div
-              aria-hidden="true"
-              className="absolute inset-0 opacity-[0.08] [background-image:linear-gradient(rgba(255,255,255,.35)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.35)_1px,transparent_1px)] [background-size:32px_32px]"
-            />
-
-            <div className="absolute inset-x-[8%] top-[18%] bottom-[20%] overflow-hidden border border-white/10 bg-black/40 shadow-2xl sm:inset-x-[10%] md:top-[22%] md:bottom-[22%]">
-              <PhotoSlot
-                src={media.hero ?? HERO.image.src}
-                alt={HERO.image.alt}
-                caption={HERO.image.caption}
-                priority
-                fit="contain"
-                sizes="(max-width: 767px) 84vw, 46vw"
-                className="absolute inset-0"
-              />
-            </div>
-
-            <div className="absolute inset-x-[8%] bottom-[7%] flex items-end justify-between sm:inset-x-[10%]">
-              <div>
-                <p className="text-[9px] font-semibold uppercase tracking-[0.28em] text-white/45 sm:text-[10px]">
-                  Identidade MoveHaus
-                </p>
-                <p className="mt-1 text-xs font-semibold uppercase tracking-[0.16em] text-white sm:text-sm">
-                  Training Club
-                </p>
-              </div>
-              <span className="font-display text-3xl font-bold leading-none text-white/15 sm:text-4xl">
-                MH
-              </span>
-            </div>
-          </div>
-        }
-      >
-        <div className="w-full min-w-0">
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-white/70">
+      <section className="relative isolate flex min-h-[570px] items-end overflow-hidden bg-[#090a0c] sm:min-h-[550px] sm:items-center lg:min-h-[440px]" aria-labelledby="home-hero-title">
+        <Image
+          src={heroImage}
+          alt={HERO.image.alt}
+          fill
+          priority
+          unoptimized={heroImage.startsWith("http")}
+          sizes="100vw"
+          className="object-cover object-[64%_center] sm:object-[62%_center] lg:object-center"
+        />
+        <div aria-hidden="true" className="absolute inset-0 bg-[linear-gradient(90deg,rgba(0,0,0,.82)_0%,rgba(0,0,0,.58)_40%,rgba(0,0,0,.08)_75%)] max-sm:bg-[linear-gradient(0deg,rgba(0,0,0,.88)_0%,rgba(0,0,0,.44)_55%,rgba(0,0,0,.12)_100%)]" />
+        <div className="relative z-10 w-full px-5 pb-10 pt-28 sm:px-8 sm:py-16 lg:px-[4vw] lg:py-14">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.34em] text-white/80 sm:text-xs">
             {t("hero.eyebrow", HERO.eyebrow)}
           </p>
-          <TextEffect
-            as="h1"
-            trigger="mount"
-            text={t("hero.title", HERO.title)}
-            className="mt-3 max-w-xl font-display text-[clamp(2.35rem,10.5vw,4.5rem)] font-bold uppercase leading-[0.92] text-white md:text-[clamp(3rem,4.2vw,4rem)]"
-          />
-          <p className="mt-4 max-w-lg text-[15px] leading-relaxed text-white/75 sm:mt-5 sm:text-lg">
+          <h1 id="home-hero-title" className="mt-4 max-w-[720px] font-sans text-[clamp(3.25rem,13vw,5rem)] font-extrabold leading-[0.94] tracking-[-0.055em] text-white lg:text-[clamp(5rem,5.7vw,6.7rem)]">
+            {heroTitle.map((line, index) => (
+              <span key={index} className={`block ${index > 0 ? "text-[#ed0925]" : ""}`}>{line}</span>
+            ))}
+          </h1>
+          <p className="mt-5 max-w-[650px] text-base leading-snug text-white/90 sm:text-[20px]">
             {t("hero.text", HERO.text)}
           </p>
-          <div className="mt-6 grid grid-cols-1 gap-3 sm:mt-8 sm:flex sm:flex-row">
-            <CtaButton href={HERO.primary.href} variant="primary" size="lg">
+          <div className="mt-7 flex flex-wrap items-center gap-x-7 gap-y-4">
+            <CtaButton href={HERO.primary.href} variant="primary" size="lg" className="min-w-[196px] justify-center rounded-md">
               {t("hero.primary", HERO.primary.label)}
             </CtaButton>
-            <CtaButton href={HERO.secondary.href} variant="outline" size="lg">
-              {t("hero.secondary", HERO.secondary.label)}
-            </CtaButton>
+            <Link href={HERO.secondary.href} className="inline-flex min-h-11 items-center gap-5 border-b border-white/80 text-sm font-medium text-white transition-colors hover:border-mh-red hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mh-red sm:text-base">
+              {t("hero.secondary", HERO.secondary.label)} <ArrowRight className="size-4" aria-hidden="true" />
+            </Link>
           </div>
         </div>
-      </ScrollExpandHero>
+      </section>
 
       {campaign && (campaign.desktopUrl || campaign.mobileUrl) && (
         <section className="mx-auto w-full max-w-6xl px-4 pt-8 sm:px-6">

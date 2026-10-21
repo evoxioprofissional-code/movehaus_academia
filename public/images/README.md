@@ -1,5 +1,9 @@
 # Imagens da MoveHaus
 
+`home-hero-ropes.webp` é uma imagem conceitual criada para reproduzir o layout
+do topo. Não mostra a academia nem uma aluna real da MoveHaus. Substitua-a por
+uma foto autorizada no painel da página inicial assim que estiver disponível.
+
 Coloque aqui as fotos reais da academia (treino, alunos, professores,
 ambiente, produtos). Depois é só apontar o caminho no arquivo de conteúdo.
 

@@ -19,15 +19,15 @@ export interface MediaSlot {
 }
 
 export const HERO = {
-  eyebrow: "MoveHaus Training Club — Colômbia/SP",
-  title: "Seu próximo nível\ncomeça aqui.",
-  text: "Treino, produtos e conteúdos para transformar constância em resultado.",
+  eyebrow: "MoveHaus Training Club",
+  title: "Seu ritmo.\nSua força.",
+  text: "Treino, produtos e conteúdos para seguir em movimento.",
   primary: { label: "Explorar a loja", href: "/loja" },
   secondary: { label: "Conhecer a MoveHaus", href: "/sobre" },
   image: {
-    src: null,
-    alt: "Treino na MoveHaus Training Club",
-    caption: "Foto ou vídeo de treino",
+    src: "/images/home-hero-ropes.webp",
+    alt: "Atleta treinando com cordas em uma academia",
+    caption: "Imagem conceitual de treino",
   } as MediaSlot,
 };
 

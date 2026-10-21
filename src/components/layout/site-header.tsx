@@ -16,6 +16,13 @@ export const NAV = [
   { href: "/sobre", label: "Sobre a MoveHaus" },
 ];
 
+const HOME_NAV = [
+  { href: "/loja", label: "Loja" },
+  { href: "/ebooks", label: "Conteúdos" },
+  { href: "/acompanhamento", label: "Acompanhamento" },
+  { href: "/sobre", label: "Sobre" },
+];
+
 // Sem getUser aqui: o header é público e não deve depender do serviço de auth
 // a cada acesso. /conta resolve o destino sem bloquear o primeiro feedback.
 export function SiteHeader() {
@@ -43,6 +50,33 @@ export function SiteHeader() {
       if (frame) cancelAnimationFrame(frame);
     };
   }, []);
+
+  if (pathname === "/") {
+    return (
+      <header className="sticky top-0 z-40 border-b border-white/[0.07] bg-[#0b0c0e]/95 text-white backdrop-blur-md">
+        <div className="relative flex h-16 w-full items-center gap-3 px-4 sm:h-[70px] sm:px-8 lg:px-[4vw]">
+          <MobileNav items={HOME_NAV} />
+          <Link href="/" prefetch={false} aria-label="MoveHaus — início" className="shrink-0 font-sans text-[25px] font-extrabold leading-none tracking-[-0.075em] text-white sm:text-[34px]">
+            Move<span className="text-[#ed0925]">Haus</span>
+          </Link>
+          <nav aria-label="Navegação principal" className="ml-28 hidden items-center gap-9 lg:flex">
+            {HOME_NAV.map((item) => (
+              <Link key={item.href} href={item.href} className="text-[15px] font-medium text-white/90 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mh-red">
+                {item.label}
+              </Link>
+            ))}
+          </nav>
+          <div className="ml-auto flex shrink-0 items-center gap-0 sm:gap-2">
+            <HeaderSearch />
+            <Link href="/conta" prefetch={false} aria-label="Minha conta" className="grid size-10 place-items-center rounded-full text-white transition-colors hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mh-red">
+              <UserRound className="size-[25px]" strokeWidth={1.75} />
+            </Link>
+            <CartButton icon="cart" />
+          </div>
+        </div>
+      </header>
+    );
+  }
 
   return (
     <header className={`sticky top-0 z-40 px-2.5 transition-[padding] duration-300 sm:px-5 ${scrolled ? "py-1.5 sm:py-2" : "py-2.5 sm:py-3"}`}>
