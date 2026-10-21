@@ -48,6 +48,11 @@ export function PhotoSlot({
   className?: string;
   children?: React.ReactNode;
 }) {
+  // As imagens públicas já são entregues pelo CDN do Supabase. Carregá-las
+  // diretamente evita que uma falha temporária no proxy de imagens do Next
+  // deixe a vitrine aguardando até o timeout (principalmente no mobile).
+  const isRemoteImage = Boolean(src?.startsWith("http://") || src?.startsWith("https://"));
+
   return (
     <div className={cn("relative overflow-hidden mh-noise", fit === "contain" ? "bg-[#101012]" : !src && toneBg[tone], className)}>
       {src ? (
@@ -56,6 +61,7 @@ export function PhotoSlot({
           alt={alt}
           fill
           priority={priority}
+          unoptimized={isRemoteImage}
           sizes={sizes ?? "100vw"}
           className={cn(
             fit === "contain"
