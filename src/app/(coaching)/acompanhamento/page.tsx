@@ -89,12 +89,13 @@ export default async function AcompanhamentoPage({
   const featuredDay = activeDay ?? todayDay;
   const otherDays = tree.days.filter((day) => day.id !== featuredDay?.id);
   const athleteName = profile?.full_name || "Aluno";
-  const dateLabel = new Intl.DateTimeFormat("pt-BR", {
+  const rawDateLabel = new Intl.DateTimeFormat("pt-BR", {
     weekday: "long",
     day: "2-digit",
     month: "long",
     timeZone: "America/Sao_Paulo",
   }).format(new Date());
+  const dateLabel = rawDateLabel.charAt(0).toLocaleUpperCase("pt-BR") + rawDateLabel.slice(1);
 
   return (
     <CoachingDashboard
