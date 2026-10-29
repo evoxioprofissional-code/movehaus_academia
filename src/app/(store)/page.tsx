@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight, ArrowUpRight, BookOpen, MessageCircle } from "lucide-react";
+import { ArrowRight, ArrowUpRight, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CtaButton } from "@/components/ui/cta-button";
 import { PhotoSlot } from "@/components/ui/photo-slot";
@@ -15,25 +15,22 @@ import { CommunityFeature } from "@/components/home/community-feature";
 import { ReaderPreview } from "@/components/home/reader-preview";
 import { getHomeMedia, getPublicBanners } from "@/lib/home-media";
 import { getHomeText } from "@/lib/home-content";
-import { getPublicSettings } from "@/lib/settings";
 import {
   getEbooks,
   getFeaturedProducts,
   getOnSaleProducts,
 } from "@/lib/catalog";
 import { formatBRL } from "@/lib/utils";
-import { whatsappLink } from "@/lib/site";
 import { hasBilling, isPhysical } from "@/types/catalog";
 import { ABOUT, COMMUNITY, DIGITAL, HERO, OFFER } from "@/content/home";
 
 export default async function HomePage() {
-  const [featured, onSale, ebooks, media, banners, settings, text] = await Promise.all([
+  const [featured, onSale, ebooks, media, banners, text] = await Promise.all([
     getFeaturedProducts(),
     getOnSaleProducts(),
     getEbooks(),
     getHomeMedia(),
     getPublicBanners(),
-    getPublicSettings(),
     getHomeText(),
   ]);
   // Texto da home: valor editado no admin, com fallback para o padrão.
@@ -321,30 +318,6 @@ export default async function HomePage() {
             sizes="(max-width: 1024px) 100vw, 50vw"
             className="h-72 w-full rounded-lg sm:h-96"
           />
-        </div>
-      </section>
-
-      {/* ================= CTA WHATSAPP ================= */}
-      <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
-        <div className="flex flex-col items-start justify-between gap-6 rounded-lg border border-white/10 bg-mh-surface p-8 sm:flex-row sm:items-center sm:p-10">
-          <div>
-            <h2 className="text-2xl font-semibold tracking-tight text-white sm:text-3xl">
-              Ficou com alguma dúvida?
-            </h2>
-            <p className="mt-2 max-w-md text-mh-muted">
-              Fale com a equipe da MoveHaus no WhatsApp. A gente ajuda a escolher
-              o que faz sentido para o seu momento.
-            </p>
-          </div>
-          <CtaButton
-            href={whatsappLink("Olá! Quero ajuda para escolher um produto da MoveHaus.", settings.whatsapp)}
-            external
-            variant="whatsapp"
-            size="lg"
-            leadingIcon={<MessageCircle className="size-5" />}
-          >
-            Chamar no WhatsApp
-          </CtaButton>
         </div>
       </section>
     </>
