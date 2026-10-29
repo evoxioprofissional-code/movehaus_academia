@@ -15,7 +15,7 @@ export { CATEGORIES } from "@/lib/catalog-data";
 
 type Row = Database["public"]["Tables"]["products"]["Row"];
 
-function mapRow(r: Row, slugById: Map<string, string>): Product {
+function mapRow(r: Row, slugById: Map<string, string>, imagesById: Map<string, string[]>): Product {
   const now = Date.now();
   const promotionActive =
     (!r.promotion_starts_at || new Date(r.promotion_starts_at).getTime() <= now) &&
@@ -27,7 +27,8 @@ function mapRow(r: Row, slugById: Map<string, string>): Product {
     shortDescription: r.short_description,
     description: r.description,
     categorySlug: r.category_id ? (slugById.get(r.category_id) ?? "") : "",
-    images: r.images ?? [],
+    // Imagens do admin ficam em product_images; products.images é legado.
+    images: imagesById.get(r.id) ?? r.images ?? [],
     featured: r.featured,
     active: r.active,
   };
@@ -78,7 +79,25 @@ const fetchAll = unstable_cache(
       ]);
       if (error || !data) return null;
       const slugById = new Map((cats ?? []).map((c) => [c.id, c.slug]));
-      return data.map((r) => mapRow(r as Row, slugById));
+
+      const ids = data.map((r) => r.id);
+      const { data: imgs } = ids.length
+        ? await supabaseAnon
+            .from("product_images")
+            .select("product_id, storage_path, legacy_url, is_primary, display_order")
+            .in("product_id", ids)
+        : { data: [] };
+      const imagesById = new Map<string, string[]>();
+      const sorted = [...(imgs ?? [])].sort(
+        (a, b) => Number(b.is_primary) - Number(a.is_primary) || a.display_order - b.display_order,
+      );
+      for (const im of sorted) {
+        const url = im.legacy_url || (im.storage_path ? supabaseAnon.storage.from("catalog").getPublicUrl(im.storage_path).data.publicUrl : null);
+        if (!url) continue;
+        imagesById.set(im.product_id, [...(imagesById.get(im.product_id) ?? []), url]);
+      }
+
+      return data.map((r) => mapRow(r as Row, slugById, imagesById));
     } catch {
       return null;
     }

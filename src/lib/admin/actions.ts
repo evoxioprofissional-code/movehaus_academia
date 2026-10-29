@@ -1,7 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { requireAdmin } from "@/lib/auth/user";
 import type { Database, VariantGroup } from "@/types/database";
@@ -175,7 +175,9 @@ export async function createProduct(
   }
 
   revalidatePath("/admin/produtos");
+  updateTag("catalog");
   revalidatePath("/loja");
+  revalidatePath("/");
   redirect("/admin/produtos");
 }
 
@@ -227,7 +229,9 @@ export async function updateProduct(
 
   revalidatePath("/admin/produtos");
   revalidatePath(`/admin/produtos/${id}`);
+  updateTag("catalog");
   revalidatePath("/loja");
+  revalidatePath("/");
   redirect("/admin/produtos");
 }
 
@@ -240,7 +244,9 @@ export async function deleteProduct(fd: FormData): Promise<void> {
   const paths = (images ?? []).flatMap((image) => image.storage_path ? [image.storage_path] : []);
   if (paths.length) await createAdminClient().storage.from("catalog").remove(paths);
   revalidatePath("/admin/produtos");
+  updateTag("catalog");
   revalidatePath("/loja");
+  revalidatePath("/");
   redirect("/admin/produtos");
 }
 
@@ -255,7 +261,9 @@ export async function bulkUpdateProducts(fd: FormData): Promise<void> {
   if (operation === "feature") await supabase.from("products").update({ featured: true, show_on_home: true }).in("id", ids);
   if (operation === "unfeature") await supabase.from("products").update({ featured: false }).in("id", ids);
   revalidatePath("/admin/produtos");
+  updateTag("catalog");
   revalidatePath("/loja");
+  revalidatePath("/");
 }
 
 export async function toggleProductActive(fd: FormData): Promise<void> {
@@ -265,7 +273,9 @@ export async function toggleProductActive(fd: FormData): Promise<void> {
   const supabase = await createClient();
   await supabase.from("products").update({ active }).eq("id", id);
   revalidatePath("/admin/produtos");
+  updateTag("catalog");
   revalidatePath("/loja");
+  revalidatePath("/");
 }
 
 // ---------- categorias ----------
@@ -285,7 +295,9 @@ export async function upsertCategory(fd: FormData): Promise<void> {
     await supabase.from("categories").insert({ name, slug, description, position, active });
   }
   revalidatePath("/admin/categorias");
+  updateTag("catalog");
   revalidatePath("/loja");
+  revalidatePath("/");
 }
 
 export async function deleteCategory(fd: FormData): Promise<void> {
