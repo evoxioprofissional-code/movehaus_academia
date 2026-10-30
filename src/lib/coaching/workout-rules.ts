@@ -8,6 +8,7 @@ export function trainingDayStart(value: string | Date = new Date()) {
 
 export function validateWorkoutLogs(raw: string, exercises: { id: string; name: string; sets: number }[]) {
   if (!exercises.length || raw.length > 100000) throw new Error("Este treino ainda não está pronto.");
+  if (exercises.some((exercise) => !Number.isInteger(exercise.sets) || exercise.sets < 1 || exercise.sets > 50)) throw new Error("O número de séries precisa ser corrigido pelo professor.");
   const logs = JSON.parse(raw);
   if (!Array.isArray(logs)) throw new Error("Não foi possível ler as séries.");
   const byId = new Map(exercises.map((exercise) => [exercise.id, exercise]));

@@ -95,7 +95,7 @@ export async function addExercise(fd: FormData): Promise<void> {
   await supabase.from("workout_exercises").insert({
     day_id: dayId,
     name: S(fd.get("name")) || "Exercício",
-    sets: N(fd.get("sets")) ?? 3,
+    sets: Math.max(1, Math.min(50, N(fd.get("sets")) ?? 3)),
     reps: S(fd.get("reps")) || "10-12",
     target_load: S(fd.get("target_load")),
     rest_seconds: N(fd.get("rest_seconds")) ?? 60,
@@ -115,7 +115,7 @@ export async function updateExercise(fd: FormData): Promise<void> {
     .from("workout_exercises")
     .update({
       name: S(fd.get("name")),
-      sets: N(fd.get("sets")) ?? 3,
+      sets: Math.max(1, Math.min(50, N(fd.get("sets")) ?? 3)),
       reps: S(fd.get("reps")) || "10-12",
       target_load: S(fd.get("target_load")),
       rest_seconds: N(fd.get("rest_seconds")) ?? 60,

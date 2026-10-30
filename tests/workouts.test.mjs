@@ -21,6 +21,7 @@ test("completion requires every prescribed set, with trusted exercise names", ()
   assert.equal(rules.validateWorkoutLogs(JSON.stringify(logs), exercises).length, 2);
   assert.throws(() => rules.validateWorkoutLogs(JSON.stringify(logs.slice(0, 1)), exercises));
   assert.throws(() => rules.validateWorkoutLogs("[]", []));
+  assert.throws(() => rules.validateWorkoutLogs("[]", [{ id: "exercise", name: "Remada", sets: 0 }]));
   assert.equal(rules.validateWorkoutLogs(JSON.stringify(logs.map(log => ({ ...log, exercise_name: "fake" }))), exercises)[0].exercise_name, "Remada");
 });
 
