@@ -71,38 +71,35 @@ function mapRow(r: Row, slugById: Map<string, string>, imagesById: Map<string, s
 // Cache entre requisições (Data Cache do Next): 1 leitura a cada 5 min, servindo
 // todo o tráfego público a partir do cache — rápido e resiliente à lentidão do DB.
 const fetchAll = unstable_cache(
-  async (): Promise<Product[] | null> => {
-    try {
-      const [{ data: cats }, { data, error }] = await Promise.all([
-        supabaseAnon.from("categories").select("id, slug"),
-        supabaseAnon.from("products").select("*").eq("active", true),
-      ]);
-      if (error || !data) return null;
-      const slugById = new Map((cats ?? []).map((c) => [c.id, c.slug]));
+  async (): Promise<Product[]> => {
+    const [{ data: cats }, { data, error }] = await Promise.all([
+      supabaseAnon.from("categories").select("id, slug"),
+      supabaseAnon.from("products").select("*").eq("active", true),
+    ]);
+    if (error || !data) throw new Error("Não foi possível consultar o catálogo.");
+    const slugById = new Map((cats ?? []).map((c) => [c.id, c.slug]));
 
-      const ids = data.map((r) => r.id);
-      const { data: imgs } = ids.length
-        ? await supabaseAnon
-            .from("product_images")
-            .select("product_id, storage_path, legacy_url, is_primary, display_order")
-            .in("product_id", ids)
-        : { data: [] };
-      const imagesById = new Map<string, string[]>();
-      const sorted = [...(imgs ?? [])].sort(
-        (a, b) => Number(b.is_primary) - Number(a.is_primary) || a.display_order - b.display_order,
-      );
-      for (const im of sorted) {
-        const url = im.legacy_url || (im.storage_path ? supabaseAnon.storage.from("catalog").getPublicUrl(im.storage_path).data.publicUrl : null);
-        if (!url) continue;
-        imagesById.set(im.product_id, [...(imagesById.get(im.product_id) ?? []), url]);
-      }
-
-      return data.map((r) => mapRow(r as Row, slugById, imagesById));
-    } catch {
-      return null;
+    const ids = data.map((r) => r.id);
+    const { data: imgs, error: imageError } = ids.length
+      ? await supabaseAnon
+          .from("product_images")
+          .select("product_id, storage_path, legacy_url, is_primary, display_order")
+          .in("product_id", ids)
+      : { data: [], error: null };
+    if (imageError) throw new Error("Não foi possível consultar as imagens do catálogo.");
+    const imagesById = new Map<string, string[]>();
+    const sorted = [...(imgs ?? [])].sort(
+      (a, b) => Number(b.is_primary) - Number(a.is_primary) || a.display_order - b.display_order,
+    );
+    for (const im of sorted) {
+      const url = im.legacy_url || (im.storage_path ? supabaseAnon.storage.from("catalog").getPublicUrl(im.storage_path).data.publicUrl : null);
+      if (!url) continue;
+      imagesById.set(im.product_id, [...(imagesById.get(im.product_id) ?? []), url]);
     }
+
+    return data.map((r) => mapRow(r as Row, slugById, imagesById));
   },
-  ["catalog:products"],
+  ["catalog:products:v2"],
   { revalidate: 300, tags: ["catalog"] },
 );
 
@@ -127,8 +124,13 @@ function applyFilter(
 
 // Memoizado por request: os vários getters da mesma página compartilham 1 busca.
 const allProducts = cache(async (): Promise<Product[]> => {
-  const fromDb = await fetchAll();
-  return fromDb ?? SAMPLE_PRODUCTS.filter((p) => p.active);
+  try {
+    return await fetchAll();
+  } catch {
+    // A falha fica fora do cache: revalidações preservam o último catálogo válido.
+    console.error("[catalog] Consulta indisponível; usando catálogo de exemplo nesta requisição.");
+    return SAMPLE_PRODUCTS.filter((p) => p.active);
+  }
 });
 
 export async function getProducts(filter?: {
