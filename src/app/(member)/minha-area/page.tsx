@@ -48,6 +48,7 @@ export default async function MinhaAreaPage() {
   const rawFirstName = displayName.trim().split(/\s+/)[0];
   const firstName = rawFirstName.charAt(0).toLocaleUpperCase("pt-BR") + rawFirstName.slice(1);
 
+  let sessionId: string | undefined;
   let coachingEntry = { hasPlan: false, todayLabel: null as string | null, todayExercises: 0, points: 0, hasOpenSession: false };
   if (coaching) {
     const [tree, progress, openSession] = await Promise.all([
@@ -55,9 +56,11 @@ export default async function MinhaAreaPage() {
       getProgress(user.id),
       getOpenSession(user.id),
     ]);
-    const todayDay = tree.days.find((day) => day.weekday === todayWeekday()) ?? null;
+    const readyDays = tree.days.filter((day) => day.exercises.length > 0);
+    sessionId = openSession?.id;
+    const todayDay = readyDays.find((day) => day.weekday === todayWeekday()) ?? null;
     coachingEntry = {
-      hasPlan: Boolean(tree.plan),
+      hasPlan: readyDays.length > 0,
       todayLabel: todayDay?.name ?? null,
       todayExercises: todayDay?.exercises.length ?? 0,
       points: progress.points,
@@ -88,6 +91,7 @@ export default async function MinhaAreaPage() {
             todayLabel={coachingEntry.todayLabel}
             todayExercises={coachingEntry.todayExercises}
             hasOpenSession={coachingEntry.hasOpenSession}
+            sessionId={sessionId}
             joinHref={whatsappLink("Olá! Quero assinar o MoveHaus Acompanhamento.")}
           />
         </div>

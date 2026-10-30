@@ -1,3 +1,5 @@
+import { eventId } from "@/lib/coaching/event-id";
+import { trainingDate, trainingDayStart } from "@/lib/coaching/workout-rules";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 
 export const POINTS = { workout: 10, goal: 50 };
@@ -11,12 +13,9 @@ const MILESTONES: { n: number; title: string }[] = [
 ];
 
 function startOfISOWeek(): string {
-  const now = new Date();
-  const day = (now.getDay() + 6) % 7; // 0 = segunda
-  const monday = new Date(now);
-  monday.setHours(0, 0, 0, 0);
-  monday.setDate(now.getDate() - day);
-  return monday.toISOString();
+  const day = new Date(`${trainingDate()}T12:00:00Z`);
+  day.setUTCDate(day.getUTCDate() - ((day.getUTCDay() + 6) % 7));
+  return `${day.toISOString().slice(0, 10)}T00:00:00-03:00`;
 }
 
 /**
@@ -24,13 +23,19 @@ function startOfISOWeek(): string {
  * Escrita via service role (não forjável pelo cliente). Chamado no servidor
  * após finalizar uma sessão legítima.
  */
-export async function awardWorkoutCompletion(userId: string): Promise<void> {
+export async function awardWorkoutCompletion(userId: string, sessionId: string): Promise<void> {
   const admin = createAdminClient();
-  await admin.from("points_ledger").insert({
-    user_id: userId,
-    points: POINTS.workout,
-    reason: "Treino concluído",
-  });
+  const { data: session, error: sessionError } = await admin.from("workout_sessions").select("finished_at").eq("id", sessionId).eq("user_id", userId).maybeSingle();
+  if (sessionError || !session?.finished_at) throw new Error("Treino não concluído.");
+  const date = trainingDate(session.finished_at);
+  // Créditos antigos do mesmo dia são preservados e já contam para o limite diário.
+  const end = new Date(Date.parse(trainingDayStart(session.finished_at)) + 86400000).toISOString();
+  const { data: legacy, error: readError } = await admin.from("points_ledger").select("id").eq("user_id", userId).eq("reason", "Treino concluído").gte("created_at", trainingDayStart(session.finished_at)).lt("created_at", end).limit(1);
+  if (readError) throw new Error("Não foi possível consultar os pontos.");
+  if (!legacy?.length) {
+    const { error } = await admin.from("points_ledger").upsert({ id: eventId(`workout-points:${userId}:${date}`), user_id: userId, points: POINTS.workout, reason: `Treino concluído · pontos do dia ${date}` }, { onConflict: "id", ignoreDuplicates: true });
+    if (error) throw new Error("Não foi possível registrar os pontos.");
+  }
 
   const { count } = await admin
     .from("workout_sessions")
@@ -49,7 +54,10 @@ export async function awardWorkoutCompletion(userId: string): Promise<void> {
     (m) => total >= m.n && !have.has(`workouts_${m.n}`),
   ).map((m) => ({ user_id: userId, code: `workouts_${m.n}`, title: m.title }));
 
-  if (toInsert.length) await admin.from("achievements").insert(toInsert);
+  if (toInsert.length) {
+    const { error } = await admin.from("achievements").upsert(toInsert, { onConflict: "user_id,code", ignoreDuplicates: true });
+    if (error) throw new Error("Não foi possível salvar conquistas.");
+  }
 }
 
 export type GoalProgress = {
@@ -63,6 +71,7 @@ export type GoalProgress = {
 };
 
 export type Progress = {
+  ledger: { id: string; points: number; reason: string; created_at: string }[];
   points: number;
   achievements: { code: string; title: string; achieved_at: string }[];
   goals: GoalProgress[];
@@ -72,7 +81,7 @@ export type Progress = {
 export async function getProgress(userId: string): Promise<Progress> {
   const supabase = await createClient();
 
-  const [{ data: bal }, { data: achievements }, { data: goals }, allCount, weekCount] =
+  const [{ data: bal }, { data: achievements }, { data: goals }, allCount, weekCount, ledger] =
     await Promise.all([
       supabase.rpc("points_balance", { uid: userId }),
       supabase
@@ -96,6 +105,7 @@ export async function getProgress(userId: string): Promise<Progress> {
         .eq("user_id", userId)
         .not("finished_at", "is", null)
         .gte("finished_at", startOfISOWeek()),
+      supabase.from("points_ledger").select("id,points,reason,created_at").eq("user_id", userId).order("created_at", { ascending: false }).limit(12),
     ]);
 
   const totalWorkouts = allCount.count ?? 0;
@@ -125,6 +135,7 @@ export async function getProgress(userId: string): Promise<Progress> {
 
   return {
     points: (bal as number) ?? 0,
+    ledger: ledger.data ?? [],
     achievements: achievements ?? [],
     goals: goalProgress,
   };

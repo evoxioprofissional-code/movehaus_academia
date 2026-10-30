@@ -1,3 +1,4 @@
+import { trainingDayStart } from "@/lib/coaching/workout-rules";
 import { createClient } from "@/lib/supabase/server";
 import type { Database } from "@/types/database";
 
@@ -105,12 +106,14 @@ export async function getOpenSession(userId: string, dayId?: string | null) {
     .select("*")
     .eq("user_id", userId)
     .is("finished_at", null)
+    .gte("started_at", trainingDayStart())
     .order("started_at", { ascending: false })
-    .limit(1);
+    .limit(20);
 
   if (dayId) query = query.eq("day_id", dayId);
-  const { data } = await query.maybeSingle();
-  return data ?? null;
+  const [{ data }, tree] = await Promise.all([query, getPlanTree(userId)]);
+  const ready = new Set(tree.days.filter((day) => day.exercises.length > 0).map((day) => day.id));
+  return (data ?? []).find((session) => session.day_id && ready.has(session.day_id) && session.notes !== "__abandoned__") ?? null;
 }
 
 /** Cargas registradas por exercício (evolução) — últimos registros. */

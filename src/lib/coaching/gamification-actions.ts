@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { requireAdmin, requireUser } from "@/lib/auth/user";
+import { eventId } from "@/lib/coaching/event-id";
 import { POINTS } from "@/lib/coaching/gamification";
 
 const S = (v: FormDataEntryValue | null) => String(v ?? "").trim();
@@ -42,20 +43,15 @@ export async function markGoalAchieved(fd: FormData): Promise<void> {
   await requireAdmin();
   const id = S(fd.get("id"));
   const userId = S(fd.get("user_id"));
-  const title = S(fd.get("title"));
   const supabase = await createClient();
-  await supabase
-    .from("goals")
-    .update({ status: "achieved", achieved_at: new Date().toISOString() })
-    .eq("id", id);
-  // Bônus de pontos pela meta (via service role).
-  const adminDb = createAdminClient();
-  await adminDb.from("points_ledger").insert({
-    user_id: userId,
-    points: POINTS.goal,
-    reason: `Meta atingida: ${title}`,
-  });
+  const { data: goal, error } = await supabase.from("goals").update({ status: "achieved", achieved_at: new Date().toISOString() }).eq("id", id).eq("user_id", userId).neq("status", "achieved").select("title").maybeSingle();
+  if (error) throw new Error("Não foi possível confirmar a meta.");
+  if (!goal) return;
+  const { error: pointsError } = await createAdminClient().from("points_ledger").upsert({ id: eventId(`goal:${id}`), user_id: userId, points: POINTS.goal, reason: `Meta atingida: ${goal.title}` }, { onConflict: "id", ignoreDuplicates: true });
+  if (pointsError) throw new Error("Não foi possível registrar os pontos da meta.");
   revalidatePath(`/admin/acompanhamento/${userId}/metas`);
+  revalidatePath("/acompanhamento");
+  revalidatePath("/minha-area");
 }
 
 // ============ ADMIN: recompensas ============
@@ -95,26 +91,17 @@ export async function decideRedemption(fd: FormData): Promise<void> {
   await requireAdmin();
   const id = S(fd.get("id"));
   const decision = S(fd.get("decision")); // approve | reject
-  const userId = S(fd.get("user_id"));
-  const points = Math.round(NUM(fd.get("points")));
+  if (!["approve", "reject"].includes(decision)) return;
   const supabase = await createClient();
-  await supabase
-    .from("reward_redemptions")
-    .update({
-      status: decision === "approve" ? "approved" : "rejected",
-      decided_at: new Date().toISOString(),
-    })
-    .eq("id", id);
-  // Reembolsa pontos se rejeitado.
-  if (decision === "reject" && points > 0) {
-    const adminDb = createAdminClient();
-    await adminDb.from("points_ledger").insert({
-      user_id: userId,
-      points,
-      reason: "Estorno de resgate",
-    });
+  const { data: redemption, error } = await supabase.from("reward_redemptions").update({ status: decision === "approve" ? "approved" : "rejected", decided_at: new Date().toISOString() }).eq("id", id).eq("status", "pending").select("user_id,points_spent").maybeSingle();
+  if (error) throw new Error("Não foi possível atualizar o resgate.");
+  if (decision === "reject" && redemption) {
+    const { error: refundError } = await createAdminClient().from("points_ledger").upsert({ id: eventId(`reward-refund:${id}`), user_id: redemption.user_id, points: redemption.points_spent, reason: "Estorno de resgate" }, { onConflict: "id", ignoreDuplicates: true });
+    if (refundError) throw new Error("Não foi possível estornar os pontos.");
   }
   revalidatePath("/admin/acompanhamento/recompensas");
+  revalidatePath("/acompanhamento");
+  revalidatePath("/minha-area");
 }
 
 // ============ ALUNO: resgatar recompensa ============

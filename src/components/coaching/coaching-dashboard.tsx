@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Award, Check, ChevronRight, Dumbbell, Gift, MessageCircle, Star, Target, TrendingUp, UtensilsCrossed } from "lucide-react";
 import type { Database } from "@/types/database";
-import type { DayWithExercises, Session } from "@/lib/coaching/workouts";
+import { WEEKDAYS, type DayWithExercises, type Session } from "@/lib/coaching/workouts";
 import type { Progress } from "@/lib/coaching/gamification";
 import { startSession } from "@/lib/coaching/workout-actions";
 import { redeemReward } from "@/lib/coaching/gamification-actions";
@@ -17,6 +17,7 @@ type CoachingDashboardProps = {
   featuredDay: DayWithExercises | null;
   otherDays: DayWithExercises[];
   activeSession: Session | null;
+  completedDayIds: string[];
   progress: Progress;
   rewards: Reward[];
   sessions: Session[];
@@ -44,6 +45,7 @@ export function CoachingDashboard({
   featuredDay,
   otherDays,
   activeSession,
+  completedDayIds,
   progress,
   rewards,
   sessions,
@@ -52,17 +54,20 @@ export function CoachingDashboard({
 }: CoachingDashboardProps) {
   const allDays = featuredDay ? [featuredDay, ...otherDays] : otherDays;
   const dayWithExercises = featuredDay && featuredDay.exercises.length > 0 ? featuredDay : null;
-  const isRestDay = !featuredDay && !activeSession;
+  const featuredCompleted = Boolean(featuredDay && completedDayIds.includes(featuredDay.id));
+  const chooseWorkout = !featuredDay && !activeSession && allDays.some((day) => day.weekday == null);
+  const isRestDay = allDays.length > 0 && !featuredDay && !activeSession && !chooseWorkout;
 
   return (
     <div className="mx-auto w-full max-w-lg px-4 pb-8 pt-6 sm:px-6 sm:pt-8">
       <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-mh-red">Meu treino</p>
       <h1 className="mt-2 max-w-[14ch] text-[clamp(2rem,8vw,2.9rem)] font-bold leading-[1.04] tracking-[-0.045em] text-white">
-        {isRestDay ? "Hoje é dia de recuperar." : activeSession ? "Treino em andamento." : dayWithExercises ? "Seu treino de hoje." : "Seu plano está chegando."}
+        {chooseWorkout ? "Escolha seu treino." : isRestDay ? "Hoje é dia de recuperar." : activeSession ? "Treino em andamento." : featuredCompleted ? "Treino de hoje concluído." : dayWithExercises ? "Seu treino de hoje." : "Seu plano está chegando."}
       </h1>
       <p className="mt-2 text-[15px] text-white/60">{dateLabel}</p>
 
-      {status?.workout === "concluido" && <p role="status" className="mt-5 flex items-center gap-2 rounded-xl bg-emerald-500/10 p-3 text-sm text-emerald-300"><Check className="size-4" /> Treino registrado. Mandou bem! (+10 pts)</p>}
+      {status?.workout === "concluido" && <p role="status" className="mt-5 flex items-center gap-2 rounded-xl bg-emerald-500/10 p-3 text-sm text-emerald-300"><Check className="size-4" /> Treino concluído e salvo. Os pontos de treino são limitados a 10 por dia.</p>}
+      {["ja_concluido", "expirado", "indisponivel", "erro", "pontos_pendentes", "encerrado"].includes(status?.workout ?? "") && <p role="status" className="mt-5 rounded-xl bg-white/5 p-4 text-sm text-white/75">{({ encerrado: "Sessão encerrada sem concluir. Nenhum ponto foi concedido.", ja_concluido: "Este treino já foi concluído hoje. Você pode consultar seu histórico abaixo.", expirado: "A sessão anterior era de outro dia. Inicie uma nova sessão pelo seu plano.", indisponivel: "Este treino ainda está em preparação pelo professor.", erro: "Não foi possível iniciar o treino. Tente novamente.", pontos_pendentes: "O treino foi salvo. A confirmação dos pontos ficou pendente; fale com a equipe." })[status?.workout ?? ""]}</p>}
       {status?.redemption === "ok" && <p role="status" className="mt-5 flex items-center gap-2 rounded-xl bg-emerald-500/10 p-3 text-sm text-emerald-300"><Check className="size-4" /> Resgate solicitado com sucesso.</p>}
 
       <section className="relative isolate mt-5 flex min-h-64 flex-col justify-end overflow-hidden rounded-2xl bg-[#141519] p-5 sm:min-h-72 sm:p-6">
@@ -71,24 +76,25 @@ export function CoachingDashboard({
         <span className="absolute -top-14 right-9 h-52 w-11 rotate-[29deg] bg-mh-red/85" aria-hidden="true" />
         <div className="relative z-10">
           <h2 className="max-w-[16ch] text-[clamp(1.75rem,7vw,2.4rem)] font-bold leading-[1.07] tracking-[-0.04em] text-white">
-            {isRestDay ? "Descanso também é treino." : dayWithExercises?.name || activeSession?.day_name || featuredDay?.name || "Treino MoveHaus"}
+            {chooseWorkout ? "Seus treinos disponíveis." : isRestDay ? "Descanso também é treino." : dayWithExercises?.name || activeSession?.day_name || featuredDay?.name || "Treino MoveHaus"}
           </h2>
           <p className="mt-2 max-w-[28ch] text-sm leading-snug text-white/85 sm:text-base">
-            {isRestDay ? "Seu plano continua no próximo treino." : dayWithExercises ? `${dayWithExercises.exercises.length} ${dayWithExercises.exercises.length === 1 ? "exercício" : "exercícios"} no plano de hoje.` : featuredDay ? "Seu professor ainda vai adicionar os exercícios." : "Continue de onde parou."}
+            {chooseWorkout ? "Escolha uma ficha no seu plano abaixo para começar." : isRestDay ? "Seu plano continua no próximo treino." : dayWithExercises ? `${dayWithExercises.exercises.length} ${dayWithExercises.exercises.length === 1 ? "exercício" : "exercícios"} no plano de hoje.` : featuredDay ? "Seu professor ainda vai adicionar os exercícios." : "Continue de onde parou."}
           </p>
           {activeSession ? (
             <Link href={`/acompanhamento/treino/${activeSession.id}`} className="mt-5 inline-flex min-h-11 items-center gap-2 rounded-xl bg-mh-red px-5 text-sm font-semibold text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white">Continuar treino <ArrowRight className="size-4" /></Link>
-          ) : dayWithExercises ? (
+          ) : featuredCompleted ? <p className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-emerald-300"><Check className="size-4" />Concluído hoje. Consulte seu histórico abaixo.</p> : dayWithExercises ? (
             <div className="mt-5 max-w-[250px]"><StartDay day={dayWithExercises} label="Iniciar treino" /></div>
           ) : null}
         </div>
       </section>
 
       <div className="mt-4 grid grid-cols-2 divide-x divide-white/10 rounded-2xl border border-white/[0.07] bg-[#111216] py-4">
-        <div className="flex min-w-0 items-center justify-center gap-3 px-2"><Star className="size-6 shrink-0 text-mh-red" strokeWidth={1.7} /><div><strong className="block text-2xl leading-none text-white">{progress.points}</strong><span className="text-xs text-white/60">pontos</span></div></div>
+        <div className="flex min-w-0 items-center justify-center gap-3 px-2"><Star className="size-6 shrink-0 text-mh-red" strokeWidth={1.7} /><div><strong className="block text-2xl leading-none text-white">{progress.points}</strong><span className="text-xs text-white/60">pontos disponíveis</span></div></div>
         <div className="flex min-w-0 items-center justify-center gap-3 px-2"><TrendingUp className="size-6 shrink-0 text-mh-red" strokeWidth={1.7} /><div><strong className="block text-2xl leading-none text-white">{allDays.length}</strong><span className="text-xs text-white/60">{allDays.length === 1 ? "treino no plano" : "treinos no plano"}</span></div></div>
       </div>
 
+      <details className="mt-4 rounded-xl border border-white/10 bg-[#111216] p-4"><summary className="cursor-pointer text-sm font-semibold text-white">Meus pontos: regras e extrato</summary><p className="mt-3 text-sm text-white/65">+10 pontos no primeiro treino completo do dia. Outros treinos do mesmo dia entram no histórico, sem pontos extras. Metas validadas pela equipe: +50 pontos. Resgates descontam o saldo.</p><ul className="mt-4 space-y-3">{progress.ledger.map((entry) => <li key={entry.id} className="flex justify-between gap-3 border-t border-white/10 pt-3 text-xs"><span className="text-white/65">{entry.reason}<span className="mt-1 block text-white/40">{new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeZone: "America/Sao_Paulo" }).format(new Date(entry.created_at))}</span></span><strong className={entry.points > 0 ? "text-emerald-300" : "text-white"}>{entry.points > 0 ? "+" : ""}{entry.points}</strong></li>)}</ul></details>
       <section className="mt-7">
         <h2 className="text-[23px] font-bold tracking-tight text-white">Seu plano</h2>
         {allDays.length === 0 ? (
@@ -99,12 +105,12 @@ export function CoachingDashboard({
               <details key={day.id} className="group overflow-hidden rounded-xl border border-white/[0.07] bg-[#111216]">
                 <summary className="flex min-h-18 cursor-pointer list-none items-center gap-4 px-4 py-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-mh-red [&::-webkit-details-marker]:hidden">
                   <Dumbbell className="size-6 shrink-0 text-mh-red" strokeWidth={1.6} aria-hidden="true" />
-                  <span className="min-w-0 flex-1"><strong className="block truncate text-sm text-white">{day.name}</strong><span className="block text-xs text-white/55">{day.exercises.length} {day.exercises.length === 1 ? "exercício" : "exercícios"}</span></span>
+                  <span className="min-w-0 flex-1"><strong className="block truncate text-sm text-white">{day.name}</strong><span className="block text-xs text-white/55">{day.weekday ? `${WEEKDAYS[day.weekday - 1]} · ` : "Sem dia fixo · "}{day.exercises.length} {day.exercises.length === 1 ? "exercício" : "exercícios"}</span></span>
                   <ChevronRight className="size-5 shrink-0 text-white/75 transition-transform group-open:rotate-90" aria-hidden="true" />
                 </summary>
                 <div className="border-t border-white/[0.07] px-4 pb-4 pt-3">
                   {day.exercises.length > 0 ? <ul className="mb-4 space-y-2 text-sm text-white/75">{day.exercises.map((exercise) => <li key={exercise.id} className="flex items-start justify-between gap-3"><span>{exercise.name}</span><span className="shrink-0 text-xs text-white/45">{exercise.sets} × {exercise.reps}{exercise.target_load ? ` · ${loadLabel(exercise.target_load)}` : ""}</span></li>)}</ul> : <p className="mb-4 text-sm text-white/55">Exercícios ainda não cadastrados.</p>}
-                  {activeSession?.day_id === day.id ? <Link href={`/acompanhamento/treino/${activeSession.id}`} className="inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-mh-red">Continuar treino <ArrowRight className="size-4" /></Link> : <StartDay day={day} label="Iniciar este treino" />}
+                  {completedDayIds.includes(day.id) ? <p className="inline-flex min-h-11 items-center gap-2 text-sm text-emerald-300"><Check className="size-4" />Concluído hoje</p> : activeSession?.day_id === day.id ? <Link href={`/acompanhamento/treino/${activeSession.id}`} className="inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-mh-red">Continuar treino <ArrowRight className="size-4" /></Link> : <StartDay day={day} label="Iniciar este treino" />}
                 </div>
               </details>
             ))}

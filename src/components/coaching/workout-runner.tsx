@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useActionState, useEffect, useMemo, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { Check, ChevronDown, Loader2, Pause, Play, Timer } from "lucide-react";
-import { finishSession } from "@/lib/coaching/workout-actions";
+import { abandonSession, finishSession, type WorkoutState } from "@/lib/coaching/workout-actions";
 import { methodInfo } from "@/lib/coaching/training-methods";
 import { fmtKg, loadInput, loadLabel, loadNum } from "@/lib/coaching/format";
 import { cn } from "@/lib/utils";
@@ -42,18 +42,24 @@ function ExerciseVideo({ url }: { url: string }) {
   return <video src={url} controls autoPlay playsInline className="my-4 aspect-video w-full rounded-xl bg-black object-contain" />;
 }
 
-export function WorkoutRunner({ sessionId, dayName, exercises, dateLabel }: { sessionId: string; dayName: string; exercises: Exercise[]; athleteName: string; dateLabel: string }) {
+function WorkoutRunnerContent({ sessionId, dayName, exercises, dateLabel, initialDraft }: { sessionId: string; dayName: string; exercises: Exercise[]; athleteName: string; dateLabel: string; initialDraft?: Draft }) {
   const [entries, setEntries] = useState<Record<string, Entry>>(() => {
     const initial: Record<string, Entry> = {};
     for (const exercise of exercises) for (let setNumber = 1; setNumber <= exercise.sets; setNumber++) initial[exercise.id + ":" + setNumber] = { reps: suggestedReps(exercise.reps), load: loadInput(exercise.target_load), done: false };
+    for (const key of Object.keys(initial)) { const saved = initialDraft?.entries?.[key]; if (saved && typeof saved.reps === "string" && typeof saved.load === "string" && typeof saved.done === "boolean") initial[key] = saved; }
     return initial;
   });
   const [openId, setOpenId] = useState(exercises[0]?.id ?? "");
   const [rest, setRest] = useState<number | null>(null);
-  const [rpe, setRpe] = useState<number | null>(null);
+  const [rpe, setRpe] = useState<number | null>(initialDraft?.rpe ?? null);
+  const [notes, setNotes] = useState(initialDraft?.notes ?? "");
+  const [state, finishAction] = useActionState<WorkoutState, FormData>(finishSession, {});
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => () => { if (timerRef.current) clearInterval(timerRef.current); }, []);
+  useEffect(() => {
+    try { localStorage.setItem(`movehaus:workout:${sessionId}`, JSON.stringify({ entries, rpe, notes })); } catch { /* treino continua sem armazenamento local */ }
+  }, [entries, rpe, notes, sessionId]);
 
   function startRest(seconds: number) {
     if (timerRef.current) clearInterval(timerRef.current);
@@ -100,6 +106,7 @@ export function WorkoutRunner({ sessionId, dayName, exercises, dateLabel }: { se
 
   return (
     <div className="mx-auto w-full max-w-lg px-4 pb-24 pt-6 sm:px-6 sm:pt-8">
+      <a href="/acompanhamento" className="mb-4 inline-flex min-h-10 items-center text-sm text-white/60 hover:text-white">← Voltar ao meu plano</a>
       <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-mh-red">Treino em andamento</p>
       <h1 className="mt-2 text-[clamp(2rem,8vw,2.9rem)] font-bold leading-[1.05] tracking-[-0.045em] text-white">{dayName}</h1>
       <p className="mt-1 text-sm text-white/55">{dateLabel}</p>
@@ -143,15 +150,33 @@ export function WorkoutRunner({ sessionId, dayName, exercises, dateLabel }: { se
         })}
       </div>
 
+      {state.error && <p role="alert" className="mt-5 rounded-xl bg-red-500/10 p-4 text-sm text-red-300">{state.error}</p>}
+      <p className="mt-4 text-xs text-white/55">Marque cada série realizada. O treino só é concluído após todas as séries. Seu progresso é salvo neste aparelho.</p>
+      <form action={abandonSession} onSubmit={() => { try { localStorage.removeItem(`movehaus:workout:${sessionId}`); } catch { /* sem rascunho */ } }} className="mt-4"><input type="hidden" name="session_id" value={sessionId} /><button type="submit" className="min-h-10 text-sm text-white/55 underline">Encerrar esta sessão sem concluir (sem pontos)</button></form>
       <section className="mt-6">
         <h2 className="text-base font-semibold text-white">Como foi o esforço?</h2>
         <div className="mt-3 grid grid-cols-11 gap-1" role="group" aria-label="Percepção de esforço de zero a dez">{Array.from({ length: 11 }).map((_, value) => <button type="button" key={value} onClick={() => setRpe(value)} aria-label={`Esforço ${value} de 10`} aria-pressed={rpe === value} className={cn("aspect-square min-w-0 rounded-full border text-[11px] font-semibold tabular-nums focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mh-red sm:text-xs", rpe === value ? "border-mh-red bg-mh-red text-white" : "border-white/30 text-white/70 hover:border-white/70 hover:text-white")}>{value}</button>)}</div>
         <div className="mt-1 flex justify-between text-[11px] text-white/45"><span>Muito leve</span><span>Máximo</span></div>
       </section>
       <label htmlFor="workout-notes" className="mt-6 block text-sm font-semibold text-white">Observações <span className="font-normal text-white/55">(opcional)</span></label>
-      <textarea id="workout-notes" form="finish-workout" name="discomfort" rows={3} placeholder="Como você se sentiu durante o treino?" className="mt-2 w-full resize-none rounded-xl border border-white/15 bg-[#111216] p-4 text-sm text-white outline-none placeholder:text-white/40 focus-visible:ring-2 focus-visible:ring-mh-red" />
+      <textarea id="workout-notes" value={notes} onChange={(event) => setNotes(event.target.value)} form="finish-workout" name="discomfort" rows={3} placeholder="Como você se sentiu durante o treino?" className="mt-2 w-full resize-none rounded-xl border border-white/15 bg-[#111216] p-4 text-sm text-white outline-none placeholder:text-white/40 focus-visible:ring-2 focus-visible:ring-mh-red" />
 
-      <div className="fixed inset-x-0 bottom-[calc(4.25rem+env(safe-area-inset-bottom))] z-30 mx-auto max-w-3xl bg-[#08090b]/95 px-4 py-3 backdrop-blur-xl sm:px-6"><div className="mx-auto max-w-lg"><form id="finish-workout" action={finishSession}><input type="hidden" name="session_id" value={sessionId} /><input type="hidden" name="logs" value={JSON.stringify(logs)} /><input type="hidden" name="rpe" value={rpe ?? ""} /><FinishButton disabled={exercises.length === 0} /></form></div></div>
+      <div className="fixed inset-x-0 bottom-[calc(4.25rem+env(safe-area-inset-bottom))] z-30 mx-auto max-w-3xl bg-[#08090b]/95 px-4 py-3 backdrop-blur-xl sm:px-6"><div className="mx-auto max-w-lg"><form id="finish-workout" action={finishAction}><input type="hidden" name="session_id" value={sessionId} /><input type="hidden" name="logs" value={JSON.stringify(logs)} /><input type="hidden" name="rpe" value={rpe ?? ""} /><FinishButton disabled={exercises.length === 0 || completedExercises !== exercises.length} /></form></div></div>
     </div>
   );
+}
+
+type Draft = { entries?: Record<string, Entry>; rpe?: number | null; notes?: string };
+export function WorkoutRunner(props: { sessionId: string; dayName: string; exercises: Exercise[]; athleteName: string; dateLabel: string }) {
+  const [draft, setDraft] = useState<Draft | null>(null);
+  useEffect(() => {
+    let active = true;
+    Promise.resolve().then(() => {
+      let saved: Draft = {};
+      try { const value = JSON.parse(localStorage.getItem(`movehaus:workout:${props.sessionId}`) ?? "{}"); if (value && typeof value === "object") saved = { entries: value.entries, rpe: Number.isInteger(value.rpe) && value.rpe >= 0 && value.rpe <= 10 ? value.rpe : null, notes: typeof value.notes === "string" ? value.notes : "" }; } catch { /* começa sem rascunho */ }
+      if (active) setDraft(saved);
+    });
+    return () => { active = false; };
+  }, [props.sessionId]);
+  return draft ? <WorkoutRunnerContent {...props} initialDraft={draft} /> : <p className="p-8 text-sm text-white/60">Recuperando suas séries…</p>;
 }

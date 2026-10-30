@@ -1,3 +1,5 @@
+import { trainingDate } from "@/lib/coaching/workout-rules";
+import { getPublicSettings } from "@/lib/settings";
 import type { Metadata } from "next";
 import { Apple, Dumbbell, LineChart, Lock, MessageCircle, Target } from "lucide-react";
 import { requireUser, getProfile } from "@/lib/auth/user";
@@ -21,10 +23,11 @@ export default async function AcompanhamentoPage({
   searchParams: Promise<{ treino?: string; resgate?: string }>;
 }) {
   const user = await requireUser("/acompanhamento");
-  const [access, profile, params] = await Promise.all([
+  const [access, profile, params, settings] = await Promise.all([
     hasCoachingAccess(),
     getProfile(),
     searchParams,
+    getPublicSettings(),
   ]);
 
   if (!access) {
@@ -60,7 +63,7 @@ export default async function AcompanhamentoPage({
             Para ativar o acompanhamento, fale com a equipe da MoveHaus.
           </p>
           <CtaButton
-            href={whatsappLink("Olá! Quero assinar o MoveHaus Acompanhamento.")}
+            href={whatsappLink("Olá! Quero assinar o MoveHaus Acompanhamento.", settings.whatsapp)}
             external
             variant="whatsapp"
             size="lg"
@@ -76,18 +79,19 @@ export default async function AcompanhamentoPage({
 
   const [tree, sessions, progress, rewards, activeSession] = await Promise.all([
     getPlanTree(user.id),
-    getRecentSessions(user.id, 5),
+    getRecentSessions(user.id, 30),
     getProgress(user.id),
     getActiveRewards(),
     getOpenSession(user.id),
   ]);
   const today = todayWeekday();
-  const todayDay = tree.days.find((day) => day.weekday === today) ?? null;
+  const readyDays = tree.days.filter((day) => day.exercises.length > 0);
+  const todayDay = readyDays.find((day) => day.weekday === today) ?? null;
   const activeDay = activeSession?.day_id
-    ? tree.days.find((day) => day.id === activeSession.day_id) ?? null
+    ? readyDays.find((day) => day.id === activeSession.day_id) ?? null
     : null;
   const featuredDay = activeDay ?? todayDay;
-  const otherDays = tree.days.filter((day) => day.id !== featuredDay?.id);
+  const otherDays = readyDays.filter((day) => day.id !== featuredDay?.id);
   const athleteName = profile?.full_name || "Aluno";
   const rawDateLabel = new Intl.DateTimeFormat("pt-BR", {
     weekday: "long",
@@ -107,8 +111,9 @@ export default async function AcompanhamentoPage({
       progress={progress}
       rewards={rewards}
       sessions={sessions}
+      completedDayIds={sessions.filter((session) => session.finished_at && trainingDate(session.finished_at) === trainingDate()).flatMap((session) => session.day_id ? [session.day_id] : [])}
       status={{ workout: params.treino, redemption: params.resgate }}
-      coachHref={whatsappLink(`Olá! Aqui é ${athleteName}. Preciso falar com meu professor.`)}
+      coachHref={whatsappLink(`Olá! Aqui é ${athleteName}. Preciso falar com meu professor.`, settings.whatsapp)}
     />
   );
 }

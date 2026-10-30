@@ -8,6 +8,7 @@ type Props = {
   todayLabel: string | null;
   todayExercises: number;
   hasOpenSession: boolean;
+  sessionId?: string;
   joinHref: string;
 };
 
@@ -17,6 +18,7 @@ export function CoachingEntry({
   todayLabel,
   todayExercises,
   hasOpenSession,
+  sessionId,
   joinHref,
 }: Props) {
   const title = !hasAccess
@@ -64,7 +66,7 @@ export function CoachingEntry({
         </h2>
         <p className="mt-3 max-w-[26ch] text-[15px] leading-snug text-white/90 sm:text-base">{description}</p>
         {hasAccess ? (
-          <Link href="/acompanhamento" className="mt-6 inline-flex min-h-12 w-full max-w-[245px] items-center justify-center gap-2 rounded-2xl bg-mh-red px-5 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(245,0,25,.25)] transition-colors hover:bg-mh-red-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white sm:w-auto sm:min-w-[230px]">
+          <Link href={sessionId ? `/acompanhamento/treino/${sessionId}` : "/acompanhamento"} className="mt-6 inline-flex min-h-12 w-full max-w-[245px] items-center justify-center gap-2 rounded-2xl bg-mh-red px-5 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(245,0,25,.25)] transition-colors hover:bg-mh-red-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white sm:w-auto sm:min-w-[230px]">
             {actionLabel}<ArrowRight className="size-4" />
           </Link>
         ) : (

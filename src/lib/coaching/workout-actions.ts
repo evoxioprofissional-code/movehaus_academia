@@ -4,6 +4,10 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { requireAdmin, requireUser } from "@/lib/auth/user";
+import { hasCoachingAccess } from "@/lib/coaching/access";
+import { eventId } from "@/lib/coaching/event-id";
+import { trainingDate, validateWorkoutLogs } from "@/lib/coaching/workout-rules";
+import { getPlanTree, getOpenSession } from "@/lib/coaching/workouts";
 import { awardWorkoutCompletion } from "@/lib/coaching/gamification";
 
 const S = (v: FormDataEntryValue | null) => String(v ?? "").trim();
@@ -178,104 +182,72 @@ export async function duplicateDay(fd: FormData): Promise<void> {
   adminRevalidate(userId);
 }
 // ============ ALUNO: modo treino ============
+
 export async function startSession(fd: FormData): Promise<void> {
-  const user = await requireUser();
+  const user = await requireUser("/acompanhamento");
+  if (!(await hasCoachingAccess())) redirect("/acompanhamento");
   const dayId = S(fd.get("day_id"));
-  if (!dayId) return;
+  const tree = await getPlanTree(user.id);
+  const day = tree.days.find((item) => item.id === dayId && item.exercises.length > 0);
+  if (!day) redirect("/acompanhamento?treino=indisponivel");
+  const open = await getOpenSession(user.id);
+  if (open) redirect(`/acompanhamento/treino/${open.id}`);
   const supabase = await createClient();
-  // Confirma que o dia pertence ao aluno (RLS só devolve dias próprios).
-  const { data: day } = await supabase
-    .from("workout_days")
-    .select("id, name")
-    .eq("id", dayId)
-    .maybeSingle();
-  if (!day) redirect("/acompanhamento");
-
-  const { data: openSession } = await supabase
-    .from("workout_sessions")
-    .select("id")
-    .eq("user_id", user.id)
-    .eq("day_id", day!.id)
-    .is("finished_at", null)
-    .order("started_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
-  if (openSession) redirect(`/acompanhamento/treino/${openSession.id}`);
-
-  const { data: session, error } = await supabase
-    .from("workout_sessions")
-    .insert({ user_id: user.id, day_id: day!.id, day_name: day!.name })
-    .select("id")
-    .single();
-  if (error || !session) redirect("/acompanhamento");
-  redirect(`/acompanhamento/treino/${session!.id}`);
+  const id = eventId(`session:${user.id}:${trainingDate()}:${dayId}`);
+  const { data: existing } = await supabase.from("workout_sessions").select("id,finished_at,notes").eq("id", id).eq("user_id", user.id).maybeSingle();
+  if (existing?.finished_at) redirect("/acompanhamento?treino=ja_concluido");
+  if (existing?.notes === "__abandoned__") {
+    await supabase.from("workout_sessions").update({ notes: "" }).eq("id", id).eq("user_id", user.id).is("finished_at", null);
+  }
+  if (!existing) {
+    const { error } = await supabase.from("workout_sessions").insert({ id, user_id: user.id, day_id: day.id, day_name: day.name });
+    if (error && error.code !== "23505") redirect("/acompanhamento?treino=erro");
+  }
+  revalidatePath("/minha-area");
+  redirect(`/acompanhamento/treino/${id}`);
 }
 
-export async function finishSession(fd: FormData): Promise<void> {
-  const user = await requireUser();
+export type WorkoutState = { error?: string };
+export async function finishSession(_state: WorkoutState, fd: FormData): Promise<WorkoutState> {
+  const user = await requireUser("/acompanhamento");
+  if (!(await hasCoachingAccess())) return { error: "Seu acesso ao acompanhamento não está ativo." };
   const sessionId = S(fd.get("session_id"));
-  if (!sessionId) return;
   const supabase = await createClient();
-
-  const { data: session } = await supabase
-    .from("workout_sessions")
-    .select("id, user_id")
-    .eq("id", sessionId)
-    .maybeSingle();
-  if (!session || session.user_id !== user.id) redirect("/acompanhamento");
-
-  // Logs vêm como JSON do cliente. Calcula o volume load total (Σ reps × carga).
-  let totalVolume = 0;
-  try {
-    const raw = S(fd.get("logs"));
-    const logs = raw ? (JSON.parse(raw) as Array<Record<string, unknown>>) : [];
-    const rows = logs
-      .filter((l) => l && (l.load_used != null || l.reps_done != null))
-      .map((l) => {
-        const reps = l.reps_done != null ? Number(l.reps_done) : null;
-        const load = l.load_used != null ? Number(l.load_used) : null;
-        if (reps != null && load != null && Number.isFinite(reps) && Number.isFinite(load)) {
-          totalVolume += reps * load;
-        }
-        return {
-          session_id: sessionId,
-          exercise_id: (l.exercise_id as string) || null,
-          exercise_name: String(l.exercise_name ?? ""),
-          set_number: Number(l.set_number ?? 1),
-          reps_done: reps,
-          load_used: load,
-        };
-      });
-    if (rows.length) await supabase.from("exercise_logs").insert(rows);
-  } catch {
-    // ignora logs malformados
-    totalVolume = 0;
-  }
-
-  // PSE (0-10). Deriva o "como foi" (leve/adequado/pesado) a partir da PSE.
+  const { data: session, error: sessionError } = await supabase.from("workout_sessions").select("*").eq("id", sessionId).eq("user_id", user.id).maybeSingle();
+  if (sessionError || !session) return { error: "Treino não encontrado." };
+  if (session.notes === "__abandoned__") return { error: "Esta sessão foi encerrada sem concluir. Inicie novamente pelo plano." };
+  if (session.finished_at) redirect("/acompanhamento?treino=ja_concluido");
+  if (trainingDate(session.started_at) !== trainingDate()) return { error: "Esta sessão é de outro dia. Volte ao plano e inicie o treino de hoje." };
+  const tree = await getPlanTree(user.id);
+  const day = tree.days.find((item) => item.id === session.day_id);
+  if (!day?.exercises.length) return { error: "O professor alterou o plano. Volte ao seu treino para atualizar." };
+  let logs;
+  try { logs = validateWorkoutLogs(S(fd.get("logs")), day.exercises); }
+  catch (error) { return { error: error instanceof Error ? error.message : "Confira suas séries." }; }
+  const { error: logError } = await supabase.from("exercise_logs").upsert(logs.map((log) => ({ ...log, session_id: session.id, id: eventId(`log:${session.id}:${log.exercise_id}:${log.set_number}`) })), { onConflict: "id" });
+  if (logError) return { error: "Não foi possível salvar as séries. Tente novamente." };
   const rpeRaw = N(fd.get("rpe"));
   const rpe = rpeRaw != null && rpeRaw >= 0 && rpeRaw <= 10 ? rpeRaw : null;
-  const feelingFromRpe = rpe == null ? null : rpe <= 3 ? "leve" : rpe <= 6 ? "adequado" : "pesado";
-
-  await supabase
-    .from("workout_sessions")
-    .update({
-      finished_at: new Date().toISOString(),
-      feeling: feelingFromRpe ?? (S(fd.get("feeling")) || null),
-      discomfort: S(fd.get("discomfort")),
-      notes: S(fd.get("notes")),
-      rpe,
-      total_volume_load: Math.round(totalVolume * 100) / 100,
-    })
-    .eq("id", sessionId);
-
-  // Pontos + conquistas (via service role).
-  try {
-    await awardWorkoutCompletion(user.id);
-  } catch {
-    // não bloqueia a finalização do treino
-  }
-
+  const finishedAt = new Date().toISOString();
+  const { data: completed, error } = await supabase.from("workout_sessions").update({
+    finished_at: finishedAt, feeling: rpe == null ? null : rpe <= 3 ? "leve" : rpe <= 6 ? "adequado" : "pesado",
+    discomfort: S(fd.get("discomfort")).slice(0, 2000), notes: S(fd.get("notes")).slice(0, 2000), rpe,
+    total_volume_load: Math.round(logs.reduce((sum, log) => sum + log.reps_done * (log.load_used ?? 0), 0) * 100) / 100,
+  }).eq("id", session.id).eq("user_id", user.id).is("finished_at", null).select("id").maybeSingle();
+  if (error) return { error: "Não foi possível finalizar. Suas séries foram preservadas." };
+  if (!completed) redirect("/acompanhamento?treino=ja_concluido");
+  try { await awardWorkoutCompletion(user.id, session.id); }
+  catch { revalidatePath("/minha-area"); revalidatePath("/acompanhamento"); redirect("/acompanhamento?treino=pontos_pendentes"); }
   revalidatePath("/acompanhamento");
+  revalidatePath("/minha-area");
   redirect("/acompanhamento?treino=concluido");
+}
+
+export async function abandonSession(fd: FormData): Promise<void> {
+  const user = await requireUser("/acompanhamento");
+  const { error } = await (await createClient()).from("workout_sessions").update({ notes: "__abandoned__" }).eq("id", S(fd.get("session_id"))).eq("user_id", user.id).is("finished_at", null);
+  if (error) throw new Error("Não foi possível encerrar a sessão.");
+  revalidatePath("/acompanhamento");
+  revalidatePath("/minha-area");
+  redirect("/acompanhamento?treino=encerrado");
 }
