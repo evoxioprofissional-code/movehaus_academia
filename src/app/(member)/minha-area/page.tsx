@@ -147,7 +147,7 @@ export default async function MinhaAreaPage() {
                     </div>
                     <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-white/10"><div className="h-full rounded-full bg-mh-red" style={{ width: `${complete}%` }} /></div>
                     <p className="mt-2 text-xs text-white/50">{complete}% concluído{access.expires_at && !access.permanent ? ` · Acesso até ${new Intl.DateTimeFormat("pt-BR").format(new Date(access.expires_at))}` : ""}</p>
-                    {access.available && product.type === "ebook" && <Link href={`/minha-area/ler/${product.slug}`} className="mt-4 inline-flex min-h-10 items-center gap-2 text-sm font-semibold text-mh-red hover:text-mh-red-soft">{complete > 0 ? "Continuar leitura" : "Começar leitura"}<ArrowRight className="size-4" /></Link>}
+                    {access.available && product.type !== "physical" && <Link href={`/minha-area/ler/${product.slug}`} className="mt-4 inline-flex min-h-10 items-center gap-2 text-sm font-semibold text-mh-red hover:text-mh-red-soft">{product.type === "digital" ? complete > 0 ? "Continuar conteúdo" : "Acessar conteúdo" : complete > 0 ? "Continuar leitura" : "Começar leitura"}<ArrowRight className="size-4" /></Link>}
                   </article>
                 );
               })}

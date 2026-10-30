@@ -20,7 +20,9 @@ export default async function EditarConteudoPage({
 }) {
   const { id } = await params;
   const { product, ebook, chapters } = await getEbook(id);
-  if (!product || product.type !== "ebook") notFound();
+  if (!product || !["ebook", "digital"].includes(product.type)) notFound();
+
+  const sectionName = product.type === "digital" ? "Aulas e materiais" : "Capítulos";
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
@@ -35,7 +37,7 @@ export default async function EditarConteudoPage({
         {product.name}
       </h1>
       <p className="mb-6 text-sm text-mh-muted">
-        Edite a apresentação e os capítulos.{" "}
+        Edite a apresentação, adicione o conteúdo abaixo e selecione Publicado para liberar aos compradores.{" "}
         <Link href={`/admin/produtos/${id}`} className="underline hover:text-white">
           Dados comerciais do produto
         </Link>
@@ -45,7 +47,7 @@ export default async function EditarConteudoPage({
 
       {/* Capítulos */}
       <h2 className="mb-3 mt-8 text-lg font-semibold text-white">
-        Capítulos ({chapters.length})
+        {sectionName} ({chapters.length})
       </h2>
 
       <div className="space-y-3">
@@ -105,7 +107,7 @@ export default async function EditarConteudoPage({
       {/* Novo capítulo */}
       <form action={createChapter} className="mt-4 space-y-2 rounded-lg border border-dashed border-white/15 p-4">
         <input type="hidden" name="product_id" value={id} />
-        <p className="text-sm font-medium text-white">Adicionar capítulo</p>
+        <p className="text-sm font-medium text-white">{product.type === "digital" ? "Adicionar aula ou material" : "Adicionar capítulo"}</p>
         <input
           name="title"
           required
@@ -118,7 +120,7 @@ export default async function EditarConteudoPage({
           placeholder="Conteúdo (opcional agora)"
           className="w-full rounded-mh border border-mh-border bg-mh-black px-3 py-2 text-sm text-white placeholder:text-mh-muted focus:border-mh-red focus:outline-none"
         />
-        <Button type="submit">Adicionar capítulo</Button>
+        <Button type="submit">{product.type === "digital" ? "Adicionar aula ou material" : "Adicionar capítulo"}</Button>
       </form>
     </div>
   );

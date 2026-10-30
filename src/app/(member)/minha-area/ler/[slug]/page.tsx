@@ -54,7 +54,7 @@ export default async function ReaderPage({ params }: { params: Promise<{ slug: s
         icon={Lock}
         title="Conteúdo ainda não liberado"
         text={`Você ainda não tem acesso a “${data.product.name}”. Esse conteúdo faz parte da biblioteca MoveHaus — garanta o seu acesso para começar a leitura.`}
-        primary={{ href: `/ebooks/${data.product.slug}`, label: "Ver na loja" }}
+        primary={{ href: `${data.product.type === "ebook" ? "/ebooks" : "/loja"}/${data.product.slug}`, label: "Ver na loja" }}
         secondary={{ href: "/minha-area", label: "Minha área" }}
       />
     );
@@ -74,6 +74,7 @@ export default async function ReaderPage({ params }: { params: Promise<{ slug: s
   return (
     <EbookReader
       product={data.product}
+      sectionLabel={data.product.type === "digital" ? "Aula ou material" : "Capítulo"}
       chapters={data.chapters}
       initialChapterId={data.progress?.chapter_id}
       watermark={data.watermark}

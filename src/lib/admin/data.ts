@@ -126,16 +126,17 @@ export async function listEbookProducts(): Promise<
   (ProductRow & { ebook: EbookRow | null })[]
 > {
   const supabase = await createClient();
-  const [{ data: products }, { data: ebooks }] = await Promise.all([
+  const [{ data: products }, { data: ebooks }, { data: chapters }] = await Promise.all([
     supabase
       .from("products")
       .select("*")
-      .eq("type", "ebook")
+      .in("type", ["ebook", "digital"])
       .order("created_at", { ascending: false }),
     supabase.from("ebooks").select("*"),
+    supabase.from("ebook_chapters").select("product_id"),
   ]);
   const metaById = new Map((ebooks ?? []).map((e) => [e.product_id, e]));
-  return (products ?? []).map((p) => ({ ...p, ebook: metaById.get(p.id) ?? null }));
+  return (products ?? []).map((p) => ({ ...p, chapters_count: (chapters ?? []).filter((chapter) => chapter.product_id === p.id).length, ebook: metaById.get(p.id) ?? null }));
 }
 
 export async function getEbook(productId: string) {

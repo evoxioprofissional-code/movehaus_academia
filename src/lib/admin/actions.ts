@@ -342,6 +342,8 @@ export async function saveEbookMeta(
     .upsert(payload, { onConflict: "product_id" });
   if (error) return { error: error.message };
   revalidatePath(`/admin/conteudos/${productId}`);
+  revalidatePath("/admin/conteudos");
+  revalidatePath("/minha-area", "layout");
   return { message: "Conteúdo salvo." };
 }
 
@@ -359,13 +361,16 @@ export async function createChapter(fd: FormData): Promise<void> {
     .limit(1)
     .maybeSingle();
   const position = (last?.position ?? 0) + 1;
-  await supabase.from("ebook_chapters").insert({
+  const { error } = await supabase.from("ebook_chapters").insert({
     product_id: productId,
     title,
     content: String(fd.get("content") ?? ""),
     position,
   });
+  if (error) throw new Error("Não foi possível salvar o conteúdo. Tente novamente.");
   revalidatePath(`/admin/conteudos/${productId}`);
+  revalidatePath("/admin/conteudos");
+  revalidatePath("/minha-area", "layout");
 }
 
 export async function updateChapter(fd: FormData): Promise<void> {
@@ -374,14 +379,17 @@ export async function updateChapter(fd: FormData): Promise<void> {
   const productId = String(fd.get("product_id") ?? "");
   if (!id) return;
   const supabase = await createClient();
-  await supabase
+  const { error } = await supabase
     .from("ebook_chapters")
     .update({
       title: String(fd.get("title") ?? "").trim(),
       content: String(fd.get("content") ?? ""),
     })
-    .eq("id", id);
+    .eq("id", id).eq("product_id", productId);
+  if (error) throw new Error("Não foi possível salvar o conteúdo. Tente novamente.");
   revalidatePath(`/admin/conteudos/${productId}`);
+  revalidatePath("/admin/conteudos");
+  revalidatePath("/minha-area", "layout");
 }
 
 export async function deleteChapter(fd: FormData): Promise<void> {
@@ -391,6 +399,8 @@ export async function deleteChapter(fd: FormData): Promise<void> {
   const supabase = await createClient();
   await supabase.from("ebook_chapters").delete().eq("id", id);
   revalidatePath(`/admin/conteudos/${productId}`);
+  revalidatePath("/admin/conteudos");
+  revalidatePath("/minha-area", "layout");
 }
 
 export async function moveChapter(fd: FormData): Promise<void> {
@@ -415,6 +425,8 @@ export async function moveChapter(fd: FormData): Promise<void> {
     supabase.from("ebook_chapters").update({ position: a.position }).eq("id", b.id),
   ]);
   revalidatePath(`/admin/conteudos/${productId}`);
+  revalidatePath("/admin/conteudos");
+  revalidatePath("/minha-area", "layout");
 }
 
 // ---------- configurações ----------

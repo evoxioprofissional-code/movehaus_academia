@@ -29,16 +29,17 @@ export const getCustomerOverview = cache(async () => {
 export async function getProtectedEbook(slug: string) {
   const user = await requireUser(`/minha-area/ler/${slug}`);
   const supabase = await createClient();
-  const { data: product } = await supabase.from("products").select("id,slug,name,author,images,chapters_count").eq("slug", slug).eq("type", "ebook").maybeSingle();
+  const { data: product } = await supabase.from("products").select("id,slug,name,type,author,images,chapters_count").eq("slug", slug).in("type", ["ebook", "digital"]).maybeSingle();
   if (!product) return null; // produto inexistente -> 404 de verdade
   const { data: access } = await supabase.from("digital_access").select("*").eq("user_id", user.id).eq("product_id", product.id).eq("status", "active").maybeSingle();
   const valid = access && (access.permanent || !access.expires_at || Date.parse(access.expires_at) > Date.now());
   if (!valid) return { denied: true as const, product }; // existe, mas o aluno não tem acesso
-  const [{ data: chapters }, { data: progress }, { data: profile }] = await Promise.all([
+  const [{ data: chapters }, { data: progress }, { data: profile }, { data: publication }] = await Promise.all([
     supabase.from("ebook_chapters").select("id,title,position,content").eq("product_id", product.id).order("position"),
     supabase.from("reading_progress").select("chapter_id,progress_percent").eq("user_id", user.id).eq("product_id", product.id).maybeSingle(),
     supabase.from("profiles").select("full_name,email").eq("id", user.id).maybeSingle(),
+    supabase.from("ebooks").select("status").eq("product_id", product.id).eq("status", "published").maybeSingle(),
   ]);
   await supabase.from("access_logs").insert({ user_id: user.id, product_id: product.id, action: "ebook_opened" });
-  return { denied: false as const, product, chapters: chapters ?? [], progress, watermark: profile?.full_name || profile?.email || user.email || "Cliente MoveHaus" };
+  return { denied: false as const, product, chapters: publication ? chapters ?? [] : [], progress, watermark: profile?.full_name || profile?.email || user.email || "Cliente MoveHaus" };
 }

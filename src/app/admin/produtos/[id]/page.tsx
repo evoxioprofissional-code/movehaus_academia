@@ -31,6 +31,7 @@ export default async function EditarProdutoPage({
       <h1 className="mb-6 mt-3 text-2xl font-semibold tracking-tight text-white sm:text-3xl">
         Editar produto
       </h1>
+      {product.type !== "physical" && <div className="mb-6 rounded-lg border border-mh-border bg-mh-surface p-4"><p className="text-sm text-mh-muted">Adicione as aulas e os materiais que os compradores vão acessar.</p><Link href={`/admin/conteudos/${product.id}`} className="mt-2 inline-flex min-h-10 items-center text-sm font-semibold text-mh-red">Editar conteúdo do produto →</Link></div>}
       <ProductForm product={product} categories={categories} images={images} />
     </div>
   );
