@@ -1,27 +1,29 @@
 import "server-only";
 import { publicEnv, serverEnv } from "@/lib/env";
 
-export async function createPaymentLink(order: { id: string; order_number: number; total: number }) {
-  if (!serverEnv.mercadoPagoAccessToken || order.total <= 0) return undefined;
-  const site = new URL(publicEnv.siteUrl);
-  // Só disponibiliza cobrança quando a confirmação automática estiver configurada.
-  if (site.protocol !== "https:" || !serverEnv.mercadoPagoWebhookSecret) return undefined;
-  const response = await fetch("https://api.mercadopago.com/checkout/preferences", {
-    method: "POST",
-    headers: { Authorization: `Bearer ${serverEnv.mercadoPagoAccessToken}`, "Content-Type": "application/json" },
-    cache: "no-store",
-    signal: AbortSignal.timeout(15000),
-    body: JSON.stringify({
-      items: [{ id: order.id, title: `MoveHaus — Pedido #${order.order_number}`, quantity: 1, currency_id: "BRL", unit_price: order.total / 100 }],
-      external_reference: order.id,
-      notification_url: new URL("/api/mercadopago/webhook", site).href,
-      back_urls: Object.fromEntries(["success", "failure", "pending"].map((status) => [status, new URL("/minha-area", site).href])),
-      auto_return: "approved",
-    }),
+export class MercadoPagoError extends Error {
+  constructor(public status: number) {
+    super("Não foi possível processar o pagamento. Confira os dados ou fale com a equipe.");
+  }
+}
+
+export function requirePaymentConfiguration() {
+  if (!serverEnv.mercadoPagoAccessToken || !serverEnv.mercadoPagoWebhookSecret || !serverEnv.mercadoPagoPublicKey || new URL(publicEnv.siteUrl).protocol !== "https:") {
+    throw new Error("O pagamento está temporariamente indisponível. Fale com a equipe.");
+  }
+}
+
+export async function mercadoPagoRequest<T>(path: string, options?: { method: "POST" | "PUT"; body: unknown; idempotencyKey?: string }): Promise<T> {
+  if (!serverEnv.mercadoPagoAccessToken) throw new Error("Mercado Pago não configurado.");
+  const response = await fetch(`https://api.mercadopago.com${path}`, {
+    method: options?.method ?? "GET",
+    headers: {
+      Authorization: `Bearer ${serverEnv.mercadoPagoAccessToken}`, "Content-Type": "application/json",
+      ...(options?.idempotencyKey ? { "X-Idempotency-Key": options.idempotencyKey } : {}),
+    },
+    body: options ? JSON.stringify(options.body) : undefined,
+    cache: "no-store", signal: AbortSignal.timeout(15000),
   });
-  if (!response.ok) throw new Error("Pagamento temporariamente indisponível.");
-  const result = await response.json();
-  const url = new URL(result.init_point);
-  if (url.protocol !== "https:" || url.hostname !== "www.mercadopago.com.br") throw new Error("Link de pagamento inválido.");
-  return url.href;
+  if (!response.ok) throw new MercadoPagoError(response.status);
+  return response.json();
 }

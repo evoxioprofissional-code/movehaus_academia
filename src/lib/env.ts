@@ -35,6 +35,7 @@ export const publicEnv = {
  * Server Actions ou módulos executados no servidor.
  */
 export const serverEnv = {
+  mercadoPagoPublicKey: process.env.MERCADOPAGO_PUBLIC_KEY ?? "",
   supabaseServiceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY ?? "",
   mercadoPagoAccessToken: process.env.MERCADOPAGO_ACCESS_TOKEN ?? "",
   mercadoPagoWebhookSecret: process.env.MERCADOPAGO_WEBHOOK_SECRET ?? "",

@@ -1,5 +1,6 @@
 "use server";
 
+import { mercadoPagoRequest } from "@/lib/commerce/mercadopago";
 import { revalidatePath } from "next/cache";
 import { requireUser } from "@/lib/auth/user";
 import { createAdminClient, createClient } from "@/lib/supabase/server";
@@ -31,8 +32,12 @@ export async function cancelSubscription(formData: FormData) {
   const user = await requireUser("/minha-area");
   const id = String(formData.get("id") ?? "");
   const supabase = await createClient();
-  const { data: owned } = await supabase.from("subscriptions").select("id,status").eq("id", id).eq("user_id", user.id).maybeSingle();
+  const { data: owned } = await supabase.from("subscriptions").select("id,status,provider,provider_subscription_id").eq("id", id).eq("user_id", user.id).maybeSingle();
   if (!owned || !["pending", "active", "past_due"].includes(owned.status)) throw new Error("Assinatura não encontrada.");
+  if (owned.provider === "mercadopago" && owned.provider_subscription_id) {
+    if (owned.provider_subscription_id.startsWith("creating:")) throw new Error("Assinatura em preparação. Tente novamente em instantes.");
+    await mercadoPagoRequest(`/preapproval/${encodeURIComponent(owned.provider_subscription_id)}`, { method: "PUT", body: { status: "cancelled" } });
+  }
   const { error } = await createAdminClient().from("subscriptions").update({ status: "cancelled", cancelled_at: new Date().toISOString() }).eq("id", id).eq("user_id", user.id);
   if (error) throw new Error("Não foi possível solicitar o cancelamento.");
   revalidatePath("/minha-area");

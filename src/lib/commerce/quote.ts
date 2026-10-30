@@ -4,7 +4,7 @@ import { createAdminClient } from "@/lib/supabase/server";
 import type { Json } from "@/types/database";
 
 export type QuoteInputItem = { productId: string; quantity: number; variant?: Record<string, string> };
-export type QuoteLine = { productId: string; slug: string; name: string; type: "physical" | "digital" | "ebook"; billingModel: "one_time" | "subscription" | null; quantity: number; unitPrice: number; total: number; sku: string | null; variant: Record<string, string> };
+export type QuoteLine = { productId: string; slug: string; name: string; type: "physical" | "digital" | "ebook"; billingModel: "one_time" | "subscription" | null; quantity: number; unitPrice: number; total: number; sku: string | null; accessDurationDays: number | null; variant: Record<string, string> };
 export type CartQuote = { lines: QuoteLine[]; subtotal: number; discount: number; upfrontTotal: number; monthlyTotal: number; coupon: { id: string; code: string } | null; errors: string[] };
 
 function normalizeItems(items: QuoteInputItem[]) {
@@ -39,6 +39,7 @@ export async function createCartQuote(items: QuoteInputItem[], couponCode?: stri
     const product = byId.get(item.productId);
     if (!product || !product.active || product.status !== "active") { errors.push("Um produto do carrinho não está mais disponível."); continue; }
     const recurring = product.type !== "physical" && product.billing_model === "subscription";
+    if (recurring && lines.some((line) => line.productId === product.id)) continue;
     const basePrice = recurring ? product.monthly_price : product.price;
     if (basePrice == null || basePrice < 0) { errors.push(`${product.name} está sem preço válido.`); continue; }
     const quantity = product.type === "physical" ? item.quantity : 1;
@@ -48,7 +49,7 @@ export async function createCartQuote(items: QuoteInputItem[], couponCode?: stri
     // Promoção (product.price no período promocional) vale só para itens de pagamento
     // único; assinaturas cobram sempre o monthly_price.
     const unitPrice = !recurring && promotionActive(product.promotion_starts_at, product.promotion_ends_at) && product.price != null ? product.price : basePrice;
-    lines.push({ productId: product.id, slug: product.slug, name: product.name, type: product.type, billingModel: product.billing_model, quantity, unitPrice, total: unitPrice * quantity, sku: product.sku, variant: item.variant ?? {} });
+    lines.push({ productId: product.id, slug: product.slug, name: product.name, type: product.type, billingModel: product.billing_model, quantity, unitPrice, total: unitPrice * quantity, sku: product.sku, accessDurationDays: product.access_duration_days, variant: item.variant ?? {} });
   }
 
   const upfrontLines = lines.filter((line) => line.billingModel !== "subscription");
@@ -80,5 +81,5 @@ export async function createCartQuote(items: QuoteInputItem[], couponCode?: stri
 }
 
 export function quoteLineMetadata(line: QuoteLine): Json {
-  return { type: line.type, billing_model: line.billingModel, variant: line.variant };
+  return { type: line.type, billing_model: line.billingModel, access_duration_days: line.accessDurationDays, variant: line.variant };
 }

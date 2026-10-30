@@ -1,16 +1,25 @@
-# Mercado Pago
+# Mercado Pago — checkout integrado
 
-As quatro credenciais ficam no `.env.local`, ignorado pelo Git. Configure-as também no ambiente de hospedagem antes de publicar. O Checkout Pro usa o Access Token no servidor; não precisa enviar Client Secret ao navegador.
+O cliente paga dentro da MoveHaus, com Pix (QR Code e Copia e Cola) ou cartão de crédito à vista. Cada produto mensal é autorizado separadamente no formulário seguro de cartão, com consentimento explícito para recorrência. Não há redirecionamento para o checkout do Mercado Pago.
 
-Para habilitar o botão de pagamento:
+## Configuração
 
-1. Configure `NEXT_PUBLIC_SITE_URL` com o domínio público HTTPS.
-2. Em Suas integrações > Webhooks no Mercado Pago, configure o evento de pagamentos para `https://SEU-DOMINIO/api/mercadopago/webhook`.
-3. Copie a assinatura secreta dessa tela para `MERCADOPAGO_WEBHOOK_SECRET`. Ela é diferente do Client Secret.
-4. Publique e valide uma compra controlada, conferindo a confirmação em pedidos e pagamentos.
+Na hospedagem: `MERCADOPAGO_PUBLIC_KEY`, `MERCADOPAGO_ACCESS_TOKEN`, `MERCADOPAGO_WEBHOOK_SECRET` e `NEXT_PUBLIC_SITE_URL` com domínio HTTPS. Só a Public Key é enviada ao navegador; tokens privados ficam no servidor. O Client Secret não é necessário neste fluxo.
 
-Sem URL HTTPS ou assinatura, o checkout mantém o atendimento pelo WhatsApp. Carrinhos com mensalidades também seguem pelo atendimento: cobranças recorrentes ainda não foram implementadas.
+No painel Mercado Pago, em Webhooks de produção, informe `https://www.movhausacademia.club/api/mercadopago/webhook` e marque **Pagamentos (legacy)** e **Planos e assinaturas**. O segundo grupo envia `subscription_preapproval` e `subscription_authorized_payment`. A assinatura secreta é diferente do Client Secret.
 
-O webhook valida a assinatura, consulta o pagamento diretamente na API e confere moeda e total antes de aprovar o pedido. O retorno do navegador não aprova pagamentos. Notificações de aprovação repetidas usam o mesmo identificador na tabela de pagamentos.
+## Confirmação e acesso
 
-Limites: estornos, chargebacks, cancelamentos e liberação automática de conteúdos não são processados por esta integração. Exigem acompanhamento administrativo. Links de pagamento podem ser gerados novamente ao repetir o pedido; confirme pagamentos duplicados no painel do provedor.
+O servidor confere o dono do pedido, usa os valores registrados no banco e ignora valores enviados pelo navegador. O formulário oficial tokeniza o cartão; número e código de segurança não são armazenados. A tabela payments guarda uma reserva única por pedido para impedir envios simultâneos, mais recibos identificados por pagamento. Em caso de resposta perdida, a consulta recupera a tentativa sem gerar outra cobrança.
+
+O webhook valida HMAC, consulta o recurso diretamente na API e confere valor/moeda. O polling autenticado também atualiza o estado. Aprovações liberam os conteúdos digitais avulsos; uma mensalidade só libera/renova acesso após fatura paga. Autorização do cartão não libera acesso por si só. Eventos antigos não encurtam o período pago. Acesso vencido é negado pelo leitor, mesmo sem novo webhook.
+
+Minha área cancela a cobrança primeiro no Mercado Pago e depois atualiza a assinatura local. O período já pago continua disponível até vencer. Uma nova adesão exige confirmar o cancelamento do contrato anterior.
+
+## Validação
+
+Execute `node --test tests/payments.test.mjs`, `npm run lint` e `npm run build`. Os testes usam API e banco simulados, sem cobranças reais. A validação final com cartão/Pix real é feita pelo titular. Pix tem validade de 30 minutos e não constitui autorização de Pix Automático.
+
+## Limites
+
+Cartão à vista; assinaturas mensais no cartão de crédito. Cobrança desconhecida após interrupção pode exigir conferência administrativa antes de outra tentativa. Estornos e chargebacks exigem acompanhamento administrativo; não há revogação automática dos acessos já concedidos. A concessão de acompanhamento personalizado (`coaching_access`) continua com a equipe; esta integração renova `digital_access` dos produtos adquiridos.

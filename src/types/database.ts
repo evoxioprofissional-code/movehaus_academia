@@ -193,7 +193,7 @@ export type Database = {
       digital_access: {
         Row: { id: string; user_id: string; product_id: string; order_id: string | null; subscription_id: string | null; status: AccessStatus; permanent: boolean; starts_at: string; expires_at: string | null; revoked_at: string | null; revoked_by: string | null; reason: string; created_at: string; updated_at: string };
         Insert: { id?: string; user_id: string; product_id: string; order_id?: string | null; subscription_id?: string | null; status?: AccessStatus; permanent?: boolean; starts_at?: string; expires_at?: string | null; revoked_at?: string | null; revoked_by?: string | null; reason?: string };
-        Update: { status?: AccessStatus; permanent?: boolean; expires_at?: string | null; revoked_at?: string | null; revoked_by?: string | null; reason?: string };
+        Update: { subscription_id?: string | null; status?: AccessStatus; permanent?: boolean; expires_at?: string | null; revoked_at?: string | null; revoked_by?: string | null; reason?: string };
         Relationships: [];
       };
       reading_progress: {
