@@ -35,7 +35,8 @@ export function ProductDetail({ product }: { product: Product }) {
           <ProductMedia
             product={product}
             priority
-            className="mx-auto max-w-md lg:max-w-none"
+            sizes="(max-width: 511px) calc(100vw - 32px), (max-width: 1023px) 448px, (max-width: 1151px) calc((100vw - 96px) / 2), 528px"
+            className="mx-auto aspect-[4/5] w-full max-w-md lg:max-w-none"
           />
         </div>
 
