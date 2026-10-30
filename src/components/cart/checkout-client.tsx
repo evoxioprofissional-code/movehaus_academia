@@ -35,7 +35,7 @@ export function CheckoutClient({ whatsapp, publicKey, initialState = {} }: { wha
       <h1 className="mt-3 text-3xl font-semibold text-white">Pedido #{state.orderNumber}</h1>
       <p className="mt-2 text-sm text-mh-muted">Finalize seu pagamento aqui, sem sair da MoveHaus.</p>
       <EmbeddedCheckout orderId={state.orderId} total={state.total ?? 0} subscriptions={state.subscriptions ?? []} publicKey={publicKey} email={state.email} />
-      <div className="mt-6 flex flex-wrap gap-3"><Button asChild variant="outline"><Link href="/minha-area">Meus pedidos e assinaturas</Link></Button><Button asChild variant="ghost"><a href={whatsappLink(summary, whatsapp)} target="_blank" rel="noopener noreferrer">Preciso de ajuda</a></Button></div>
+      <div className="mt-6 flex flex-wrap gap-3"><Button asChild variant="outline"><Link href="/minha-area/compras">Meus pedidos e assinaturas</Link></Button><Button asChild variant="ghost"><a href={whatsappLink(summary, whatsapp)} target="_blank" rel="noopener noreferrer">Preciso de ajuda</a></Button></div>
     </div>;
   }
 

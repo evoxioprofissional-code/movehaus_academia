@@ -13,10 +13,10 @@ export const getCustomerOverview = cache(async () => {
     supabase.from("subscriptions").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
     supabase.from("reading_progress").select("*").eq("user_id", user.id),
   ]);
-  const productIds = [...new Set([...(accessResult.data ?? []).map((row) => row.product_id), ...(subscriptionsResult.data ?? []).map((row) => row.product_id)])];
-  const { data: products } = productIds.length ? await supabase.from("products").select("id,slug,name,type,images,author,chapters_count,billing_model").in("id", productIds) : { data: [] };
   const orderIds = (ordersResult.data ?? []).map((order) => order.id);
   const { data: orderItems } = orderIds.length ? await supabase.from("order_items").select("*").in("order_id", orderIds) : { data: [] };
+  const productIds = [...new Set([...(accessResult.data ?? []).map((row) => row.product_id), ...(subscriptionsResult.data ?? []).map((row) => row.product_id), ...(orderItems ?? []).flatMap((row) => row.product_id ? [row.product_id] : [])])];
+  const { data: products } = productIds.length ? await supabase.from("products").select("id,slug,name,type,images,author,chapters_count,billing_model").in("id", productIds) : { data: [] };
   return {
     orders: (ordersResult.data ?? []).map((order) => ({ ...order, items: (orderItems ?? []).filter((item) => item.order_id === order.id) })),
     access: (accessResult.data ?? []).map((row) => ({ ...row, available: row.status === "active" && (row.permanent || !row.expires_at || Date.parse(row.expires_at) > Date.now()) })),
@@ -42,4 +42,17 @@ export async function getProtectedEbook(slug: string) {
   ]);
   await supabase.from("access_logs").insert({ user_id: user.id, product_id: product.id, action: "ebook_opened" });
   return { denied: false as const, product, chapters: publication ? chapters ?? [] : [], progress, watermark: profile?.full_name || profile?.email || user.email || "Cliente MoveHaus" };
+}
+
+export async function getCustomerOrder(id: string) {
+  const user = await requireUser(`/minha-area/compras/${id}`);
+  if (!/^[a-f0-9-]{36}$/i.test(id)) return null;
+  const supabase = await createClient();
+  const { data: order, error } = await supabase.from("orders").select("*").eq("id", id).eq("customer_id", user.id).maybeSingle();
+  if (error || !order) return null;
+  const { data: items, error: itemError } = await supabase.from("order_items").select("*").eq("order_id", order.id);
+  if (itemError) throw new Error("Não foi possível consultar os itens do pedido.");
+  const ids = (items ?? []).flatMap((item) => item.product_id ? [item.product_id] : []);
+  const { data: products } = ids.length ? await supabase.from("products").select("id,type").in("id", ids) : { data: [] };
+  return { ...order, items: items ?? [], products: products ?? [] };
 }

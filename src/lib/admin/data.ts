@@ -1,3 +1,4 @@
+import { receiptCode, receiptOrderNumber } from "@/lib/commerce/receipts";
 import { createClient } from "@/lib/supabase/server";
 import type { Database } from "@/types/database";
 
@@ -182,9 +183,14 @@ export async function listOrders(): Promise<OrderRow[]> {
   return data ?? [];
 }
 
-export async function listOrdersDetailed() {
+export async function listOrdersDetailed(code?: string) {
   const supabase = await createClient();
-  const { data: orders } = await supabase.from("orders").select("*").order("created_at", { ascending: false }).limit(100);
+  const number = code ? receiptOrderNumber(code) : null;
+  if (code && number == null) return [];
+  let query = supabase.from("orders").select("*").order("created_at", { ascending: false }).limit(100);
+  if (number != null) query = query.eq("order_number", number);
+  const { data: rows } = await query;
+  const orders = (rows ?? []).filter((order) => !code || receiptCode(order) === code.trim().toUpperCase());
   const ids = (orders ?? []).map((order) => order.id);
   const { data: items } = ids.length ? await supabase.from("order_items").select("*").in("order_id", ids) : { data: [] };
   return (orders ?? []).map((order) => ({ ...order, items: (items ?? []).filter((item) => item.order_id === order.id) }));

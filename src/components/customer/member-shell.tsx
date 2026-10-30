@@ -3,14 +3,14 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ArrowUpRight, BarChart3, Dumbbell, House, MapPin, UserRound } from "lucide-react";
+import { ArrowUpRight, BookOpen, ShoppingBag, Dumbbell, House, MapPin } from "lucide-react";
 import { MobileNav } from "@/components/layout/mobile-nav";
 
 const memberLinks = [
   { href: "/minha-area", label: "Início" },
   { href: "/acompanhamento", label: "Treino" },
-  { href: "/minha-area#biblioteca", label: "Biblioteca" },
-  { href: "/minha-area#compras", label: "Compras" },
+  { href: "/minha-area/biblioteca", label: "Biblioteca" },
+  { href: "/minha-area/compras", label: "Compras" },
   { href: "/minha-area#perfil", label: "Perfil" },
 ];
 
@@ -34,17 +34,18 @@ function MemberWordmark({ size = "normal" }: { size?: "normal" | "small" }) {
 }
 
 function BottomNav() {
+  const pathname = usePathname();
   const items = [
     { href: "/minha-area", label: "Início", icon: House, active: true },
     { href: "/acompanhamento", label: "Treino", icon: Dumbbell, active: false },
-    { href: "/acompanhamento/corpo", label: "Evolução", icon: BarChart3, active: false },
-    { href: "/minha-area#perfil", label: "Perfil", icon: UserRound, active: false },
+    { href: "/minha-area/biblioteca", label: "Biblioteca", icon: BookOpen, active: false },
+    { href: "/minha-area/compras", label: "Compras", icon: ShoppingBag, active: false },
   ];
 
   return (
     <nav aria-label="Navegação da minha área" className="fixed inset-x-0 bottom-0 z-50 border-t border-white/10 bg-[#0c0d10]/95 px-2 pb-[env(safe-area-inset-bottom)] shadow-[0_-14px_35px_rgba(0,0,0,.45)] backdrop-blur-xl md:hidden">
       <div className="mx-auto grid max-w-md grid-cols-4">
-        {items.map(({ href, label, icon: Icon, active }) => (
+        {items.map(({ href, label, icon: Icon }) => { const active = pathname === href || (href !== "/minha-area" && pathname.startsWith(href + "/")); return (
           <Link
             key={label}
             href={href}
@@ -55,7 +56,7 @@ function BottomNav() {
             {label}
             {active && <span className="absolute inset-x-4 bottom-0 h-[3px] rounded-t-full bg-mh-red" aria-hidden="true" />}
           </Link>
-        ))}
+        ); })}
       </div>
     </nav>
   );
@@ -84,10 +85,10 @@ export function MemberShell({
           <MobileNav items={memberLinks} mode="member" />
           <MemberWordmark />
           <nav aria-label="Minha área" className="ml-7 hidden items-center gap-7 text-sm text-white/65 md:flex">
-            <Link href="/minha-area" className="font-semibold text-white">Início</Link>
+            <Link href="/minha-area" aria-current={pathname === "/minha-area" ? "page" : undefined} className="hover:text-white">Início</Link>
             <Link href="/acompanhamento" className="hover:text-white">Treino</Link>
-            <Link href="/minha-area#biblioteca" className="hover:text-white">Biblioteca</Link>
-            <Link href="/minha-area#compras" className="hover:text-white">Compras</Link>
+            <Link href="/minha-area/biblioteca" aria-current={pathname.startsWith("/minha-area/biblioteca") ? "page" : undefined} className={pathname.startsWith("/minha-area/biblioteca") ? "font-semibold text-white" : "hover:text-white"}>Biblioteca</Link>
+            <Link href="/minha-area/compras" aria-current={pathname.startsWith("/minha-area/compras") ? "page" : undefined} className={pathname.startsWith("/minha-area/compras") ? "font-semibold text-white" : "hover:text-white"}>Compras</Link>
           </nav>
           <div className="ml-auto flex items-center gap-3 sm:gap-5">
             <Link href="/loja" className="inline-flex min-h-11 items-center gap-1.5 text-sm font-medium text-white/85 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mh-red">

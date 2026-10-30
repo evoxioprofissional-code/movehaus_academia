@@ -55,6 +55,6 @@ export const getPublicSettings = unstable_cache(
       return FALLBACK;
     }
   },
-  ["public-settings"],
+  ["public-settings:contact-v2"],
   { revalidate: 300, tags: ["settings"] },
 );

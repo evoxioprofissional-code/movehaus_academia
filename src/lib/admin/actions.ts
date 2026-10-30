@@ -1,5 +1,7 @@
 "use server";
 
+import { receiptCode, canPresentReceipt, hasPhysicalItems } from "@/lib/commerce/receipts";
+
 import { redirect } from "next/navigation";
 import { revalidatePath, updateTag } from "next/cache";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
@@ -525,9 +527,28 @@ export async function updateOrderStatus(fd: FormData): Promise<void> {
   const allowedStatus = ["pending", "paid", "preparing", "shipped", "delivered", "cancelled"];
   const allowedPayment = ["pending", "approved", "failed", "refunded", "cancelled"];
   if (!id || !allowedStatus.includes(status) || !allowedPayment.includes(paymentStatus)) return;
+  if (status === "delivered" && paymentStatus !== "approved") throw new Error("Confirme o pagamento antes de registrar a entrega.");
   const { error } = await (await createClient()).from("orders").update({ status, payment_status: paymentStatus, notes }).eq("id", id);
   if (error) throw new Error("Não foi possível atualizar o pedido.");
   revalidatePath("/admin/pedidos");
   revalidatePath("/admin");
   revalidatePath("/minha-area");
+}
+
+export async function confirmOrderDelivery(fd: FormData): Promise<void> {
+  await requireAdmin();
+  const id = String(fd.get("id") ?? "");
+  const code = String(fd.get("code") ?? "").trim().toUpperCase();
+  const supabase = await createClient();
+  const { data: order, error } = await supabase.from("orders").select("*").eq("id", id).maybeSingle();
+  if (error || !order || receiptCode(order) !== code) throw new Error("Comprovante não encontrado.");
+  const { data: items, error: itemError } = await supabase.from("order_items").select("product_id,metadata").eq("order_id", id);
+  const ids = (items ?? []).flatMap((item) => item.product_id ? [item.product_id] : []);
+  const { data: products } = ids.length ? await supabase.from("products").select("id,type").in("id", ids) : { data: [] };
+  if (itemError || !canPresentReceipt(order, hasPhysicalItems(items ?? [], products ?? []))) throw new Error("A retirada exige pagamento confirmado de um produto físico.");
+  if (order.status === "delivered") return;
+  const { data: saved, error: updateError } = await supabase.from("orders").update({ status: "delivered" }).eq("id", id).eq("payment_status", "approved").neq("status", "cancelled").neq("status", "delivered").select("id").maybeSingle();
+  if (updateError || !saved) throw new Error("O pedido mudou. Confira o pagamento novamente antes de registrar a entrega.");
+  revalidatePath("/admin/pedidos");
+  revalidatePath("/minha-area", "layout");
 }

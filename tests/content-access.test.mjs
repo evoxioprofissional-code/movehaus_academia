@@ -13,6 +13,8 @@ function reader({ type = "digital", access = true, expired = false, published = 
     profiles: [{ id: "buyer", full_name: "Aluno" }],
     ebooks: [{ product_id: "product", status: published ? "published" : "draft" }],
     reading_progress: [], access_logs: [],
+    orders: [{ id: "11111111-1111-4111-8111-111111111111", customer_id: "buyer" }, { id: "22222222-2222-4222-8222-222222222222", customer_id: "another-buyer" }],
+    order_items: [],
   };
   class Query {
     constructor(table) { this.table = table; this.filters = []; queries.push(table); }
@@ -35,7 +37,7 @@ function reader({ type = "digital", access = true, expired = false, published = 
   };
   const code = ts.transpileModule(fs.readFileSync("src/lib/customer/data.ts", "utf8"), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText;
   vm.runInNewContext("(function(require,exports){" + code + "\n})", { Date })(require, exports);
-  return { get: () => exports.getProtectedEbook("full-body"), queries };
+  return { get: () => exports.getProtectedEbook("full-body"), getOrder: id => exports.getCustomerOrder(id), queries };
 }
 
 test("a purchased digital program opens its published lessons", async () => {
@@ -66,4 +68,11 @@ test("draft lessons are not presented as published content", async () => {
 test("ebooks still work and physical products have no protected reader", async () => {
   assert.equal((await reader({ type: "ebook" }).get()).chapters.length, 1);
   assert.equal(await reader({ type: "physical" }).get(), null);
+});
+
+test("purchase receipts are restricted to the owner of the order", async () => {
+  const r = reader();
+  assert.equal((await r.getOrder("11111111-1111-4111-8111-111111111111")).customer_id, "buyer");
+  assert.equal(await r.getOrder("22222222-2222-4222-8222-222222222222"), null);
+  assert.equal(await r.getOrder("invalid-order-id"), null);
 });
