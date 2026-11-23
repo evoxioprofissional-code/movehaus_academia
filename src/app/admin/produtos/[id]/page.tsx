@@ -1,38 +1,48 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
+import { BookOpenText, ChevronRight, ExternalLink } from "lucide-react";
 import { getProductById, getProductImages, listCategories } from "@/lib/admin/data";
 import { ProductForm } from "@/components/admin/product-form";
+import { Badge, Page, PageHeader, btn } from "@/components/admin/kit";
 
-export const metadata = { title: "Editar produto" };
+export const metadata = { title: "Editar produto | MoveHaus Admin" };
 
-export default async function EditarProdutoPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default async function EditarProdutoPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const [product, categories, images] = await Promise.all([
-    getProductById(id),
-    listCategories(),
-    getProductImages(id),
-  ]);
+  const [product, categories, images] = await Promise.all([getProductById(id), listCategories(), getProductImages(id)]);
   if (!product) notFound();
+  const isPhysical = product.type === "physical";
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
-      <Link
-        href="/admin/produtos"
-        className="inline-flex items-center gap-1 text-sm text-mh-muted hover:text-white"
-      >
-        <ArrowLeft className="size-4" />
-        Produtos
-      </Link>
-      <h1 className="mb-6 mt-3 text-2xl font-semibold tracking-tight text-white sm:text-3xl">
-        Editar produto
-      </h1>
-      {product.type !== "physical" && <div className="mb-6 rounded-lg border border-mh-border bg-mh-surface p-4"><p className="text-sm text-mh-muted">Adicione os PDFs, receitas e capítulos que os compradores vão ler.</p><Link href={`/admin/conteudos/${product.id}`} className="mt-2 inline-flex min-h-10 items-center text-sm font-semibold text-mh-red">Editar conteúdo do produto →</Link></div>}
+    <Page>
+      <PageHeader
+        back={{ href: isPhysical ? "/admin/produtos" : "/admin/conteudos", label: isPhysical ? "Produtos" : "PDFs e receitas" }}
+        title={product.name}
+        subtitle={
+          <span className="inline-flex flex-wrap items-center gap-2">
+            {product.active ? <Badge tone="green" dot>Na loja</Badge> : <Badge tone="neutral" dot>Fora da loja</Badge>}
+            <span>Atualizado em {new Intl.DateTimeFormat("pt-BR", { dateStyle: "medium", timeZone: "America/Sao_Paulo" }).format(new Date(product.updated_at))}</span>
+          </span>
+        }
+        actions={
+          product.active && product.slug ? (
+            <Link href={isPhysical ? `/loja/${product.slug}` : `/ebooks/${product.slug}`} target="_blank" className={btn("secondary", "md")}>
+              <ExternalLink className="size-4" /> Ver na loja
+            </Link>
+          ) : null
+        }
+      />
+      {!isPhysical && (
+        <Link href={`/admin/conteudos/${product.id}`} className="admin-card mb-4 flex items-center gap-3 p-4 transition-transform active:scale-[0.99] sm:px-5">
+          <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-[#e8f0fb] text-[#2a5db0]"><BookOpenText className="size-5" /></span>
+          <span className="min-w-0 flex-1">
+            <span className="block text-[14.5px] font-semibold text-ad-ink">Conteúdo para leitura</span>
+            <span className="block text-[13px] text-ad-muted">Envie os PDFs, capítulos e receitas que o comprador vai ler.</span>
+          </span>
+          <ChevronRight className="size-5 text-ad-faint" />
+        </Link>
+      )}
       <ProductForm product={product} categories={categories} images={images} />
-    </div>
+    </Page>
   );
 }

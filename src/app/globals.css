@@ -34,6 +34,19 @@
   --color-admin-red-hover: #d90017;
   --color-admin-muted: #9aa0ad;
 
+  /* Painel administrativo (claro) — mesma paleta da loja mobile */
+  --color-ad-bg: #f6f5f2;
+  --color-ad-card: #ffffff;
+  --color-ad-soft: #f1f0ec;
+  --color-ad-line: #e6e4de;
+  --color-ad-ink: #202522;
+  --color-ad-ink-2: #3d423e;
+  --color-ad-muted: #737470;
+  --color-ad-faint: #9c9c97;
+  --color-ad-red: #d21f35;
+  --color-ad-red-hover: #b81a2d;
+  --color-ad-red-soft: #fae9e9;
+
   /* Superfície clara (blocos pontuais / editorial) */
   --color-mh-paper: #f2efe9;
   --color-mh-paper-2: #e7e3da;
@@ -162,44 +175,19 @@ h1, h2, h3, h4, h5 {
   }
 }
 
-/* Superfícies compartilhadas do painel */
-.admin-panel {
-  border: 1px solid var(--color-admin-border);
-  border-radius: 10px;
-  background: var(--color-admin-card);
-}
-.admin-control {
-  border: 1px solid var(--color-admin-border);
-  border-radius: 8px;
-  background: #0d0f12;
-  color: #fff;
-}
-.admin-control:focus {
-  border-color: var(--color-admin-red);
-  outline: 2px solid color-mix(in srgb, var(--color-admin-red) 25%, transparent);
-  outline-offset: 1px;
+/* Painel administrativo (claro) */
+.admin-app {
+  color-scheme: light;
+  -webkit-tap-highlight-color: transparent;
 }
 .admin-scrollbar {
   scrollbar-width: thin;
-  scrollbar-color: #30333b transparent;
+  scrollbar-color: #d8d6cf transparent;
 }
-
-.admin-app .rounded-lg.bg-mh-surface,
-.admin-app .rounded-xl.bg-mh-surface {
-  border: 1px solid var(--color-admin-border);
-  background: var(--color-admin-card);
-}
-.admin-app table thead {
-  background: #0d0f12;
-}
-.admin-app table tbody tr {
-  transition: background-color 160ms ease;
-}
-.admin-app table tbody tr:hover {
-  background: rgba(255, 255, 255, 0.025);
-}
-.admin-app input:not([type="checkbox"]):not([type="radio"]),
-.admin-app select,
-.admin-app textarea {
-  color-scheme: dark;
+.admin-noscroll { scrollbar-width: none; }
+.admin-noscroll::-webkit-scrollbar { display: none; }
+.admin-card {
+  border-radius: 1.25rem;
+  background: #fff;
+  box-shadow: 0 1px 2px rgb(32 37 34 / 0.04), 0 0 0 1px rgb(32 37 34 / 0.06);
 }

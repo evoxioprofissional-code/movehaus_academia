@@ -1,25 +1,20 @@
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
 import { listCategories } from "@/lib/admin/data";
 import { ProductForm } from "@/components/admin/product-form";
+import { Page, PageHeader } from "@/components/admin/kit";
 
-export const metadata = { title: "Novo produto" };
+export const metadata = { title: "Novo produto | MoveHaus Admin" };
 
-export default async function NovoProdutoPage() {
-  const categories = await listCategories();
+export default async function NovoProdutoPage({ searchParams }: { searchParams: Promise<{ tipo?: string }> }) {
+  const [categories, params] = await Promise.all([listCategories(), searchParams]);
+  const initialType = params.tipo === "ebook" || params.tipo === "digital" ? params.tipo : "physical";
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
-      <Link
-        href="/admin/produtos"
-        className="inline-flex items-center gap-1 text-sm text-mh-muted hover:text-white"
-      >
-        <ArrowLeft className="size-4" />
-        Produtos
-      </Link>
-      <h1 className="mb-6 mt-3 text-2xl font-semibold tracking-tight text-white sm:text-3xl">
-        Novo produto
-      </h1>
-      <ProductForm categories={categories} />
-    </div>
+    <Page>
+      <PageHeader
+        back={{ href: initialType === "physical" ? "/admin/produtos" : "/admin/conteudos", label: initialType === "physical" ? "Produtos" : "PDFs e receitas" }}
+        title={initialType === "physical" ? "Novo produto" : "Novo PDF ou receita"}
+        subtitle="Preencha o essencial agora. Dá para completar o resto depois."
+      />
+      <ProductForm categories={categories} initialType={initialType} />
+    </Page>
   );
 }

@@ -1,77 +1,74 @@
 "use client";
 
 import { useActionState } from "react";
-import { Button } from "@/components/ui/button";
-import { Field } from "@/components/ui/field";
 import { updateSettings, type FormState } from "@/lib/admin/actions";
 import type { SettingsRow } from "@/lib/admin/data";
+import { Alert, Card, FormField, Input, Textarea, btn } from "@/components/admin/kit";
 
-function Area(props: { id: string; name: string; label: string; defaultValue?: string; rows?: number }) {
-  return (
-    <div className="space-y-1.5">
-      <label htmlFor={props.id} className="block text-sm font-medium text-white">{props.label}</label>
-      <textarea
-        id={props.id}
-        name={props.name}
-        rows={props.rows ?? 3}
-        defaultValue={props.defaultValue}
-        className="w-full rounded-mh border border-mh-border bg-mh-surface px-3 py-2 text-sm text-white placeholder:text-mh-muted focus:border-mh-red focus:outline-none"
-      />
-    </div>
-  );
-}
+const SECTIONS = [
+  ["identificacao", "Loja"],
+  ["contato", "Contato"],
+  ["entrega", "Retirada"],
+  ["politicas", "Políticas"],
+] as const;
 
 export function SettingsForm({ settings }: { settings: SettingsRow | null }) {
-  const [state, formAction, pending] = useActionState<FormState, FormData>(
-    updateSettings,
-    {},
-  );
+  const [state, formAction, pending] = useActionState<FormState, FormData>(updateSettings, {});
   const s = settings;
 
   return (
-    <form action={formAction} className="grid gap-6 lg:grid-cols-[190px_minmax(0,760px)]">
-      <nav className="h-fit space-y-1 lg:sticky lg:top-20">{[["academia","Identificação da loja"],["contato","Contato e redes"],["loja","Loja e segurança"],["politicas","Políticas"]].map(([href,label]) => <a key={href} href={`#${href}`} className="block rounded-md px-3 py-2 text-sm text-mh-muted hover:bg-white/5 hover:text-white">{label}</a>)}</nav>
-      <div className="space-y-5">
-      <section id="academia" className="space-y-4 rounded-lg bg-mh-surface p-5">
-        <h2 className="text-sm font-semibold uppercase tracking-widest text-mh-red">Identificação da loja</h2>
+    <form action={formAction} className="space-y-4">
+      <nav className="admin-noscroll -mx-4 flex gap-2 overflow-x-auto px-4 sm:mx-0 sm:px-0">
+        {SECTIONS.map(([href, label]) => (
+          <a key={href} href={`#${href}`} className="inline-flex h-10 shrink-0 items-center rounded-full bg-white px-4 text-[13.5px] font-semibold text-ad-ink-2 shadow-[0_0_0_1px_rgb(32_37_34/0.08)] hover:bg-ad-soft">
+            {label}
+          </a>
+        ))}
+      </nav>
+
+      <Card id="identificacao" title="Identificação da loja">
         <div className="grid gap-4 sm:grid-cols-2">
-          <Field id="academy_name" name="academy_name" label="Nome" defaultValue={s?.academy_name ?? "MoveHaus Training Club"} />
-          <Field id="city" name="city" label="Cidade" defaultValue={s?.city ?? ""} />
-          <Field id="address" name="address" label="Endereço" defaultValue={s?.address ?? ""} />
-          <Field id="email" name="email" label="E-mail" type="email" defaultValue={s?.email ?? ""} />
+          <FormField label="Nome" htmlFor="academy_name"><Input id="academy_name" name="academy_name" defaultValue={s?.academy_name ?? "MoveHaus Training Club"} /></FormField>
+          <FormField label="Cidade" htmlFor="city"><Input id="city" name="city" defaultValue={s?.city ?? ""} /></FormField>
+          <FormField label="Endereço" htmlFor="address" className="sm:col-span-2"><Input id="address" name="address" defaultValue={s?.address ?? ""} /></FormField>
+          <FormField label="E-mail" htmlFor="email" className="sm:col-span-2"><Input id="email" name="email" type="email" inputMode="email" defaultValue={s?.email ?? ""} /></FormField>
         </div>
-      </section>
+      </Card>
 
-      <section id="contato" className="space-y-4 rounded-lg bg-mh-surface p-5">
-        <h2 className="text-sm font-semibold uppercase tracking-widest text-mh-red">Contato e redes</h2>
+      <Card id="contato" title="Contato e redes">
         <div className="grid gap-4 sm:grid-cols-2">
-          <Field id="whatsapp" name="whatsapp" label="WhatsApp (só dígitos, com DDI)" placeholder="5599999999999" defaultValue={s?.whatsapp ?? ""} />
-          <Field id="whatsapp_label" name="whatsapp_label" label="WhatsApp (exibição)" placeholder="(00) 00000-0000" defaultValue={s?.whatsapp_label ?? ""} />
-          <Field id="instagram" name="instagram" label="Instagram (URL)" defaultValue={s?.instagram ?? ""} />
+          <FormField label="WhatsApp" htmlFor="whatsapp" hint="Só números, com 55 e DDD. Ex.: 5511987654321">
+            <Input id="whatsapp" name="whatsapp" inputMode="tel" placeholder="5511987654321" defaultValue={s?.whatsapp ?? ""} />
+          </FormField>
+          <FormField label="WhatsApp como aparece no site" htmlFor="whatsapp_label">
+            <Input id="whatsapp_label" name="whatsapp_label" placeholder="(11) 98765-4321" defaultValue={s?.whatsapp_label ?? ""} />
+          </FormField>
+          <FormField label="Instagram (link)" htmlFor="instagram" className="sm:col-span-2">
+            <Input id="instagram" name="instagram" inputMode="url" placeholder="https://instagram.com/…" defaultValue={s?.instagram ?? ""} />
+          </FormField>
         </div>
-      </section>
+      </Card>
 
-      <section id="loja" className="space-y-4 rounded-lg bg-mh-surface p-5">
-        <h2 className="text-sm font-semibold uppercase tracking-widest text-mh-red">Regras</h2>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Field id="device_limit" name="device_limit" label="Limite de dispositivos" type="number" defaultValue={s?.device_limit ?? 3} />
-          <Field id="grace_days" name="grace_days" label="Carência padrão (dias)" type="number" defaultValue={s?.grace_days ?? 5} />
+      <Card id="entrega" title="Entrega e retirada">
+        <FormField label="Orientações para o cliente" htmlFor="delivery_rules" hint="Ex.: horário de retirada na recepção da academia.">
+          <Textarea id="delivery_rules" name="delivery_rules" rows={4} defaultValue={s?.delivery_rules ?? ""} />
+        </FormField>
+      </Card>
+
+      <Card id="politicas" title="Políticas">
+        <div className="grid gap-4">
+          <FormField label="Termos de uso" htmlFor="terms"><Textarea id="terms" name="terms" rows={6} defaultValue={s?.terms ?? ""} /></FormField>
+          <FormField label="Política de privacidade" htmlFor="privacy"><Textarea id="privacy" name="privacy" rows={6} defaultValue={s?.privacy ?? ""} /></FormField>
         </div>
-        <Area id="delivery_rules" name="delivery_rules" label="Regras de entrega" defaultValue={s?.delivery_rules ?? ""} />
-      </section>
+      </Card>
 
-      <section id="politicas" className="space-y-4 rounded-lg bg-mh-surface p-5">
-        <h2 className="text-sm font-semibold uppercase tracking-widest text-mh-red">Políticas</h2>
-        <Area id="terms" name="terms" label="Termos de uso" rows={5} defaultValue={s?.terms ?? ""} />
-        <Area id="privacy" name="privacy" label="Política de privacidade" rows={5} defaultValue={s?.privacy ?? ""} />
-      </section>
+      {state.error && <Alert>{state.error}</Alert>}
+      {state.message && <Alert tone="green">{state.message}</Alert>}
 
-      {state.error && <p className="text-sm text-mh-red-soft">{state.error}</p>}
-      {state.message && <p className="text-sm text-emerald-400">{state.message}</p>}
-
-      <div className="sticky bottom-3 flex justify-end rounded-lg border border-white/10 bg-[#111113]/95 p-3 backdrop-blur"><Button type="submit" size="lg" disabled={pending}>
-        {pending ? "Salvando..." : "Salvar configurações"}
-      </Button></div>
+      <div className="sticky bottom-[calc(76px+env(safe-area-inset-bottom))] z-20 flex justify-end lg:bottom-6">
+        <button type="submit" disabled={pending} className={btn("brand", "lg", "w-full shadow-[0_8px_20px_-8px_rgb(210_31_53/0.6)] sm:w-auto")}>
+          {pending ? "Salvando…" : "Salvar configurações"}
+        </button>
       </div>
     </form>
   );

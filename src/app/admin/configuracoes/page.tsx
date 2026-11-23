@@ -1,18 +1,15 @@
 import { getSettings } from "@/lib/admin/data";
 import { SettingsForm } from "@/components/admin/settings-form";
-import { AdminPageHeader } from "@/components/admin/page-header";
+import { Page, PageHeader } from "@/components/admin/kit";
 
-export const metadata = { title: "Configurações" };
+export const metadata = { title: "Configurações | MoveHaus Admin" };
 
 export default async function AdminConfiguracoesPage() {
   const settings = await getSettings();
-
   return (
-    <div className="mx-auto max-w-[1300px] px-4 py-6 sm:px-6 lg:px-8">
-      <AdminPageHeader title="Configurações" description="Dados da academia, contato, regras da loja, segurança e políticas." />
-      <div className="mt-5">
+    <Page narrow>
+      <PageHeader title="Configurações" subtitle="Dados da loja, atendimento, retirada e políticas de compra." />
       <SettingsForm settings={settings} />
-      </div>
-    </div>
+    </Page>
   );
 }

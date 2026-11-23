@@ -228,41 +228,81 @@ export async function listBanners(): Promise<BannerRow[]> {
 
 export async function dashboardPeriodData(days: number) {
   const safeDays = [1, 7, 30, 90].includes(days) ? days : 30;
-  const since = new Date(Date.now() - safeDays * 86400000).toISOString();
+  const now = Date.now();
+  const since = new Date(now - safeDays * 86400000).toISOString();
+  const previousSince = new Date(now - safeDays * 2 * 86400000).toISOString();
   const supabase = await createClient();
-  const [ordersResult, customerRoles, activeProducts, lowStock] = await Promise.all([
-    supabase.from("orders").select("id,order_number,total,status,payment_status,created_at").gte("created_at", since).order("created_at", { ascending: true }),
+  const [ordersResult, previousResult, customerRoles, newCustomers, activeProducts, lowStock] = await Promise.all([
+    supabase.from("orders").select("id,order_number,total,status,payment_status,created_at,customer_name").gte("created_at", since).order("created_at", { ascending: true }),
+    supabase.from("orders").select("total,payment_status").gte("created_at", previousSince).lt("created_at", since),
     supabase.from("user_roles").select("*", { count: "exact", head: true }).eq("role", "customer"),
+    supabase.from("profiles").select("*", { count: "exact", head: true }).gte("created_at", since),
     supabase.from("products").select("*", { count: "exact", head: true }).eq("active", true),
     supabase.from("products").select("*", { count: "exact", head: true }).eq("type", "physical").eq("track_inventory", true).lte("stock", 5),
   ]);
-  if ([ordersResult, customerRoles, activeProducts, lowStock].some(result => result.error)) {
+  if ([ordersResult, previousResult, customerRoles, newCustomers, activeProducts, lowStock].some(result => result.error)) {
     throw new Error("Não foi possível consultar os dados financeiros da loja.");
   }
   const orders = ordersResult.data ?? [];
   const approved = orders.filter((order) => order.payment_status === "approved");
   const revenue = approved.reduce((sum, order) => sum + order.total, 0);
+  const previousApproved = (previousResult.data ?? []).filter((order) => order.payment_status === "approved");
+  const previousRevenue = previousApproved.reduce((sum, order) => sum + order.total, 0);
   // Agrupa por data no fuso de São Paulo (não em UTC, que viraria o dia à noite).
   const spDate = (d: Date) => new Intl.DateTimeFormat("en-CA", { timeZone: "America/Sao_Paulo" }).format(d);
-  const points = new Map<string, number>();
-  for (let offset = safeDays - 1; offset >= 0; offset--) {
-    points.set(spDate(new Date(Date.now() - offset * 86400000)), 0);
+  const points = new Map<string, { total: number; orders: number }>();
+  const span = Math.max(safeDays, 7);
+  for (let offset = span - 1; offset >= 0; offset--) {
+    points.set(spDate(new Date(now - offset * 86400000)), { total: 0, orders: 0 });
   }
-  for (const order of approved) {
-    const key = spDate(new Date(order.created_at));
-    if (points.has(key)) points.set(key, (points.get(key) ?? 0) + order.total);
+  for (const order of orders) {
+    const point = points.get(spDate(new Date(order.created_at)));
+    if (!point) continue;
+    point.orders += 1;
+    if (order.payment_status === "approved") point.total += order.total;
   }
+  const statusCounts: Record<string, number> = { pending: 0, paid: 0, preparing: 0, shipped: 0, delivered: 0, cancelled: 0 };
+  for (const order of orders) statusCounts[order.status] = (statusCounts[order.status] ?? 0) + 1;
   return {
     pendingRevenue: orders.filter(order => order.payment_status === "pending").reduce((sum, order) => sum + order.total, 0),
     refundedRevenue: orders.filter(order => order.payment_status === "refunded").reduce((sum, order) => sum + order.total, 0),
     days: safeDays,
     revenue,
+    previousRevenue,
+    previousApprovedCount: previousApproved.length,
+    previousOrderCount: (previousResult.data ?? []).length,
     orderCount: orders.length,
     approvedCount: approved.length,
     customers: customerRoles.count ?? 0,
+    newCustomers: newCustomers.count ?? 0,
     activeProducts: activeProducts.count ?? 0,
     lowStock: lowStock.count ?? 0,
+    statusCounts,
     recentOrders: [...orders].reverse().slice(0, 5),
-    salesByDay: [...points.entries()].map(([date, total]) => ({ date, total })),
+    salesByDay: [...points.entries()].map(([date, point]) => ({ date, total: point.total, orders: point.orders })),
   };
 }
+
+/** Números que aparecem no menu e em "Para fazer agora". */
+export async function adminNavCounts() {
+  const supabase = await createClient();
+  const dayAgo = new Date(Date.now() - 86400000).toISOString();
+  const [toHandle, stalePayment, lowStock, outOfStock, drafts, ebookProducts] = await Promise.all([
+    supabase.from("orders").select("*", { count: "exact", head: true }).eq("payment_status", "approved").in("status", ["pending", "paid", "preparing"]),
+    supabase.from("orders").select("*", { count: "exact", head: true }).eq("payment_status", "pending").neq("status", "cancelled").lt("created_at", dayAgo),
+    supabase.from("products").select("*", { count: "exact", head: true }).eq("type", "physical").eq("track_inventory", true).eq("active", true).gt("stock", 0).lte("stock", 5),
+    supabase.from("products").select("*", { count: "exact", head: true }).eq("type", "physical").eq("track_inventory", true).eq("active", true).lte("stock", 0),
+    supabase.from("ebooks").select("product_id").eq("status", "draft"),
+    supabase.from("products").select("id").in("type", ["ebook", "digital"]),
+  ]);
+  const ebookIds = new Set((ebookProducts.data ?? []).map((product) => product.id));
+  return {
+    ordersToHandle: toHandle.count ?? 0,
+    stalePayments: stalePayment.count ?? 0,
+    lowStock: lowStock.count ?? 0,
+    outOfStock: outOfStock.count ?? 0,
+    draftContents: (drafts.data ?? []).filter((row) => ebookIds.has(row.product_id)).length,
+  };
+}
+
+export type AdminNavCounts = Awaited<ReturnType<typeof adminNavCounts>>;

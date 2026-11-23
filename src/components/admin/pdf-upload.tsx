@@ -2,8 +2,8 @@
 
 import { useRef, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { FileUp } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { FileText, FileUp } from "lucide-react";
+import { Alert, FormField, Input, btn } from "@/components/admin/kit";
 import { preparePdfUpload, publishPdfChapter } from "@/lib/admin/pdf-actions";
 import { createClient } from "@/lib/supabase/client";
 import { MAX_PDF_SIZE, PDF_BUCKET } from "@/lib/customer/pdf";
@@ -14,6 +14,7 @@ export function PdfUpload({ productId }: { productId: string }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
+  const [picked, setPicked] = useState<{ name: string; size: number } | null>(null);
   const uploaded = useRef<{ file: File; path: string; pages: number } | null>(null);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
@@ -46,6 +47,7 @@ export function PdfUpload({ productId }: { productId: string }) {
       setMessage("PDF adicionado. Publique o conteúdo acima para liberar a leitura aos compradores.");
       uploaded.current = null;
       form.reset();
+      setPicked(null);
       router.refresh();
     } catch (failure) {
       setError(failure instanceof Error ? failure.message : "Não foi possível adicionar o PDF.");
@@ -55,19 +57,33 @@ export function PdfUpload({ productId }: { productId: string }) {
   }
 
   return (
-    <form onSubmit={submit} className="mt-6 space-y-3 rounded-lg border border-white/10 bg-mh-surface p-5">
-      <h2 className="flex items-center gap-2 text-lg font-semibold"><FileUp size={20} /> Adicionar PDF</h2>
-      <p className="text-sm text-mh-muted">O arquivo será um item do sumário e terá leitura dentro da plataforma.</p>
-      <label className="block space-y-1 text-sm">Título no sumário
-        <input name="title" maxLength={180} placeholder="Ex.: Livro de receitas" className="block h-11 w-full rounded-md border border-mh-border bg-mh-black px-3" />
+    <form onSubmit={submit} className="grid gap-4">
+      <FormField label="Nome no sumário" hint="Como o item aparece para o cliente.">
+        <Input name="title" maxLength={180} placeholder="Ex.: Livro de receitas" />
+      </FormField>
+      <label className="flex cursor-pointer items-center gap-3 rounded-2xl border-2 border-dashed border-[#d9d7d0] bg-ad-soft/60 p-4 transition-colors hover:border-ad-ink/30">
+        <span className={picked ? "grid size-11 shrink-0 place-items-center rounded-xl bg-ad-red text-white" : "grid size-11 shrink-0 place-items-center rounded-xl bg-white text-ad-ink-2 shadow-sm"}>
+          {picked ? <FileText className="size-5" /> : <FileUp className="size-5" />}
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block truncate text-[14px] font-semibold text-ad-ink">{picked ? picked.name : "Escolher arquivo PDF"}</span>
+          <span className="block text-[12.5px] text-ad-muted">{picked ? `${(picked.size / 1024 / 1024).toFixed(1)} MB` : "Até 25 MB, sem senha"}</span>
+        </span>
+        <input
+          name="pdf"
+          type="file"
+          accept=".pdf,application/pdf"
+          required
+          className="sr-only"
+          onChange={(event) => {
+            const file = event.target.files?.[0];
+            setPicked(file ? { name: file.name, size: file.size } : null);
+          }}
+        />
       </label>
-      <label className="block space-y-1 text-sm">Arquivo PDF
-        <input name="pdf" type="file" accept=".pdf,application/pdf" required className="block w-full text-sm text-mh-muted" />
-      </label>
-      <p className="text-xs text-mh-muted">Até 25 MB. Use um PDF que abra sem senha.</p>
-      {error && <p role="alert" className="text-sm text-red-300">{error}</p>}
-      {message && <p role="status" className="text-sm text-emerald-300">{message}</p>}
-      <Button disabled={busy}>{busy ? "Enviando e verificando..." : "Adicionar PDF ao conteúdo"}</Button>
+      {error && <Alert>{error}</Alert>}
+      {message && <Alert tone="green">{message}</Alert>}
+      <button disabled={busy} className={btn("brand", "md", "sm:justify-self-start")}>{busy ? "Enviando e verificando…" : "Adicionar PDF"}</button>
     </form>
   );
 }

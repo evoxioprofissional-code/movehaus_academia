@@ -1,19 +1,66 @@
 import { Plus, Tags } from "lucide-react";
-import { AdminPageHeader } from "@/components/admin/page-header";
 import { CategoryDelete } from "@/components/admin/category-delete";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { EmptyState } from "@/components/ui/empty-state";
+import { Badge, Card, Empty, FormField, Input, Page, PageHeader, Toggle, btn, inputCls } from "@/components/admin/kit";
 import { upsertCategory } from "@/lib/admin/actions";
 import { listCategoriesWithCounts } from "@/lib/admin/data";
+import { cn } from "@/lib/utils";
 
 export const metadata = { title: "Categorias | MoveHaus Admin" };
+
 export default async function CategoriesPage() {
   const categories = await listCategoriesWithCounts();
-  return <div className="mx-auto max-w-[1200px] px-4 py-6 sm:px-6 lg:px-8">
-    <AdminPageHeader title="Categorias" description="Organize a navegação da loja sem expor campos técnicos no fluxo principal." />
-    <details className="mt-5 rounded-lg bg-mh-surface p-4"><summary className="flex cursor-pointer list-none items-center gap-2 text-sm font-medium"><Plus className="size-4" />Nova categoria</summary><form action={upsertCategory} className="mt-4 grid gap-4 md:grid-cols-[1fr_1.5fr_100px_auto]"><label className="space-y-1.5"><span className="text-sm text-mh-muted">Nome</span><input name="name" required className="h-10 w-full rounded border border-white/10 bg-[#0d0d0f] px-3 text-sm" /></label><label className="space-y-1.5"><span className="text-sm text-mh-muted">Descrição</span><input name="description" className="h-10 w-full rounded border border-white/10 bg-[#0d0d0f] px-3 text-sm" /></label><label className="space-y-1.5"><span className="text-sm text-mh-muted">Ordem</span><input name="position" type="number" defaultValue={categories.length + 1} className="h-10 w-full rounded border border-white/10 bg-[#0d0d0f] px-3 text-sm" /></label><div className="flex items-end gap-3"><label className="flex h-10 items-center gap-2 text-sm"><input type="checkbox" name="active" defaultChecked />Ativa</label><Button>Adicionar</Button></div></form></details>
-    {categories.length === 0 ? <div className="mt-5"><EmptyState icon={Tags} title="Nenhuma categoria" description="Crie a primeira categoria para organizar os produtos." /></div> : <div className="mt-5 overflow-hidden rounded-lg bg-mh-surface"><div className="hidden grid-cols-[1fr_100px_100px_110px_50px] border-b border-white/8 px-4 py-3 text-xs text-mh-muted md:grid"><span>Categoria</span><span>Produtos</span><span>Ordem</span><span>Status</span><span /></div>{categories.map((category) => <form key={category.id} action={upsertCategory} className="grid gap-3 border-b border-white/6 p-4 md:grid-cols-[1fr_100px_100px_110px_50px] md:items-center"><input type="hidden" name="id" value={category.id} /><div><input name="name" defaultValue={category.name} className="w-full bg-transparent font-medium outline-none focus:text-mh-red-soft" /><input name="description" defaultValue={category.description} placeholder="Adicionar descrição" className="mt-1 w-full bg-transparent text-sm text-mh-muted outline-none" /><input type="hidden" name="slug" value={category.slug} /></div><span className="text-sm text-mh-muted">{category.productCount}</span><input name="position" type="number" defaultValue={category.position} className="h-9 w-20 rounded border border-white/10 bg-[#0d0d0f] px-2 text-sm" /><label className="flex items-center gap-2 text-sm"><input type="checkbox" name="active" defaultChecked={category.active} /><Badge tone={category.active ? "success" : "muted"}>{category.active ? "Ativa" : "Inativa"}</Badge></label><div className="flex"><button className="sr-only">Salvar</button><CategoryDelete id={category.id} count={category.productCount} name={category.name} /></div></form>)}</div>}
-    <p className="mt-3 text-xs text-mh-muted">Edite os campos e pressione Enter para salvar uma categoria.</p>
-  </div>;
+  return (
+    <Page narrow>
+      <PageHeader title="Categorias" subtitle="Organize como os produtos aparecem nos filtros da loja." />
+
+      <details className="admin-card group" open={categories.length === 0}>
+        <summary className="flex cursor-pointer list-none items-center gap-3 p-4 sm:px-5 [&::-webkit-details-marker]:hidden">
+          <span className="grid size-10 place-items-center rounded-xl bg-ad-red text-white"><Plus className="size-5" strokeWidth={2.4} /></span>
+          <span className="flex-1 text-[15px] font-semibold text-ad-ink">Nova categoria</span>
+          <span className="text-[13px] text-ad-muted group-open:hidden">Toque para abrir</span>
+        </summary>
+        <form action={upsertCategory} className="grid gap-4 border-t border-ad-line p-4 sm:grid-cols-[1fr_1.4fr_110px] sm:px-5">
+          <FormField label="Nome"><Input name="name" required placeholder="Ex.: Camisetas" /></FormField>
+          <FormField label="Descrição (opcional)"><Input name="description" /></FormField>
+          <FormField label="Ordem"><Input name="position" type="number" defaultValue={categories.length + 1} /></FormField>
+          <Toggle name="active" label="Mostrar na loja" defaultChecked className="sm:col-span-2" />
+          <button className={btn("primary", "md", "sm:self-end")}>Adicionar</button>
+        </form>
+      </details>
+
+      {categories.length === 0 ? (
+        <Card className="mt-4"><Empty icon={Tags} title="Nenhuma categoria" text="Crie a primeira categoria para organizar os produtos." /></Card>
+      ) : (
+        <ul className="mt-4 space-y-2.5">
+          {categories.map((category) => (
+            <li key={category.id}>
+              <form action={upsertCategory} className="admin-card p-4 sm:px-5">
+                <input type="hidden" name="id" value={category.id} />
+                <input type="hidden" name="slug" value={category.slug} />
+                <div className="flex items-start gap-3">
+                  <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-ad-soft text-[13px] font-bold tabular-nums text-ad-ink-2">{category.position}</span>
+                  <div className="min-w-0 flex-1">
+                    <input name="name" defaultValue={category.name} aria-label="Nome" className="w-full rounded-lg bg-transparent px-1 py-0.5 text-[16px] font-semibold text-ad-ink outline-none hover:bg-ad-soft focus:bg-ad-soft" />
+                    <input name="description" defaultValue={category.description} placeholder="Adicionar descrição" aria-label="Descrição" className="w-full rounded-lg bg-transparent px-1 py-0.5 text-[13.5px] text-ad-muted outline-none placeholder:text-ad-faint hover:bg-ad-soft focus:bg-ad-soft" />
+                  </div>
+                  <Badge tone={category.productCount ? "neutral" : "amber"}>{category.productCount} produto(s)</Badge>
+                </div>
+                <div className="mt-3 flex flex-wrap items-center gap-3 border-t border-ad-line pt-3">
+                  <label className="flex items-center gap-2 text-[13px] text-ad-muted">
+                    Ordem
+                    <input name="position" type="number" defaultValue={category.position} className={cn(inputCls, "h-10 w-20 text-center")} />
+                  </label>
+                  <Toggle name="active" label={category.active ? "Na loja" : "Oculta"} defaultChecked={category.active} className="flex-row-reverse gap-2.5 [&>span:first-child>span]:text-[13px]" />
+                  <div className="ml-auto flex items-center gap-1">
+                    <CategoryDelete id={category.id} count={category.productCount} name={category.name} />
+                    <button className={btn("secondary", "sm")}>Salvar</button>
+                  </div>
+                </div>
+              </form>
+            </li>
+          ))}
+        </ul>
+      )}
+    </Page>
+  );
 }
