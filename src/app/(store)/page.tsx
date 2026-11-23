@@ -22,7 +22,7 @@ import {
 } from "@/lib/catalog";
 import { formatBRL } from "@/lib/utils";
 import { hasBilling, isPhysical } from "@/types/catalog";
-import { ABOUT, DIGITAL, HERO, OFFER } from "@/content/home";
+import { DIGITAL, HERO, OFFER } from "@/content/home";
 
 export default async function HomePage() {
   const [featured, onSale, ebooks, media, banners, text] = await Promise.all([
@@ -79,7 +79,7 @@ export default async function HomePage() {
               {t("hero.primary", HERO.primary.label)}
             </CtaButton>
             <Link href={HERO.secondary.href} className="inline-flex min-h-11 items-center gap-5 border-b border-white/80 text-sm font-medium text-white transition-colors hover:border-mh-red hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mh-red sm:text-base">
-              {t("hero.secondary", HERO.secondary.label)} <ArrowRight className="size-4" aria-hidden="true" />
+              {t("hero.digital", HERO.secondary.label)} <ArrowRight className="size-4" aria-hidden="true" />
             </Link>
           </div>
         </div>
@@ -291,30 +291,6 @@ export default async function HomePage() {
         </section>
       )}
 
-      {/* ================= SOBRE (bloco claro) ================= */}
-      <section className="hidden bg-mh-paper text-mh-paper-ink md:block">
-        <div className="mx-auto grid max-w-6xl grid-cols-1 items-center gap-10 px-4 py-16 sm:px-6 lg:grid-cols-2 lg:py-24">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-mh-red">
-              {t("about.kicker", ABOUT.kicker)}
-            </p>
-            <h2 className="mt-3 text-3xl font-semibold leading-tight tracking-tight sm:text-4xl">
-              {t("about.title", ABOUT.title)}
-            </h2>
-            <p className="mt-4 max-w-md text-mh-paper-muted">{t("about.text", ABOUT.text)}</p>
-            <Button asChild size="lg" variant="onDark" className="mt-7">
-              <Link href="/sobre">Conhecer a MoveHaus</Link>
-            </Button>
-          </div>
-          <PhotoSlot
-            src={media.about ?? ABOUT.image.src}
-            alt={ABOUT.image.alt}
-            caption={ABOUT.image.caption}
-            sizes="(max-width: 1024px) 100vw, 50vw"
-            className="h-72 w-full rounded-lg sm:h-96"
-          />
-        </div>
-      </section>
     </>
   );
 }

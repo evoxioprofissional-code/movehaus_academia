@@ -1,80 +1,40 @@
 import type { Metadata } from "next";
+import Link from "next/link";
+import { BookOpen, MessageCircle, Package } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EditorialPageHero } from "@/components/ui/editorial-page-hero";
+import { getPublicSettings } from "@/lib/settings";
 import { whatsappLink } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: "Sobre a loja",
-  description: "Conheça a MoveHaus Training Club.",
+  title: "Atendimento da loja",
+  description: "Ajuda com produtos, pedidos, retirada e leitura dos PDFs comprados na MoveHaus.",
 };
 
-export default function SobrePage() {
-  return (
-    <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
-      <EditorialPageHero
-        kicker="A loja"
-        title="Produtos para a sua rotina."
-        description="A MoveHaus reúne produtos e conteúdos digitais para quem vive em movimento. Escolha, compre e consulte seus pedidos em um só lugar."
-        aside="MoveHaus Training Club • Colômbia, São Paulo"
-      />
+export default async function AtendimentoPage() {
+  const settings = await getPublicSettings();
+  const options = [
+    { icon: Package, title: "Pedidos e comprovantes", text: "Consulte o pagamento e o código da compra. Para produtos físicos, combine a retirada ou entrega com a loja.", href: "/minha-area/compras", label: "Ver meus pedidos" },
+    { icon: BookOpen, title: "PDFs e receitas", text: "Após a confirmação do pagamento, os materiais adquiridos ficam disponíveis para leitura dentro da sua biblioteca.", href: "/minha-area/biblioteca", label: "Abrir minha biblioteca" },
+  ];
 
-      <div className="grid border-y border-white/10 md:grid-cols-3 md:divide-x md:divide-white/10">
-        {[
-          {
-            number: "01",
-            title: "Produtos selecionados",
-            desc: "Uma seleção de produtos para fazer parte da sua rotina.",
-          },
-          {
-            number: "02",
-            title: "Conteúdos digitais",
-            desc: "Materiais disponíveis na sua biblioteca após a confirmação da compra.",
-          },
-          {
-            number: "03",
-            title: "Compra segura",
-            desc: "Consulte seus pedidos e comprovantes na sua conta.",
-          },
-        ].map((item) => (
-          <div
-            key={item.title}
-            className="group border-b border-white/10 py-8 last:border-b-0 md:border-b-0 md:px-8 md:first:pl-0 md:last:pr-0"
-          >
-            <span className="font-display text-4xl font-bold text-white/15 transition-colors group-hover:text-mh-red">
-              {item.number}
-            </span>
-            <h2 className="mt-5 text-xl font-semibold text-white">
-              {item.title}
-            </h2>
-            <p className="mt-2 text-sm leading-relaxed text-mh-muted">{item.desc}</p>
-          </div>
-        ))}
-      </div>
-
-      <div className="relative mt-12 overflow-hidden bg-mh-paper p-8 text-mh-paper-ink sm:p-12">
-        <div className="absolute right-0 top-0 h-2 w-1/3 bg-mh-red" aria-hidden="true" />
-        <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-mh-red">Comece por aqui</p>
-        <h2 className="mt-3 max-w-xl font-display text-4xl font-bold leading-none sm:text-5xl">
-          Precisa de ajuda com uma compra?
-        </h2>
-        <p className="mt-4 max-w-lg text-mh-paper-muted">
-          Fale com a equipe no WhatsApp para tirar dúvidas sobre produtos e pedidos.
-        </p>
-        <Button asChild size="lg" className="mt-6">
-          <a
-            href={whatsappLink("Olá! Quero saber mais sobre a MoveHaus Training Club.")}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Falar no WhatsApp
-          </a>
-        </Button>
-      </div>
-
-      <p className="mt-8 text-xs text-mh-muted">
-        O conteúdo nutricional oferecido na loja é educativo e não substitui a
-        avaliação individual de um profissional.
-      </p>
+  return <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
+    <EditorialPageHero kicker="Atendimento" title="Como podemos ajudar?" description="Tudo sobre suas compras na loja MoveHaus." />
+    <div className="grid gap-4 md:grid-cols-2">
+      {options.map(({ icon: Icon, title, text, href, label }) => <section key={href} className="rounded-2xl border border-mh-border bg-mh-surface p-6">
+        <Icon className="size-6 text-mh-red" aria-hidden="true" />
+        <h2 className="mt-4 text-xl font-semibold">{title}</h2>
+        <p className="mt-2 text-sm leading-relaxed text-mh-muted">{text}</p>
+        <Button asChild variant="outline" className="mt-5"><Link href={href} prefetch={false}>{label}</Link></Button>
+      </section>)}
     </div>
-  );
+    <section className="mt-5 rounded-2xl border border-mh-border bg-mh-surface p-6">
+      <h2 className="text-xl font-semibold">Fale com a loja</h2>
+      <p className="mt-2 text-sm text-mh-muted">Tenha o número do pedido ou o código do comprovante em mãos para facilitar o atendimento.</p>
+      <Button asChild className="mt-5"><a href={whatsappLink("Olá! Preciso de ajuda com uma compra na loja MoveHaus.", settings.whatsapp)} target="_blank" rel="noopener noreferrer"><MessageCircle className="size-4" />Atendimento pelo WhatsApp</a></Button>
+      {settings.email && <p className="mt-4 text-sm text-mh-muted">E-mail: <a href={`mailto:${settings.email}`} className="underline underline-offset-4">{settings.email}</a></p>}
+      {settings.address && <p className="mt-2 text-sm text-mh-muted">Endereço: {settings.address}</p>}
+      {settings.deliveryRules && <div className="mt-5 border-t border-mh-border pt-5"><h3 className="font-semibold">Entrega e retirada</h3><p className="mt-2 whitespace-pre-line text-sm leading-relaxed text-mh-muted">{settings.deliveryRules}</p></div>}
+    </section>
+  </div>;
 }

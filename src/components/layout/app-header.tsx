@@ -10,11 +10,11 @@ import { MobileNav } from "./mobile-nav";
 const menu = [
   { href: "/", label: "Início" },
   { href: "/loja", label: "Loja" },
-  { href: "/ebooks", label: "Conteúdos" },
+  { href: "/ebooks", label: "PDFs e receitas" },
   { href: "/ofertas", label: "Ofertas" },
   { href: "/minha-area/biblioteca", label: "Minha biblioteca" },
   { href: "/minha-area/compras", label: "Meus pedidos" },
-  { href: "/sobre", label: "Sobre a loja" },
+  { href: "/sobre", label: "Atendimento" },
 ];
 
 function screenInfo(pathname: string) {
@@ -26,7 +26,7 @@ function screenInfo(pathname: string) {
     "/loja": "Loja", "/ebooks": "Conteúdos", "/ofertas": "Ofertas",
     "/carrinho": "Carrinho", "/minha-area": "Minha MoveHaus",
     "/minha-area/biblioteca": "Biblioteca", "/minha-area/compras": "Compras",
-    "/sobre": "Sobre a loja", "/termos": "Termos de uso", "/privacidade": "Privacidade",
+    "/sobre": "Atendimento", "/termos": "Termos de uso", "/privacidade": "Privacidade",
   };
   return { title: titles[pathname] ?? "Loja oficial", back: undefined };
 }

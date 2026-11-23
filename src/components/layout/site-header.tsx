@@ -12,16 +12,16 @@ import { AppHeader } from "@/components/layout/app-header";
 
 export const NAV = [
   { href: "/loja", label: "Loja" },
-  { href: "/ebooks", label: "Conteúdos" },
+  { href: "/ebooks", label: "PDFs e receitas" },
   { href: "/ofertas", label: "Ofertas" },
-  { href: "/sobre", label: "Sobre a MoveHaus" },
+  { href: "/sobre", label: "Atendimento" },
 ];
 
 const HOME_NAV = [
   { href: "/loja", label: "Loja" },
-  { href: "/ebooks", label: "Conteúdos" },
+  { href: "/ebooks", label: "PDFs e receitas" },
   { href: "/ofertas", label: "Ofertas" },
-  { href: "/sobre", label: "Sobre" },
+  { href: "/sobre", label: "Atendimento" },
 ];
 
 // Sem getUser aqui: o header é público e não deve depender do serviço de auth

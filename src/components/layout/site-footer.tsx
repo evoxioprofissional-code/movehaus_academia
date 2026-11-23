@@ -24,7 +24,7 @@ export async function SiteFooter() {
     <footer className="mh-app-footer md:hidden">
       <a href={wa} target="_blank" rel="noopener noreferrer"><MessageCircle size={17} /> Falar com a equipe <ArrowUpRight size={16} /></a>
       <nav aria-label="Informações da MoveHaus">
-        <Link href="/sobre">Sobre a loja</Link>
+        <Link href="/sobre">Atendimento</Link>
         <Link href="/termos">Termos</Link>
         <Link href="/privacidade">Privacidade</Link>
       </nav>
@@ -37,10 +37,10 @@ export async function SiteFooter() {
           <div className="max-w-2xl">
             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-mh-red">Precisa de ajuda?</p>
             <h2 className="mt-3 text-4xl font-bold leading-[1.05] tracking-tight text-white sm:text-5xl">
-              Seu próximo passo começa aqui.
+              Precisa de ajuda com sua compra?
             </h2>
             <p className="mt-4 max-w-md text-mh-muted">
-              Fale com a equipe MoveHaus e encontre o que faz sentido para você.
+              Tire dúvidas sobre produtos, pagamentos, retirada e suas leituras.
             </p>
           </div>
           <a
@@ -74,8 +74,8 @@ export async function SiteFooter() {
             <h4 className="text-sm font-semibold text-white">Explore</h4>
             <ul className="mt-4 space-y-3 text-sm text-mh-muted">
               <li><Link prefetch={false} className="transition-colors hover:text-white" href="/loja">Produtos</Link></li>
-              <li><Link prefetch={false} className="transition-colors hover:text-white" href="/ebooks">Conteúdos</Link></li>
-              <li><Link prefetch={false} className="transition-colors hover:text-white" href="/sobre">Sobre a MoveHaus</Link></li>
+              <li><Link prefetch={false} className="transition-colors hover:text-white" href="/ebooks">PDFs e receitas</Link></li>
+              <li><Link prefetch={false} className="transition-colors hover:text-white" href="/sobre">Atendimento</Link></li>
             </ul>
           </nav>
 
@@ -83,7 +83,8 @@ export async function SiteFooter() {
             <h4 className="text-sm font-semibold text-white">Sua conta</h4>
             <ul className="mt-4 space-y-3 text-sm text-mh-muted">
               <li><Link prefetch={false} className="transition-colors hover:text-white" href="/minha-area">Minha área</Link></li>
-              <li><Link prefetch={false} className="transition-colors hover:text-white" href="/minha-area">Meus pedidos</Link></li>
+              <li><Link prefetch={false} className="transition-colors hover:text-white" href="/minha-area/compras">Meus pedidos</Link></li>
+              <li><Link prefetch={false} className="transition-colors hover:text-white" href="/minha-area/biblioteca">Minha biblioteca</Link></li>
             </ul>
           </nav>
 

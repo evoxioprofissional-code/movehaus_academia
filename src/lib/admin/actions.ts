@@ -454,14 +454,13 @@ export async function updateSettings(
     address: String(fd.get("address") ?? "").trim(),
     city: String(fd.get("city") ?? "").trim(),
     delivery_rules: String(fd.get("delivery_rules") ?? "").trim(),
-    device_limit: toInt(fd.get("device_limit")) ?? 3,
-    grace_days: toInt(fd.get("grace_days")) ?? 5,
     terms: String(fd.get("terms") ?? ""),
     privacy: String(fd.get("privacy") ?? ""),
   };
   const supabase = await createClient();
   const { error } = await supabase.from("site_settings").update(payload).eq("id", 1);
   if (error) return { error: error.message };
+  updateTag("settings");
   revalidatePath("/", "layout");
   return { message: "Configurações salvas." };
 }

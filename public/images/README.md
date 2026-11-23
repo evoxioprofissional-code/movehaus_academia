@@ -1,31 +1,10 @@
-# Imagens da MoveHaus
+# Imagens da loja MoveHaus
 
-`home-hero-ropes.webp` é uma imagem conceitual criada para reproduzir o layout
-do topo. Não mostra a academia nem uma aluna real da MoveHaus. Substitua-a por
-uma foto autorizada no painel da página inicial assim que estiver disponível.
+Use esta pasta apenas para fotos de produtos, capas de PDFs e campanhas da loja.
+As imagens dos produtos são gerenciadas em Produtos, no painel administrativo.
+Banners para celular e computador ficam em Banners; as imagens da vitrine do
+computador ficam em Vitrine.
 
-`community-group.webp` e `community-plates.webp` também são imagens conceituais.
-Os dois espaços da seção de comunidade podem ser trocados no mesmo painel;
-as pessoas e o ambiente atuais não representam a MoveHaus real.
-
-Coloque aqui as fotos reais da academia (treino, alunos, professores,
-ambiente, produtos). Depois é só apontar o caminho no arquivo de conteúdo.
-
-## Como usar
-
-1. Salve a foto nesta pasta, ex.: `public/images/hero.jpg`.
-2. Abra `src/content/home.ts` e troque o `src` do slot correspondente:
-   ```ts
-   image: { src: "/images/hero.jpg", alt: "Treino na MoveHaus" }
-   ```
-3. Pronto — a foto substitui o placeholder automaticamente.
-
-## Sugestões de fotos (proporção)
-
-- `hero.jpg` — treino/ambiente, horizontal, alta resolução (para o topo).
-- `academia.jpg` — visão ampla do espaço (bloco "A academia").
-- `aluno.jpg`, `professor.jpg` — retratos verticais.
-- `comunidade.jpg` — grupo/aula (bloco "Sobre a MoveHaus").
-
-Formatos recomendados: `.webp` ou `.jpg` otimizados. Evite imagens de bancos
-genéricos que possam não representar a MoveHaus.
+Imagens locais podem ser usadas pelos componentes com caminhos como
+`/images/produtos.jpg`. Prefira WebP ou JPG otimizados e fotos autorizadas.
+O projeto Haus Coach tem seus próprios arquivos e mascote.

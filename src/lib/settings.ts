@@ -10,6 +10,7 @@ export type PublicSettings = {
   instagram: string;
   address: string;
   city: string;
+  deliveryRules: string;
   terms: string;
   privacy: string;
 };
@@ -22,6 +23,7 @@ const FALLBACK: PublicSettings = {
   instagram: SITE.instagram,
   address: SITE.address,
   city: SITE.city,
+  deliveryRules: "",
   terms: "",
   privacy: "",
 };
@@ -48,6 +50,7 @@ export const getPublicSettings = unstable_cache(
         instagram: data.instagram || FALLBACK.instagram,
         address: data.address || FALLBACK.address,
         city: data.city || FALLBACK.city,
+        deliveryRules: data.delivery_rules || "",
         terms: data.terms || "",
         privacy: data.privacy || "",
       };

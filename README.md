@@ -3,6 +3,10 @@
 E-commerce de vendedor único da MoveHaus: produtos físicos, produtos digitais e
 e-books, com pagamento único ou assinatura mensal e leitor interno protegido.
 
+O painel atende apenas à operação da loja: vendas, pedidos, financeiro, catálogo,
+PDFs e receitas, clientes, cupons, banners e configurações comerciais. O Haus Coach
+é um projeto separado; treino, acompanhamento e pontuação não fazem parte daqui.
+
 ## Stack
 Next.js 16 (App Router) · TypeScript · Tailwind CSS v4 · Supabase (Postgres +
 Auth + Storage) · Mercado Pago · lucide-react.

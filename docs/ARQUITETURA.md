@@ -1,67 +1,43 @@
 # Arquitetura — MoveHaus Training Club
 
-E-commerce oficial de vendedor único (só a MoveHaus). Não é marketplace.
+Loja oficial de vendedor único, com produtos físicos e materiais digitais.
+O Haus Coach é mantido em projeto independente.
 
-## Stack
+## Aplicação
 
-| Camada | Escolha | Observação |
-|--------|---------|------------|
-| Framework | **Next.js 16** (App Router) | `create-next-app` mais recente instalou o 16. O briefing pedia 15; o 16 é o sucessor direto e estável. Fácil de fixar em 15 se preferir. |
-| Linguagem | TypeScript (strict) | |
-| UI | Tailwind CSS v4 (config em CSS via `@theme`) | |
-| Ícones | lucide-react | Ícones de marca (Instagram) via SVG inline — lucide não os distribui. |
-| Backend | Supabase (Postgres + Auth + Storage) | Storage **privado** para conteúdo protegido. |
-| Acesso a dados | `@supabase/ssr` | Cliente browser + server, sessão via cookies, respeita RLS. |
-| Pagamentos | Mercado Pago (Pix, cartão, assinatura) | Preferência/assinatura criadas só no servidor; webhooks idempotentes. |
+Next.js 16 com App Router, TypeScript, React e Tailwind CSS v4. Supabase fornece
+Postgres, autenticação e armazenamento. Mercado Pago processa os pagamentos.
 
-## Estrutura de pastas
+- `src/app/(store)`: vitrine, catálogo, produtos, ofertas, carrinho, checkout,
+  atendimento e políticas.
+- `src/app/(auth)`: entrada, cadastro e recuperação de conta.
+- `src/app/(member)`: conta do comprador, pedidos, comprovantes, assinaturas,
+  biblioteca e leitor protegido.
+- `src/app/admin`: vendas, catálogo, produtos digitais e configurações da loja.
+- `src/lib/commerce`: orçamento, pagamentos, assinaturas e comprovantes.
+- `src/lib/customer`: consultas e ações do comprador, além do acesso aos PDFs.
+- `src/lib/admin`: consultas e ações administrativas, incluindo publicação de PDFs.
+- `src/proxy.ts`: renovação de sessão nas rotas de cliente e admin.
 
-```
-src/
-  app/                     # Rotas (App Router)
-    page.tsx               # Home (shell da marca; expandida na Fase 2)
-    layout.tsx             # Fontes, metadados, shell global
-    globals.css            # Design system (tokens Tailwind v4)
-  components/
-    brand/                 # Logo e elementos de marca
-    layout/                # SiteHeader, SiteFooter
-    ui/                    # Primitivos do design system (Button, ...)
-  lib/
-    env.ts                 # Acesso validado a env (público x servidor)
-    utils.ts               # cn(), formatBRL()
-    supabase/
-      client.ts            # Cliente browser
-      server.ts            # Cliente server + admin (service_role)
-  types/
-    database.ts            # Tipos do banco (placeholder até Fase 3)
-  proxy.ts                 # Renova sessão a cada request (Next 16 "proxy")
-docs/                      # Fonte de verdade do projeto
-public/brand/              # Arte oficial (logo)
-```
+O celular usa uma interface de aplicativo com navegação inferior. As fotos dos
+produtos alimentam a vitrine mobile. Banners atendem campanhas nos dois formatos;
+a edição da vitrine do computador fica em `/admin/home`.
 
-## Rotas planejadas (visão geral)
+## Conteúdo digital
 
-- Público: `/`, `/loja`, `/loja/[slug]`, `/ebooks`, `/ebooks/[slug]`,
-  `/ofertas`, `/sobre`, `/carrinho`, `/checkout`, `/pedido/[id]`.
-- Cliente (`/minha-area`): biblioteca, pedidos, assinaturas, dados, leitor
-  `/minha-area/ler/[ebookId]`.
-- Admin (`/admin`): dashboard, produtos, ebooks, pedidos, clientes, promoções,
-  configurações. Protegido no servidor por papel.
-- API: `/api/checkout`, `/api/webhooks/mercadopago`, `/api/reader/asset`.
+PDFs, e-books e receitas são produtos da loja. Os tipos `ebook` e `digital` usam
+a mesma biblioteca protegida. Materiais antigos comprados continuam acessíveis.
+O conteúdo pode ter texto ou um PDF privado, entregue pela rota autenticada
+`/minha-area/ler/[slug]/pdf/[chapterId]` após checar compra e publicação.
 
-## Princípios de segurança (transversais)
+## Segurança e dados
 
-- Autorização de leitura de conteúdo conferida **no servidor** (nunca só no front).
-- `service_role` só no servidor (`createAdminClient`), nunca no bundle.
-- RLS em todas as tabelas; cliente só enxerga os próprios dados.
-- Campo `role` vindo do navegador nunca concede admin.
-- Preço final e estoque calculados/confirmados no servidor.
-- Webhooks validados e idempotentes.
+- A leitura exige autorização no servidor e acesso válido em `digital_access`.
+- O papel administrativo é verificado no servidor; a interface não concede acesso.
+- Chaves de serviço e credenciais de pagamento ficam exclusivamente no servidor.
+- Preços e estoque são conferidos no servidor antes da cobrança.
+- O webhook em `/api/mercadopago/webhook` valida e sincroniza os pagamentos.
+- Pedidos, pagamentos, assinaturas e compras existentes são preservados.
 
-## Decisões em aberto (dependem de você)
-
-- Fixar Next.js em 15 ou manter 16 (recomendo manter 16).
-- Migrar para as chaves novas do Supabase (`sb_publishable_` / `sb_secret_`)
-  ou manter as JWT (`anon` / `service_role`). Hoje uso as JWT por compatibilidade.
-- Domínio de produção definitivo (hoje placeholder `movehaus.com.br`).
-- Credenciais do Mercado Pago (ausentes — integração fica em modo dev).
+As migrations antigas documentam o histórico do banco. Elas não reativam os
+módulos de treino, acompanhamento ou pontuação, removidos da aplicação.

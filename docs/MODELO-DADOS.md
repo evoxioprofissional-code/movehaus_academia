@@ -39,8 +39,8 @@ Valores monetários em **centavos** (inteiro). Datas em UTC.
 ## E-books
 - **ebooks** — 1:1 com um `product` do tipo ebook: capa, introdução, status
   (`draft` | `published`), versão.
-- **ebook_chapters** — título, ordem, conteúdo (HTML sanitizado), imagens,
-  observações da nutricionista.
+- **ebook_chapters** — título, ordem, texto dos materiais e receitas ou metadados
+  do arquivo PDF privado para leitura na plataforma.
 - **reading_progress** — cliente↔ebook: capítulo atual, posição, percentual,
   atualizado_em (para retomar de onde parou).
 
@@ -49,15 +49,13 @@ Valores monetários em **centavos** (inteiro). Datas em UTC.
   uso, produtos elegíveis, ativo.
 - **coupon_redemptions** — uso por cliente↔pedido (impede reuso além do limite).
 
-## Anti-compartilhamento e auditoria
-- **customer_devices** — dispositivos/sessões registrados por cliente; limite
-  configurável; admin pode encerrar sessões.
+## Auditoria
 - **access_logs** — registro de acessos a conteúdo (quem, quando, ip/ua, ebook).
 
 ## Configuração e conteúdo do site
-- **site_settings** — dados da academia, WhatsApp, endereço, redes, regras de
-  entrega, limite de dispositivos, dias de carência, dados da nutricionista,
-  políticas/termos.
+- **site_settings** — identificação da loja, WhatsApp, endereço, redes, regras de
+  entrega, políticas e termos. Configurações antigas de dispositivos e de
+  profissionais não são oferecidas no painel da loja.
 - **banners** — banners promocionais (imagem, link, período, ordem, ativo).
 
 ## Notas de RLS
@@ -66,5 +64,8 @@ Valores monetários em **centavos** (inteiro). Datas em UTC.
 - Conteúdo de `ebook_chapters` publicado: leitura só com `digital_access`
   válido, verificada no servidor (não exposta a `select` público direto).
 - Admin: gerência ampla via `is_admin()`.
-- Storage de conteúdo protegido: bucket **privado**, servido por URL assinada
-  temporária gerada no servidor após checar acesso.
+- Storage de PDFs: bucket **privado**, servido pela rota autenticada do leitor
+  após verificar o acesso do comprador e a publicação do conteúdo.
+
+Tabelas e papéis de módulos antigos permanecem nas migrations históricas.
+A limpeza da loja não remove dados existentes do banco de produção.

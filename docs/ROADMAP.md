@@ -1,24 +1,36 @@
-# Roadmap — MoveHaus Training Club
+# Escopo atual — MoveHaus Training Club
 
-Trabalho por fases. Cada fase termina com build/typecheck válidos e **aguarda
-aprovação explícita** antes da próxima. `docs/` é a fonte de verdade.
+A MoveHaus é uma loja de produtos físicos, PDFs, e-books e receitas.
+A experiência do celular usa navegação de aplicativo e uma biblioteca para ler
+os materiais comprados. O Haus Coach é um projeto independente.
 
-| Fase | Escopo | Status |
-|------|--------|--------|
-| 1 | Auditoria e fundação (stack, design system, estrutura, Supabase clients, env, docs) | ✅ Concluída |
-| 2 | Interface pública (home, catálogo, produto, carrinho, auth visual, responsividade) | ✅ Concluída |
-| 3 | Banco e autenticação (migrations, tipos, RLS, perfis, papéis, proteção de rotas) | ✅ Concluída |
-| 4 | Painel administrativo (dashboard, produtos, e-books, capítulos, clientes, configurações, pedidos, cupons, banners) | ✅ Concluída — migrations aplicadas, admin testado |
-| 5 | Pagamentos (Mercado Pago: pagamento único, assinatura, webhooks, idempotência, liberação/bloqueio) — usa pedidos e promoções/cupons | ⏳ Aguardando aprovação |
-| 6 | Área do cliente e leitor (biblioteca, assinaturas, pedidos, leitor, progresso, marca-d'água, dispositivos, logs) | ⬜ |
-| 7 | Revisão (build, lint, TS, responsividade, segurança, acessibilidade, desempenho, docs) | ⬜ |
+## Loja
 
-## Regras de execução
+- Vitrine, catálogo, categorias e ofertas.
+- Carrinho, cupons, Pix e cartão dentro da plataforma.
+- Pagamento único ou assinatura de um produto digital.
+- Conta do cliente, pedidos, comprovantes e contato para retirada ou entrega.
+- Biblioteca protegida, leitor de PDFs e progresso de leitura.
+- Atendimento e políticas de compra.
 
-1. Uma etapa por vez.
-2. Validar TypeScript, build e responsividade antes de seguir.
-3. Preservar o que funciona; não trocar dependências sem necessidade.
-4. Autorização de acesso a conteúdo é **sempre** decidida no servidor.
-5. Preço final e estoque **sempre** confirmados no servidor.
-6. Nada de cara de site gerado por IA: copy concreta, sem emojis aleatórios,
-   sem gradientes exagerados.
+## Administração
+
+- Vendas: visão geral, pedidos, financeiro e clientes.
+- Catálogo: produtos, PDFs e receitas, categorias e cupons.
+- Loja: banners, vitrine, contato, entrega e políticas.
+
+## Fora deste projeto
+
+Treinos interativos, acompanhamento de alunos, planos alimentares individuais,
+pontuação, metas, recompensas, comunidade e painéis de professores ou
+nutricionistas não fazem parte da loja. As URLs antigas redirecionam para as
+áreas comerciais, e os arquivos visuais antigos foram removidos.
+
+## Dados e validação
+
+Pedidos, pagamentos, assinaturas e acessos já adquiridos são preservados.
+Migrations antigas são histórico do banco; a limpeza do aplicativo não apaga
+registros nem tabelas em produção.
+
+Antes de publicar, executar build, lint e os testes em `tests/`, além de conferir
+a navegação mobile. Os valores e acessos devem continuar validados no servidor.

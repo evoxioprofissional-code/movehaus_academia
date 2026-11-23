@@ -3,6 +3,7 @@
 import { revalidatePath, updateTag } from "next/cache";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { requireAdmin } from "@/lib/auth/user";
+import { HOME_MEDIA_SLOTS } from "@/content/home";
 
 async function removeStored(path: string | null | undefined) {
   if (!path) return;
@@ -18,7 +19,7 @@ export async function uploadHomeImage(fd: FormData): Promise<void> {
   await requireAdmin();
   const key = String(fd.get("key") ?? "").trim();
   const file = fd.get("image") as File | null;
-  if (!key || !file || file.size === 0) return;
+  if (!HOME_MEDIA_SLOTS.some((slot) => slot.key === key) || !file || file.size === 0) return;
   if (file.size > 8 * 1024 * 1024) return; // 8MB
 
   const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
@@ -50,7 +51,7 @@ export async function uploadHomeImage(fd: FormData): Promise<void> {
 export async function removeHomeImage(fd: FormData): Promise<void> {
   await requireAdmin();
   const key = String(fd.get("key") ?? "");
-  if (!key) return;
+  if (!HOME_MEDIA_SLOTS.some((slot) => slot.key === key)) return;
   const supabase = await createClient();
   const { data: prev } = await supabase
     .from("home_media")

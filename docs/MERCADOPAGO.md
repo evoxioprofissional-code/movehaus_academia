@@ -22,4 +22,4 @@ Execute `node --test tests/payments.test.mjs`, `npm run lint` e `npm run build`.
 
 ## Limites
 
-Cartão à vista; assinaturas mensais no cartão de crédito. Cobrança desconhecida após interrupção pode exigir conferência administrativa antes de outra tentativa. Estornos e chargebacks exigem acompanhamento administrativo; não há revogação automática dos acessos já concedidos. A concessão de acompanhamento personalizado (`coaching_access`) continua com a equipe; esta integração renova `digital_access` dos produtos adquiridos.
+Cartão à vista; assinaturas mensais no cartão de crédito. Cobrança desconhecida após interrupção pode exigir conferência administrativa antes de outra tentativa. Estornos e chargebacks exigem acompanhamento administrativo; não há revogação automática dos acessos já concedidos. Esta integração renova `digital_access` dos produtos digitais adquiridos na loja.

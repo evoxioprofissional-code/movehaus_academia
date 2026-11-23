@@ -24,7 +24,7 @@ export default function AuthLayout({
         <div className="relative">
           <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-white/55">MoveHaus Training Club</p>
           <h2 className="mt-6 max-w-md font-display text-6xl font-bold uppercase leading-[0.9] text-white">
-            Sua rotina.<br /><span className="text-mh-red">Seu próximo nível.</span>
+            Suas compras.<br /><span className="text-mh-red">Suas leituras.</span>
           </h2>
         </div>
         <p className="relative max-w-sm text-sm leading-relaxed text-white/55">

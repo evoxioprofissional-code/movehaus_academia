@@ -33,7 +33,7 @@ export async function getProtectedEbook(slug: string) {
   if (!product) return null; // produto inexistente -> 404 de verdade
   const { data: access } = await supabase.from("digital_access").select("*").eq("user_id", user.id).eq("product_id", product.id).eq("status", "active").maybeSingle();
   const valid = access && (access.permanent || !access.expires_at || Date.parse(access.expires_at) > Date.now());
-  if (!valid) return { denied: true as const, product }; // existe, mas o aluno não tem acesso
+  if (!valid) return { denied: true as const, product }; // existe, mas o cliente não tem acesso
   const [{ data: chapters }, { data: progress }, { data: profile }, { data: publication }] = await Promise.all([
     supabase.from("ebook_chapters").select("id,title,position,content").eq("product_id", product.id).order("position"),
     supabase.from("reading_progress").select("chapter_id,progress_percent").eq("user_id", user.id).eq("product_id", product.id).maybeSingle(),
