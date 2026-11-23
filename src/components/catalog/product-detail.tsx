@@ -14,12 +14,12 @@ import { Badge } from "@/components/ui/badge";
 import { isEbook, isPhysical, type Product } from "@/types/catalog";
 
 export function ProductDetail({ product }: { product: Product }) {
-  const backHref = isEbook(product) ? "/ebooks" : "/loja";
-  const backLabel = isEbook(product) ? "E-books" : "Loja";
+  const backHref = isPhysical(product) ? "/loja" : "/ebooks";
+  const backLabel = isPhysical(product) ? "Loja" : "Conteúdos";
   const soldOut = isPhysical(product) && product.stock <= 0;
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-10">
+    <div className="mh-app-product-detail mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-10">
       {/* Breadcrumb */}
       <nav className="mb-6 flex items-center gap-1 text-sm text-mh-muted">
         <Link href={backHref} className="hover:text-white">
@@ -99,13 +99,13 @@ export function ProductDetail({ product }: { product: Product }) {
       {/* Descrição completa */}
       <section className="mt-12 max-w-3xl">
         <h2 className="text-xl font-bold uppercase tracking-tight text-white">
-          Sobre o {isEbook(product) ? "conteúdo" : "produto"}
+          Sobre o {isPhysical(product) ? "produto" : "conteúdo"}
         </h2>
         <p className="mt-3 leading-relaxed text-mh-muted">
           {product.description}
         </p>
 
-        {isEbook(product) && (
+        {!isPhysical(product) && (
           <ul className="mt-6 space-y-2 text-sm text-mh-text">
             {[
               { icon: BookOpen, text: "Leitura no leitor interno, com progresso salvo." },

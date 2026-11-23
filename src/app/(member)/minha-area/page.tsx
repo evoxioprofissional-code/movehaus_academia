@@ -2,28 +2,20 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import {
   ArrowRight,
-  BarChart3,
   BookOpen,
   ChevronRight,
   Download,
-  Dumbbell,
   LogOut,
   Package,
   Pencil,
   ShoppingBag,
-  Star,
   UserRound,
 } from "lucide-react";
 import { requireUser, getProfile } from "@/lib/auth/user";
-import { hasCoachingAccess } from "@/lib/coaching/access";
-import { getPlanTree, getOpenSession, todayWeekday } from "@/lib/coaching/workouts";
-import { getProgress } from "@/lib/coaching/gamification";
 import { signOut } from "@/lib/auth/actions";
 import { ProfileForm } from "@/components/customer/profile-form";
-import { CoachingEntry } from "@/components/customer/coaching-entry";
 import { getCustomerOverview } from "@/lib/customer/data";
 import { LibraryCards } from "@/components/customer/library-cards";
-import { whatsappLink } from "@/lib/site";
 
 export const metadata: Metadata = { title: "Minha MoveHaus" };
 
@@ -43,30 +35,10 @@ function SectionTitle({ icon: Icon, children }: { icon: typeof BookOpen; childre
 
 export default async function MinhaAreaPage() {
   const user = await requireUser("/minha-area");
-  const [profile, coaching, overview] = await Promise.all([getProfile(), hasCoachingAccess(), getCustomerOverview()]);
-  const displayName = profile?.full_name || user.email?.split("@")[0] || "Atleta";
+  const [profile, overview] = await Promise.all([getProfile(), getCustomerOverview()]);
+  const displayName = profile?.full_name || user.email?.split("@")[0] || "Cliente";
   const rawFirstName = displayName.trim().split(/\s+/)[0];
   const firstName = rawFirstName.charAt(0).toLocaleUpperCase("pt-BR") + rawFirstName.slice(1);
-
-  let sessionId: string | undefined;
-  let coachingEntry = { hasPlan: false, todayLabel: null as string | null, todayExercises: 0, points: 0, hasOpenSession: false };
-  if (coaching) {
-    const [tree, progress, openSession] = await Promise.all([
-      getPlanTree(user.id),
-      getProgress(user.id),
-      getOpenSession(user.id),
-    ]);
-    const readyDays = tree.days.filter((day) => day.exercises.length > 0);
-    sessionId = openSession?.id;
-    const todayDay = readyDays.find((day) => day.weekday === todayWeekday()) ?? null;
-    coachingEntry = {
-      hasPlan: readyDays.length > 0,
-      todayLabel: todayDay?.name ?? null,
-      todayExercises: todayDay?.exercises.length ?? 0,
-      points: progress.points,
-      hasOpenSession: Boolean(openSession),
-    };
-  }
 
   return (
     <div className="mx-auto grid w-full max-w-6xl gap-x-12 px-4 pb-12 pt-7 sm:px-6 sm:pt-10 lg:grid-cols-[minmax(0,1.03fr)_minmax(0,.97fr)] lg:gap-x-14 lg:pt-16">
@@ -75,30 +47,11 @@ export default async function MinhaAreaPage() {
         <h1 className="mt-2 text-[clamp(2rem,7.5vw,2.9rem)] font-bold leading-[1.1] tracking-[-0.045em] text-white">
           {greeting()}, {firstName}
         </h1>
-        <p className="mt-2 text-[15px] text-white/55">Seu espaço de treino e evolução.</p>
-
-        {coaching && (
-          <span className="mt-5 inline-flex min-h-10 items-center gap-2 rounded-full border border-white/20 bg-[#111216] px-4 text-sm font-medium text-white">
-            <Star className="size-5 text-mh-red" strokeWidth={1.8} aria-hidden="true" />
-            {coachingEntry.points} {coachingEntry.points === 1 ? "ponto" : "pontos"}
-          </span>
-        )}
-
-        <div className="mt-5">
-          <CoachingEntry
-            hasAccess={coaching}
-            hasPlan={coachingEntry.hasPlan}
-            todayLabel={coachingEntry.todayLabel}
-            todayExercises={coachingEntry.todayExercises}
-            hasOpenSession={coachingEntry.hasOpenSession}
-            sessionId={sessionId}
-            joinHref={whatsappLink("Olá! Quero assinar o MoveHaus Acompanhamento.")}
-          />
-        </div>
+        <p className="mt-2 text-[15px] text-white/55">Seus pedidos, produtos digitais e dados da conta.</p>
 
         <nav aria-label="Acesso rápido" className="mt-4 grid grid-cols-3 gap-2.5 sm:gap-3">
           {[
-            { href: "/acompanhamento", label: "Treino", icon: Dumbbell },
+            { href: "/loja", label: "Loja", icon: ShoppingBag },
             { href: "/minha-area/biblioteca", label: "Biblioteca", icon: BookOpen },
             { href: "/minha-area/compras", label: "Compras", icon: ShoppingBag },
           ].map(({ href, label, icon: Icon }) => (
@@ -111,9 +64,6 @@ export default async function MinhaAreaPage() {
           ))}
         </nav>
 
-        <Link href="/acompanhamento/corpo" className="mt-5 hidden items-center gap-2 text-sm font-medium text-white/60 hover:text-white lg:inline-flex">
-          <BarChart3 className="size-4 text-mh-red" /> Ver minha evolução <ArrowRight className="size-4" />
-        </Link>
       </div>
 
       <div className="min-w-0 pt-12 lg:pt-0">

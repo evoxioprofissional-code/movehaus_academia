@@ -19,7 +19,7 @@ export function SectionHeading({
 }) {
   const isPaper = tone === "paper";
   return (
-    <div className="mb-7 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-end sm:gap-6">
+    <div className="mh-app-section-heading mb-7 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-end sm:gap-6">
       <div>
         {kicker && (
           <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-mh-red">

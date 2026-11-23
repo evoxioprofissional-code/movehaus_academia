@@ -9,6 +9,8 @@ import {
   updateChapter,
 } from "@/lib/admin/actions";
 import { EbookMetaForm } from "@/components/admin/ebook-meta-form";
+import { PdfUpload } from "@/components/admin/pdf-upload";
+import { pdfAttachment } from "@/lib/customer/pdf";
 import { Button } from "@/components/ui/button";
 
 export const metadata = { title: "Editar conteúdo" };
@@ -22,7 +24,7 @@ export default async function EditarConteudoPage({
   const { product, ebook, chapters } = await getEbook(id);
   if (!product || !["ebook", "digital"].includes(product.type)) notFound();
 
-  const sectionName = product.type === "digital" ? "Aulas e materiais" : "Capítulos";
+  const sectionName = "Capítulos e PDFs";
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
@@ -44,6 +46,7 @@ export default async function EditarConteudoPage({
       </p>
 
       <EbookMetaForm productId={id} ebook={ebook} />
+      <PdfUpload productId={id} />
 
       {/* Capítulos */}
       <h2 className="mb-3 mt-8 text-lg font-semibold text-white">
@@ -83,7 +86,9 @@ export default async function EditarConteudoPage({
                 </form>
               </div>
             </div>
-            <form action={updateChapter} className="space-y-2">
+            {pdfAttachment(c.content) ? (
+              <p className="rounded-md border border-white/10 p-3 text-sm text-mh-muted">PDF · {c.title}<span className="mt-1 block text-xs">Disponível para leitura na plataforma após a publicação.</span></p>
+            ) : <form action={updateChapter} className="space-y-2">
               <input type="hidden" name="id" value={c.id} />
               <input type="hidden" name="product_id" value={id} />
               <input
@@ -99,7 +104,7 @@ export default async function EditarConteudoPage({
                 className="w-full rounded-mh border border-mh-border bg-mh-black px-3 py-2 text-sm text-white placeholder:text-mh-muted focus:border-mh-red focus:outline-none"
               />
               <Button type="submit" variant="outline" size="sm">Salvar capítulo</Button>
-            </form>
+            </form>}
           </div>
         ))}
       </div>
@@ -107,7 +112,7 @@ export default async function EditarConteudoPage({
       {/* Novo capítulo */}
       <form action={createChapter} className="mt-4 space-y-2 rounded-lg border border-dashed border-white/15 p-4">
         <input type="hidden" name="product_id" value={id} />
-        <p className="text-sm font-medium text-white">{product.type === "digital" ? "Adicionar aula ou material" : "Adicionar capítulo"}</p>
+        <p className="text-sm font-medium text-white">Adicionar capítulo ou receita</p>
         <input
           name="title"
           required
@@ -120,7 +125,7 @@ export default async function EditarConteudoPage({
           placeholder="Conteúdo (opcional agora)"
           className="w-full rounded-mh border border-mh-border bg-mh-black px-3 py-2 text-sm text-white placeholder:text-mh-muted focus:border-mh-red focus:outline-none"
         />
-        <Button type="submit">{product.type === "digital" ? "Adicionar aula ou material" : "Adicionar capítulo"}</Button>
+        <Button type="submit">Adicionar capítulo ou receita</Button>
       </form>
     </div>
   );

@@ -19,10 +19,13 @@ export async function updateCustomerProfile(_state: CustomerActionState, formDat
 }
 
 export async function saveReadingProgress(productId: string, chapterId: string, percent: number) {
+  if (!/^[a-f0-9-]{36}$/i.test(productId) || !/^[a-f0-9-]{36}$/i.test(chapterId)) return { error: "Material inválido." };
   const user = await requireUser("/minha-area");
   const supabase = await createClient();
   const { data: access } = await supabase.from("digital_access").select("id,permanent,expires_at,status").eq("user_id", user.id).eq("product_id", productId).eq("status", "active").maybeSingle();
   if (!access || (!access.permanent && access.expires_at && Date.parse(access.expires_at) <= Date.now())) return { error: "Acesso indisponível." };
+  const { data: chapter } = await supabase.from("ebook_chapters").select("id").eq("id", chapterId).eq("product_id", productId).maybeSingle();
+  if (!chapter) return { error: "Material indisponível." };
   const safePercent = Math.max(0, Math.min(100, Number(percent) || 0));
   const { error } = await supabase.from("reading_progress").upsert({ user_id: user.id, product_id: productId, chapter_id: chapterId, progress_percent: safePercent }, { onConflict: "user_id,product_id" });
   return error ? { error: "Não foi possível salvar o progresso." } : { ok: true };

@@ -26,6 +26,6 @@ export default async function EbookPage({
 }) {
   const { slug } = await params;
   const product = await getProductBySlug(slug);
-  if (!product || product.type !== "ebook") notFound();
+  if (!product || product.type === "physical") notFound();
   return <ProductDetail product={product} />;
 }

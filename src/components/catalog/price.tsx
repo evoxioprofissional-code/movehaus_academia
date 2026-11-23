@@ -17,16 +17,16 @@ export function Price({
     lg: "text-[28px]",
   }[size];
 
-  const value = "font-semibold tabular-nums text-white";
+  const value = "whitespace-nowrap font-semibold tabular-nums text-white";
 
   if (isPhysical(product)) {
     const onSale =
       product.compareAtPrice && product.compareAtPrice > product.price;
     return (
-      <div className={cn("flex items-baseline gap-2", className)}>
+      <div className={cn("flex flex-wrap items-baseline gap-x-2 gap-y-0.5", className)}>
         <span className={cn(value, main)}>{formatBRL(product.price)}</span>
         {onSale && (
-          <span className="text-sm text-mh-muted line-through">
+          <span className="whitespace-nowrap text-sm text-mh-muted line-through">
             {formatBRL(product.compareAtPrice!)}
           </span>
         )}
@@ -36,7 +36,7 @@ export function Price({
 
   if (hasBilling(product) && product.billingModel === "subscription") {
     return (
-      <div className={cn("flex items-baseline gap-1", className)}>
+      <div className={cn("flex flex-wrap items-baseline gap-1", className)}>
         <span className={cn(value, main)}>
           {formatBRL(product.monthlyPrice ?? 0)}
         </span>

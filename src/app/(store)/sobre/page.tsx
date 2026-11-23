@@ -4,7 +4,7 @@ import { EditorialPageHero } from "@/components/ui/editorial-page-hero";
 import { whatsappLink } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: "A academia",
+  title: "Sobre a loja",
   description: "Conheça a MoveHaus Training Club.",
 };
 
@@ -12,9 +12,9 @@ export default function SobrePage() {
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
       <EditorialPageHero
-        kicker="A academia"
-        title="Treino sério. Acompanhamento próximo."
-        description="A MoveHaus nasceu para quem busca evolução com método e uma comunidade que cresce junto. A loja reúne o que faz parte dessa rotina."
+        kicker="A loja"
+        title="Produtos para a sua rotina."
+        description="A MoveHaus reúne produtos e conteúdos digitais para quem vive em movimento. Escolha, compre e consulte seus pedidos em um só lugar."
         aside="MoveHaus Training Club • Colômbia, São Paulo"
       />
 
@@ -22,18 +22,18 @@ export default function SobrePage() {
         {[
           {
             number: "01",
-            title: "Treino com método",
-            desc: "Programas estruturados, com progressão e orientação de execução.",
+            title: "Produtos selecionados",
+            desc: "Uma seleção de produtos para fazer parte da sua rotina.",
           },
           {
             number: "02",
-            title: "Nutrição na prática",
-            desc: "Conteúdo educativo para organizar a alimentação em torno do treino.",
+            title: "Conteúdos digitais",
+            desc: "Materiais disponíveis na sua biblioteca após a confirmação da compra.",
           },
           {
             number: "03",
-            title: "Comunidade",
-            desc: "Um clube de gente que treina junto e evolui junto.",
+            title: "Compra segura",
+            desc: "Consulte seus pedidos e comprovantes na sua conta.",
           },
         ].map((item) => (
           <div
@@ -55,11 +55,10 @@ export default function SobrePage() {
         <div className="absolute right-0 top-0 h-2 w-1/3 bg-mh-red" aria-hidden="true" />
         <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-mh-red">Comece por aqui</p>
         <h2 className="mt-3 max-w-xl font-display text-4xl font-bold leading-none sm:text-5xl">
-          Quer treinar com a gente?
+          Precisa de ajuda com uma compra?
         </h2>
         <p className="mt-4 max-w-lg text-mh-paper-muted">
-          Fale com a equipe no WhatsApp para saber sobre planos, horários e como
-          começar.
+          Fale com a equipe no WhatsApp para tirar dúvidas sobre produtos e pedidos.
         </p>
         <Button asChild size="lg" className="mt-6">
           <a

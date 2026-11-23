@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter, Oswald } from "next/font/google";
 import "./globals.css";
 
@@ -21,8 +21,14 @@ export const metadata: Metadata = {
     template: "%s · MoveHaus Training Club",
   },
   description:
-    "Loja oficial da MoveHaus Training Club. Produtos, e-books e conteúdos de treino e nutrição.",
+    "Loja oficial da MoveHaus Training Club. Produtos, PDFs, receitas e e-books com leitura na plataforma.",
   metadataBase: new URL("https://movehaus.com.br"),
+};
+
+export const viewport: Viewport = {
+  themeColor: "#090a0c",
+  viewportFit: "cover",
+  interactiveWidget: "resizes-content",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

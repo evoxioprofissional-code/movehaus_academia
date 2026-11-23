@@ -9,7 +9,7 @@ import type { Category, Product } from "@/types/catalog";
 export const CATEGORIES: Category[] = [
   { slug: "vestuario", name: "Vestuário" },
   { slug: "acessorios", name: "Acessórios" },
-  { slug: "programas", name: "Programas de treino" },
+  { slug: "materiais", name: "Materiais digitais" },
   { slug: "nutricao", name: "Nutrição" },
 ];
 
@@ -61,24 +61,6 @@ export const SAMPLE_PRODUCTS: Product[] = [
       "Par de straps em algodão reforçado para auxiliar a pegada em levantamentos e puxadas. Costura dupla e boa durabilidade.",
     categorySlug: "acessorios", images: [], featured: false, active: true,
     price: 4500, stock: 0, sku: "MH-STR-01", weightGrams: 90,
-  },
-  {
-    id: "d-hipertrofia-12", slug: "programa-hipertrofia-12-semanas", type: "digital",
-    name: "Programa de Hipertrofia — 12 semanas",
-    shortDescription: "Plano completo de 12 semanas para ganho de massa.",
-    description:
-      "Programa progressivo de 12 semanas com divisão de treinos, séries, repetições e orientações de execução. Pensado para quem já treina e quer estrutura para evoluir. Acesso permanente após a compra.",
-    categorySlug: "programas", images: [], featured: true, active: true,
-    billingModel: "one_time", price: 14900, accessDurationDays: null,
-  },
-  {
-    id: "d-full-body-mensal", slug: "full-body-clube", type: "digital",
-    name: "Full Body Clube — treinos mensais",
-    shortDescription: "Treinos novos todo mês enquanto a assinatura estiver ativa.",
-    description:
-      "Assinatura com novos treinos full body publicados mensalmente, com variações para academia e para casa. O acesso acompanha a assinatura ativa.",
-    categorySlug: "programas", images: [], featured: true, active: true,
-    billingModel: "subscription", monthlyPrice: 3990, graceDays: 5,
   },
   {
     id: "e-alimentacao-treino", slug: "guia-alimentacao-para-treino", type: "ebook",

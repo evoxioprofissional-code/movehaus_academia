@@ -8,6 +8,7 @@ import { Logo } from "@/components/brand/logo";
 import { CartButton } from "@/components/cart/cart-button";
 import { HeaderSearch } from "@/components/layout/header-search";
 import { MobileNav } from "@/components/layout/mobile-nav";
+import { AppHeader } from "@/components/layout/app-header";
 
 export const NAV = [
   { href: "/loja", label: "Loja" },
@@ -19,7 +20,7 @@ export const NAV = [
 const HOME_NAV = [
   { href: "/loja", label: "Loja" },
   { href: "/ebooks", label: "Conteúdos" },
-  { href: "/acompanhamento", label: "Acompanhamento" },
+  { href: "/ofertas", label: "Ofertas" },
   { href: "/sobre", label: "Sobre" },
 ];
 
@@ -53,7 +54,9 @@ export function SiteHeader() {
 
   if (pathname === "/") {
     return (
-      <header className="sticky top-0 z-40 border-b border-white/[0.07] bg-[#0b0c0e]/95 text-white backdrop-blur-md">
+      <>
+      <AppHeader />
+      <header className="sticky top-0 z-40 hidden border-b border-white/[0.07] bg-[#0b0c0e]/95 text-white backdrop-blur-md md:block">
         <div className="relative flex h-16 w-full items-center gap-3 px-4 sm:h-[70px] sm:px-8 lg:px-[4vw]">
           <MobileNav items={HOME_NAV} />
           <Link href="/" prefetch={false} aria-label="MoveHaus — início" className="shrink-0 font-sans text-[25px] font-extrabold leading-none tracking-[-0.075em] text-white sm:text-[34px]">
@@ -75,11 +78,14 @@ export function SiteHeader() {
           </div>
         </div>
       </header>
+      </>
     );
   }
 
   return (
-    <header className={`sticky top-0 z-40 px-2.5 transition-[padding] duration-300 sm:px-5 ${scrolled ? "py-1.5 sm:py-2" : "py-2.5 sm:py-3"}`}>
+    <>
+    <AppHeader />
+    <header className={`sticky top-0 z-40 hidden px-2.5 transition-[padding] duration-300 sm:px-5 md:block ${scrolled ? "py-1.5 sm:py-2" : "py-2.5 sm:py-3"}`}>
       <div className={`relative mx-auto flex max-w-5xl animate-[mh-navbar-enter_.45s_ease-out_both] items-center gap-2 rounded-full border px-2.5 text-white transition-[height,background-color,border-color,box-shadow] duration-300 sm:gap-3 sm:px-4 sm:backdrop-blur-xl ${scrolled ? "h-12 border-white/10 bg-black/85 shadow-[0_12px_38px_-18px_rgba(0,0,0,.9)] sm:h-13 sm:bg-black/75" : "h-14 border-white/[0.07] bg-black/60 shadow-none sm:h-[58px] sm:bg-black/35"}`}>
         <span className={`absolute left-8 right-8 top-0 h-px bg-gradient-to-r from-transparent via-mh-red to-transparent transition-opacity duration-300 ${scrolled ? "opacity-70" : "opacity-35"}`} aria-hidden="true" />
         {/* Marca e navegação formam uma única unidade visual. */}
@@ -120,5 +126,6 @@ export function SiteHeader() {
         </div>
       </div>
     </header>
+    </>
   );
 }

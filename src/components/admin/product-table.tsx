@@ -11,7 +11,7 @@ import { formatBRL } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 
 type Row = ProductRow & { categoryName: string; primaryImage?: ProductImageRow };
-const typeLabel = { physical: "Físico", digital: "Programa", ebook: "E-book" };
+const typeLabel = { physical: "Físico", digital: "PDF / material", ebook: "E-book" };
 
 function imageUrl(image?: ProductImageRow) {
   if (!image) return "";

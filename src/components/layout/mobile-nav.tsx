@@ -52,7 +52,7 @@ export function MobileNav({
   const drawer = open && typeof document !== "undefined"
     ? createPortal(
         <div
-          className="fixed inset-0 z-[100] md:hidden"
+          className={cn("fixed inset-0 z-[100] md:hidden", tone === "light" && "mh-app-menu")}
           role="dialog"
           aria-modal="true"
           aria-label="Menu principal"
@@ -80,7 +80,6 @@ export function MobileNav({
             {mode === "store" && (
               <form
                 action="/loja"
-                onSubmit={close}
                 className="mx-4 mt-4 flex shrink-0 items-center gap-2 rounded-xl border border-white/10 bg-[#111318] px-3"
               >
                 <Search className="size-4 shrink-0 text-mh-muted" />

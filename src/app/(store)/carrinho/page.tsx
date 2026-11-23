@@ -146,7 +146,7 @@ function CartRow({
           <div className="min-w-0">
             <Link
               href={
-                item.type === "ebook"
+                item.type !== "physical"
                   ? `/ebooks/${item.slug}`
                   : `/loja/${item.slug}`
               }

@@ -7,7 +7,7 @@ import { isPhysical, type Product } from "@/types/catalog";
 import { cn } from "@/lib/utils";
 
 export function productHref(product: Product): string {
-  return product.type === "ebook"
+  return product.type !== "physical"
     ? `/ebooks/${product.slug}`
     : `/loja/${product.slug}`;
 }
@@ -17,7 +17,7 @@ function categoryName(slug: string) {
 }
 
 const TYPE_LABEL: Partial<Record<Product["type"], string>> = {
-  digital: "Programa",
+  digital: "PDF / material",
   ebook: "E-book",
 };
 
@@ -40,7 +40,7 @@ export function ProductCard({
   const typeLabel = TYPE_LABEL[product.type];
 
   return (
-    <article className="group relative flex flex-col border-b border-white/10 pb-5 transition-colors duration-200 hover:border-mh-red/60">
+    <article className="mh-app-product group relative flex flex-col border-b border-white/10 pb-5 transition-colors duration-200 hover:border-mh-red/60">
       {/* Link que cobre o card inteiro */}
       <Link
         href={productHref(product)}

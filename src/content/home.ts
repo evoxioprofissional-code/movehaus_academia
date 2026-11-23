@@ -20,44 +20,21 @@ export interface MediaSlot {
 
 export const HERO = {
   eyebrow: "MoveHaus Training Club",
-  title: "Seu ritmo.\nSua força.",
-  text: "Treino, produtos e conteúdos para seguir em movimento.",
+  title: "Sua loja.\nSeu próximo favorito.",
+  text: "Produtos oficiais, PDFs e receitas para a sua rotina.",
   primary: { label: "Explorar a loja", href: "/loja" },
   secondary: { label: "Conhecer a MoveHaus", href: "/sobre" },
   image: {
-    src: "/images/home-hero-ropes.webp",
-    alt: "Atleta treinando com cordas em uma academia",
-    caption: "Imagem conceitual de treino",
+    src: null,
+    alt: "Seleção de produtos da loja MoveHaus",
+    caption: "Produtos da loja",
   } as MediaSlot,
-};
-
-/** Seção editorial da comunidade. Fotos conceituais até chegar mídia do clube. */
-export const COMMUNITY = {
-  kicker: "Comunidade",
-  title: "Isso é\nMoveHaus.",
-  text: "Treino sério, acompanhamento próximo e gente que evolui junto.",
-  items: [
-    { caption: "Pessoas juntas depois do treino", tone: "dark", media: { src: "/images/community-group.webp", alt: "Pessoas conversando depois de treinar" } },
-    { caption: "Treinar junto muda tudo.", tone: "dark", media: { src: "/images/community-plates.webp", alt: "Mãos preparando anilhas para treino" } },
-  ] as { caption: string; tone: "dark" | "red"; media: MediaSlot }[],
-};
-
-export const BRAND = {
-  kicker: "A academia",
-  title: "Feita por quem treina de verdade",
-  text: "Um espaço para evoluir com método, acompanhamento próximo e uma comunidade que puxa junto. Aqui, cada treino tem propósito.",
-  pillars: ["Treino guiado", "Acompanhamento próximo", "Comunidade que evolui junto"],
-  images: {
-    main: { src: null, alt: "Ambiente da MoveHaus", caption: "Ambiente da academia" } as MediaSlot,
-    top: { src: null, alt: "Aluno treinando", caption: "Aluno em treino" } as MediaSlot,
-    bottom: { src: null, alt: "Professor acompanhando o treino", caption: "Professor" } as MediaSlot,
-  },
 };
 
 export const DIGITAL = {
   kicker: "Conteúdos",
-  title: "Conhecimento que acompanha o seu treino",
-  text: "Materiais de nutrição e organização de rotina, lidos no leitor interno — com acompanhamento e exclusividade.",
+  title: "PDFs, receitas e novas leituras",
+  text: "Compre seu acesso e leia os materiais digitais na sua biblioteca.",
 };
 
 export const OFFER = {
@@ -73,17 +50,15 @@ export const OFFER = {
  */
 export const HOME_MEDIA_SLOTS: { key: string; label: string; hint: string }[] = [
   { key: "hero", label: "Topo (hero)", hint: "Imagem/foto grande do topo. Horizontal, alta resolução." },
-  { key: "community_0", label: "Comunidade — foto principal", hint: "Foto horizontal de pessoas no ambiente de treino." },
-  { key: "community_1", label: "Comunidade — detalhe do treino", hint: "Foto vertical de equipamento ou rotina." },
   { key: "offer", label: "Faixa de ofertas", hint: "Horizontal, tom mais escuro." },
-  { key: "about", label: "Sobre a MoveHaus", hint: "Foto do ambiente/comunidade." },
+  { key: "about", label: "Sobre a loja", hint: "Imagem da marca ou dos produtos." },
 ];
 
 export const ABOUT = {
   kicker: "Sobre a MoveHaus",
-  title: "Evolução com treino sério e gente por perto",
-  text: "A MoveHaus nasceu para quem busca evolução com treino sério, acompanhamento próximo e uma comunidade que cresce junto.",
-  image: { src: null, alt: "Comunidade MoveHaus", caption: "Comunidade / alunos" } as MediaSlot,
+  title: "A loja oficial da MoveHaus",
+  text: "Produtos selecionados, receitas e conteúdos digitais reunidos em um só lugar.",
+  image: { src: null, alt: "Loja MoveHaus", caption: "Produtos MoveHaus" } as MediaSlot,
 };
 
 /**
@@ -98,11 +73,6 @@ export const HOME_TEXT_FIELDS: HomeTextField[] = [
   { key: "hero.text", group: "Topo", label: "Descrição", multiline: true, default: HERO.text },
   { key: "hero.primary", group: "Topo", label: "Texto do botão principal", default: HERO.primary.label },
   { key: "hero.secondary", group: "Topo", label: "Texto do botão secundário", default: HERO.secondary.label },
-
-  { key: "community.kicker", group: "Comunidade", label: "Selo", default: COMMUNITY.kicker },
-  { key: "community.title", group: "Comunidade", label: "Título", multiline: true, default: COMMUNITY.title },
-  { key: "community.text", group: "Comunidade", label: "Descrição", multiline: true, default: COMMUNITY.text },
-  { key: "community.item1", group: "Comunidade", label: "Legenda do detalhe", default: COMMUNITY.items[1].caption },
 
   { key: "digital.kicker", group: "Conteúdos", label: "Selo", default: DIGITAL.kicker },
   { key: "digital.title", group: "Conteúdos", label: "Título", default: DIGITAL.title },

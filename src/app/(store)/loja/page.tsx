@@ -9,11 +9,8 @@ import { getCategories, getProducts } from "@/lib/catalog";
 
 export const metadata: Metadata = {
   title: "Loja",
-  description: "Vestuário, acessórios e programas de treino da MoveHaus.",
+  description: "Produtos oficiais, vestuário, acessórios e suplementos MoveHaus.",
 };
-
-// Categorias mostradas na loja (e-books ficam em /ebooks).
-const STORE_CATEGORIES = ["vestuario", "acessorios", "programas"];
 
 export default async function LojaPage({
   searchParams,
@@ -21,22 +18,24 @@ export default async function LojaPage({
   searchParams: Promise<{ q?: string; categoria?: string }>;
 }) {
   const { q, categoria } = await searchParams;
-  const [allCategories, products] = await Promise.all([
+  const [allCategories, products, physicalProducts] = await Promise.all([
     getCategories(),
-    getProducts({ categorySlug: categoria, query: q }),
+    getProducts({ type: "physical", categorySlug: categoria, query: q }),
+    getProducts({ type: "physical" }),
   ]);
 
   const categories = allCategories.filter((c) =>
-    STORE_CATEGORIES.includes(c.slug),
+    physicalProducts.some((product) => product.categorySlug === c.slug),
   );
-  const list = products.filter((p) => p.type !== "ebook");
+  const list = products;
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
       <EditorialPageHero
         kicker="Loja oficial"
-        title="Treino também é o que você leva com você."
-        description="Vestuário, acessórios e programas selecionados pela MoveHaus para acompanhar sua rotina dentro e fora do treino."
+        mobileTitle="Loja"
+        title="Sua seleção MoveHaus."
+        description="Vestuário, acessórios e suplementos. Explore os produtos e acompanhe cada compra pela sua conta."
         aside="Produtos oficiais, compra segura e atendimento direto da equipe MoveHaus."
       />
 

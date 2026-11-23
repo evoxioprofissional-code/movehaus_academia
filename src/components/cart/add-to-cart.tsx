@@ -45,6 +45,7 @@ export function AddToCart({ product }: { product: Product }) {
                 <button
                   key={opt}
                   type="button"
+                  aria-pressed={active}
                   onClick={() =>
                     setSelected((s) => ({ ...s, [v.label]: opt }))
                   }

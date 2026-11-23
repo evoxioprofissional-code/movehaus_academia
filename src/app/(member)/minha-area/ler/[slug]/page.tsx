@@ -74,9 +74,9 @@ export default async function ReaderPage({ params }: { params: Promise<{ slug: s
   return (
     <EbookReader
       product={data.product}
-      sectionLabel={data.product.type === "digital" ? "Aula ou material" : "Capítulo"}
       chapters={data.chapters}
       initialChapterId={data.progress?.chapter_id}
+      initialPercent={data.progress?.progress_percent ?? 0}
       watermark={data.watermark}
     />
   );

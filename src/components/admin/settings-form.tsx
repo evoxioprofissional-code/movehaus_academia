@@ -30,10 +30,10 @@ export function SettingsForm({ settings }: { settings: SettingsRow | null }) {
 
   return (
     <form action={formAction} className="grid gap-6 lg:grid-cols-[190px_minmax(0,760px)]">
-      <nav className="h-fit space-y-1 lg:sticky lg:top-20">{[["academia","Academia"],["contato","Contato e redes"],["loja","Loja e segurança"],["nutricionista","Nutricionista"],["politicas","Políticas"]].map(([href,label]) => <a key={href} href={`#${href}`} className="block rounded-md px-3 py-2 text-sm text-mh-muted hover:bg-white/5 hover:text-white">{label}</a>)}</nav>
+      <nav className="h-fit space-y-1 lg:sticky lg:top-20">{[["academia","Identificação da loja"],["contato","Contato e redes"],["loja","Loja e segurança"],["politicas","Políticas"]].map(([href,label]) => <a key={href} href={`#${href}`} className="block rounded-md px-3 py-2 text-sm text-mh-muted hover:bg-white/5 hover:text-white">{label}</a>)}</nav>
       <div className="space-y-5">
       <section id="academia" className="space-y-4 rounded-lg bg-mh-surface p-5">
-        <h2 className="text-sm font-semibold uppercase tracking-widest text-mh-red">Academia</h2>
+        <h2 className="text-sm font-semibold uppercase tracking-widest text-mh-red">Identificação da loja</h2>
         <div className="grid gap-4 sm:grid-cols-2">
           <Field id="academy_name" name="academy_name" label="Nome" defaultValue={s?.academy_name ?? "MoveHaus Training Club"} />
           <Field id="city" name="city" label="Cidade" defaultValue={s?.city ?? ""} />
@@ -58,12 +58,6 @@ export function SettingsForm({ settings }: { settings: SettingsRow | null }) {
           <Field id="grace_days" name="grace_days" label="Carência padrão (dias)" type="number" defaultValue={s?.grace_days ?? 5} />
         </div>
         <Area id="delivery_rules" name="delivery_rules" label="Regras de entrega" defaultValue={s?.delivery_rules ?? ""} />
-      </section>
-
-      <section id="nutricionista" className="space-y-4 rounded-lg bg-mh-surface p-5">
-        <h2 className="text-sm font-semibold uppercase tracking-widest text-mh-red">Nutricionista</h2>
-        <Field id="nutritionist_name" name="nutritionist_name" label="Nome" defaultValue={s?.nutritionist_name ?? ""} />
-        <Area id="nutritionist_bio" name="nutritionist_bio" label="Apresentação" defaultValue={s?.nutritionist_bio ?? ""} />
       </section>
 
       <section id="politicas" className="space-y-4 rounded-lg bg-mh-surface p-5">

@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { publicEnv } from "@/lib/env";
 
 // Rotas que exigem sessão. A checagem de papel (admin) fica no layout /admin.
-const PROTECTED = ["/minha-area", "/admin", "/acompanhamento", "/equipe"];
+const PROTECTED = ["/minha-area", "/admin"];
 
 /**
  * Renova a sessão do Supabase a cada request e a propaga para os
@@ -61,7 +61,5 @@ export const config = {
   matcher: [
     "/minha-area/:path*",
     "/admin/:path*",
-    "/acompanhamento/:path*",
-    "/equipe/:path*",
   ],
 };

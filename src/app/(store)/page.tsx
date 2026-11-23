@@ -11,8 +11,8 @@ import { ProductMedia } from "@/components/catalog/product-media";
 import { productHref } from "@/components/catalog/product-card";
 import { Price } from "@/components/catalog/price";
 import { accessDescription } from "@/components/catalog/billing-info";
-import { CommunityFeature } from "@/components/home/community-feature";
 import { ReaderPreview } from "@/components/home/reader-preview";
+import { MobileHome } from "@/components/home/mobile-home";
 import { getHomeMedia, getPublicBanners } from "@/lib/home-media";
 import { getHomeText } from "@/lib/home-content";
 import {
@@ -22,7 +22,7 @@ import {
 } from "@/lib/catalog";
 import { formatBRL } from "@/lib/utils";
 import { hasBilling, isPhysical } from "@/types/catalog";
-import { ABOUT, COMMUNITY, DIGITAL, HERO, OFFER } from "@/content/home";
+import { ABOUT, DIGITAL, HERO, OFFER } from "@/content/home";
 
 export default async function HomePage() {
   const [featured, onSale, ebooks, media, banners, text] = await Promise.all([
@@ -36,7 +36,7 @@ export default async function HomePage() {
   // Texto da home: valor editado no admin, com fallback para o padrão.
   const t = (key: string, fallback: string) => text[key] ?? fallback;
 
-  const featuredProducts = featured.filter((p) => p.type !== "ebook").slice(0, 4);
+  const featuredProducts = featured.filter((p) => p.type === "physical").slice(0, 4);
   const mainEbook = ebooks[0];
   const otherEbooks = ebooks.slice(1, 4);
   const offer = onSale[0];
@@ -48,13 +48,11 @@ export default async function HomePage() {
   const heroImage = media.hero && !legacyLogoHero ? media.hero : HERO.image.src!;
   const heroTitle = t("hero.title", HERO.title).split("\n");
 
-  const communityMain = media.community_0 ?? COMMUNITY.items[0].media.src!;
-  const communityDetail = media.community_1 ?? COMMUNITY.items[1].media.src!;
-
   return (
     <>
-      <section className="relative isolate flex min-h-[570px] items-end overflow-hidden bg-[#090a0c] sm:min-h-[550px] sm:items-center lg:min-h-[440px]" aria-labelledby="home-hero-title">
-        <Image
+      <MobileHome featuredProduct={featuredProducts.find((product) => product.images.length > 0) ?? featuredProducts[0]} />
+      <section className="relative isolate hidden min-h-[570px] items-end overflow-hidden bg-[#090a0c] sm:min-h-[550px] sm:items-center md:flex lg:min-h-[440px]" aria-labelledby="home-hero-title">
+        {heroImage && <Image
           src={heroImage}
           alt={HERO.image.alt}
           fill
@@ -62,7 +60,7 @@ export default async function HomePage() {
           unoptimized={heroImage.startsWith("http")}
           sizes="100vw"
           className="object-cover object-[64%_center] sm:object-[62%_center] lg:object-center"
-        />
+        />}
         <div aria-hidden="true" className="absolute inset-0 bg-[linear-gradient(90deg,rgba(0,0,0,.82)_0%,rgba(0,0,0,.58)_40%,rgba(0,0,0,.08)_75%)] max-sm:bg-[linear-gradient(0deg,rgba(0,0,0,.88)_0%,rgba(0,0,0,.44)_55%,rgba(0,0,0,.12)_100%)]" />
         <div className="relative z-10 w-full px-5 pb-10 pt-28 sm:px-8 sm:py-16 lg:px-[4vw] lg:py-14">
           <p className="text-[10px] font-semibold uppercase tracking-[0.34em] text-white/80 sm:text-xs">
@@ -89,7 +87,7 @@ export default async function HomePage() {
 
       {campaign && (campaign.desktopUrl || campaign.mobileUrl) && (
         <section className="mx-auto w-full max-w-6xl px-4 pt-8 sm:px-6">
-          <Link href={campaign.link || "/ofertas"} className="group relative block min-h-52 overflow-hidden rounded-xl bg-mh-surface sm:min-h-72">
+          <Link href={campaign.link || "/ofertas"} className="mh-app-campaign group relative block min-h-52 overflow-hidden rounded-xl bg-mh-surface sm:min-h-72">
             <picture>{campaign.mobileUrl && <source media="(max-width: 639px)" srcSet={campaign.mobileUrl} />}<img src={campaign.desktopUrl || campaign.mobileUrl || ""} alt="" className="absolute inset-0 size-full object-cover transition-transform duration-300 group-hover:scale-[1.02]" /></picture>
             <div className="absolute inset-0 bg-black/50" />
             <div className="relative flex min-h-52 max-w-xl flex-col justify-end p-6 sm:min-h-72 sm:p-9"><p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/70">Campanha MoveHaus</p><h2 className="mt-2 text-3xl font-semibold text-white sm:text-4xl">{campaign.title}</h2>{campaign.subtitle && <p className="mt-2 text-white/75">{campaign.subtitle}</p>}<span className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-white">{campaign.button_label || "Conhecer oferta"}<ArrowRight className="size-4 transition-transform group-hover:translate-x-1" /></span></div>
@@ -97,19 +95,10 @@ export default async function HomePage() {
         </section>
       )}
 
-      <CommunityFeature
-        kicker={t("community.kicker", COMMUNITY.kicker)}
-        title={t("community.title", COMMUNITY.title)}
-        text={t("community.text", COMMUNITY.text)}
-        caption={t("community.item1", COMMUNITY.items[1].caption)}
-        mainSrc={communityMain}
-        detailSrc={communityDetail}
-      />
-
       {/* ================= PRODUTOS EM DESTAQUE ================= */}
       {featuredProducts.length > 0 && (
         <section className="border-t border-white/5 bg-mh-ink/40">
-          <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:py-20">
+          <div className="mx-auto max-w-6xl px-4 py-7 sm:px-6 md:py-16 lg:py-20">
             <SectionHeading
               kicker="Loja"
               title="Produtos em destaque"
@@ -124,7 +113,7 @@ export default async function HomePage() {
 
       {/* ================= CONTEÚDOS DIGITAIS (editorial) ================= */}
       {mainEbook && (
-        <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:py-24">
+        <section className="mx-auto max-w-6xl px-4 py-7 sm:px-6 md:py-16 lg:py-24">
           <SectionHeading
             kicker={t("digital.kicker", DIGITAL.kicker)}
             title={t("digital.title", DIGITAL.title)}
@@ -132,7 +121,8 @@ export default async function HomePage() {
             href="/ebooks"
           />
 
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+          <div className="md:hidden"><ProductGrid products={ebooks.slice(0, 4)} /></div>
+          <div className="hidden grid-cols-1 gap-6 md:grid lg:grid-cols-12">
             {/* Destaque principal */}
             <Reveal className="lg:col-span-7">
               <article className="group relative h-full overflow-hidden rounded-lg">
@@ -240,7 +230,12 @@ export default async function HomePage() {
       {/* ================= OFERTAS (campanha) ================= */}
       {offer && isPhysical(offer) && offer.compareAtPrice && (
         <section className="px-4 pb-16 sm:px-6 lg:pb-24">
-          <div className="relative mx-auto max-w-6xl overflow-hidden rounded-lg">
+          <Link href={productHref(offer)} className="mh-app-offer md:hidden">
+            <ProductMedia product={offer} sizes="72px" className="size-[72px] shrink-0 rounded-lg" />
+            <span><small>OFERTA NA LOJA</small><strong>{offer.name}</strong><span>{formatBRL(offer.price)} <del>{formatBRL(offer.compareAtPrice)}</del></span></span>
+            <ArrowRight size={19} />
+          </Link>
+          <div className="relative mx-auto hidden max-w-6xl overflow-hidden rounded-lg md:block">
             <PhotoSlot
               src={media.offer ?? OFFER.image.src}
               alt={OFFER.image.alt}
@@ -297,7 +292,7 @@ export default async function HomePage() {
       )}
 
       {/* ================= SOBRE (bloco claro) ================= */}
-      <section className="bg-mh-paper text-mh-paper-ink">
+      <section className="hidden bg-mh-paper text-mh-paper-ink md:block">
         <div className="mx-auto grid max-w-6xl grid-cols-1 items-center gap-10 px-4 py-16 sm:px-6 lg:grid-cols-2 lg:py-24">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-mh-red">

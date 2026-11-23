@@ -230,13 +230,15 @@ export async function dashboardPeriodData(days: number) {
   const safeDays = [1, 7, 30, 90].includes(days) ? days : 30;
   const since = new Date(Date.now() - safeDays * 86400000).toISOString();
   const supabase = await createClient();
-  const [ordersResult, customerRoles, activeProducts, lowStock, subscriptions] = await Promise.all([
+  const [ordersResult, customerRoles, activeProducts, lowStock] = await Promise.all([
     supabase.from("orders").select("id,order_number,total,status,payment_status,created_at").gte("created_at", since).order("created_at", { ascending: true }),
     supabase.from("user_roles").select("*", { count: "exact", head: true }).eq("role", "customer"),
     supabase.from("products").select("*", { count: "exact", head: true }).eq("active", true),
     supabase.from("products").select("*", { count: "exact", head: true }).eq("type", "physical").eq("track_inventory", true).lte("stock", 5),
-    supabase.from("subscriptions").select("*", { count: "exact", head: true }).eq("status", "active"),
   ]);
+  if ([ordersResult, customerRoles, activeProducts, lowStock].some(result => result.error)) {
+    throw new Error("Não foi possível consultar os dados financeiros da loja.");
+  }
   const orders = ordersResult.data ?? [];
   const approved = orders.filter((order) => order.payment_status === "approved");
   const revenue = approved.reduce((sum, order) => sum + order.total, 0);
@@ -251,12 +253,13 @@ export async function dashboardPeriodData(days: number) {
     if (points.has(key)) points.set(key, (points.get(key) ?? 0) + order.total);
   }
   return {
+    pendingRevenue: orders.filter(order => order.payment_status === "pending").reduce((sum, order) => sum + order.total, 0),
+    refundedRevenue: orders.filter(order => order.payment_status === "refunded").reduce((sum, order) => sum + order.total, 0),
     days: safeDays,
     revenue,
     orderCount: orders.length,
     approvedCount: approved.length,
     customers: customerRoles.count ?? 0,
-    subscriptions: subscriptions.count ?? 0,
     activeProducts: activeProducts.count ?? 0,
     lowStock: lowStock.count ?? 0,
     recentOrders: [...orders].reverse().slice(0, 5),

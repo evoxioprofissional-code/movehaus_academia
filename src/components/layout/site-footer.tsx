@@ -20,7 +20,17 @@ export async function SiteFooter() {
   const settings = await getPublicSettings();
   const wa = whatsappLink("Olá! Vim pelo site da MoveHaus e gostaria de uma ajuda.", settings.whatsapp);
   return (
-    <footer className="mt-auto bg-mh-ink">
+    <>
+    <footer className="mh-app-footer md:hidden">
+      <a href={wa} target="_blank" rel="noopener noreferrer"><MessageCircle size={17} /> Falar com a equipe <ArrowUpRight size={16} /></a>
+      <nav aria-label="Informações da MoveHaus">
+        <Link href="/sobre">Sobre a loja</Link>
+        <Link href="/termos">Termos</Link>
+        <Link href="/privacidade">Privacidade</Link>
+      </nav>
+      <p>© {new Date().getFullYear()} {settings.academyName}</p>
+    </footer>
+    <footer className="mt-auto hidden bg-mh-ink md:block">
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
         {/* Chamada */}
         <div className="flex flex-col gap-6 py-14 sm:py-16 lg:flex-row lg:items-center lg:justify-between">
@@ -57,7 +67,7 @@ export async function SiteFooter() {
                 Training Club
               </span>
             </Link>
-            <p className="mt-5 text-sm text-mh-muted">Treino, conteúdo e evolução.</p>
+            <p className="mt-5 text-sm text-mh-muted">Produtos, PDFs e receitas para a sua rotina.</p>
           </div>
 
           <nav className="md:col-span-2">
@@ -113,5 +123,6 @@ export async function SiteFooter() {
         </div>
       </div>
     </footer>
+    </>
   );
 }

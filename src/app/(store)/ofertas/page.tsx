@@ -19,6 +19,7 @@ export default async function OfertasPage() {
     <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
       <EditorialPageHero
         kicker="Seleção da semana"
+        mobileTitle="Ofertas"
         title="Boas escolhas. Condições melhores."
         description="Uma seleção curta de produtos e conteúdos com condições especiais por tempo limitado."
         aside="As ofertas e a disponibilidade são atualizadas pela equipe MoveHaus."

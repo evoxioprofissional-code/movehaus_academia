@@ -220,126 +220,6 @@ export type Database = {
         Update: never;
         Relationships: [];
       };
-      coaching_access: {
-        Row: { user_id: string; active: boolean; source: string; granted_by: string | null; starts_at: string; expires_at: string | null; created_at: string; updated_at: string };
-        Insert: { user_id: string; active?: boolean; source?: string; granted_by?: string | null; starts_at?: string; expires_at?: string | null };
-        Update: { active?: boolean; source?: string; granted_by?: string | null; starts_at?: string; expires_at?: string | null };
-        Relationships: [];
-      };
-      workout_plans: {
-        Row: { id: string; user_id: string; name: string; active: boolean; created_by: string | null; created_at: string; updated_at: string };
-        Insert: { id?: string; user_id: string; name?: string; active?: boolean; created_by?: string | null };
-        Update: { name?: string; active?: boolean };
-        Relationships: [];
-      };
-      workout_days: {
-        Row: { id: string; plan_id: string; weekday: number | null; name: string; position: number; created_at: string };
-        Insert: { id?: string; plan_id: string; weekday?: number | null; name?: string; position?: number };
-        Update: { weekday?: number | null; name?: string; position?: number };
-        Relationships: [];
-      };
-      workout_exercises: {
-        Row: { id: string; day_id: string; name: string; sets: number; reps: string; target_load: string; rest_seconds: number; video_url: string | null; notes: string; method: string; group_label: string; position: number; created_at: string };
-        Insert: { id?: string; day_id: string; name: string; sets?: number; reps?: string; target_load?: string; rest_seconds?: number; video_url?: string | null; notes?: string; method?: string; group_label?: string; position?: number };
-        Update: { name?: string; sets?: number; reps?: string; target_load?: string; rest_seconds?: number; video_url?: string | null; notes?: string; method?: string; group_label?: string; position?: number };
-        Relationships: [];
-      };
-      workout_sessions: {
-        Row: { id: string; user_id: string; day_id: string | null; day_name: string; started_at: string; finished_at: string | null; feeling: string | null; discomfort: string; notes: string; rpe: number | null; total_volume_load: number; created_at: string };
-        Insert: { id?: string; user_id: string; day_id?: string | null; day_name?: string };
-        Update: { finished_at?: string | null; feeling?: string | null; discomfort?: string; notes?: string; rpe?: number | null; total_volume_load?: number };
-        Relationships: [];
-      };
-      exercise_logs: {
-        Row: { id: string; session_id: string; exercise_id: string | null; exercise_name: string; set_number: number; reps_done: number | null; load_used: number | null; created_at: string };
-        Insert: { id?: string; session_id: string; exercise_id?: string | null; exercise_name?: string; set_number: number; reps_done?: number | null; load_used?: number | null };
-        Update: { reps_done?: number | null; load_used?: number | null };
-        Relationships: [];
-      };
-      points_ledger: {
-        Row: { id: string; user_id: string; points: number; reason: string; created_at: string };
-        Insert: { id?: string; user_id: string; points: number; reason?: string };
-        Update: { points?: number; reason?: string };
-        Relationships: [];
-      };
-      goals: {
-        Row: { id: string; user_id: string; title: string; type: string; target: number; period: string | null; status: string; created_by: string | null; achieved_at: string | null; created_at: string };
-        Insert: { id?: string; user_id: string; title: string; type?: string; target?: number; period?: string | null; status?: string; created_by?: string | null; achieved_at?: string | null };
-        Update: { title?: string; type?: string; target?: number; period?: string | null; status?: string; achieved_at?: string | null };
-        Relationships: [];
-      };
-      achievements: {
-        Row: { id: string; user_id: string; code: string; title: string; achieved_at: string };
-        Insert: { id?: string; user_id: string; code: string; title: string; achieved_at?: string };
-        Update: { title?: string };
-        Relationships: [];
-      };
-      rewards: {
-        Row: { id: string; title: string; description: string; cost_points: number; type: string; active: boolean; created_at: string; updated_at: string };
-        Insert: { id?: string; title: string; description?: string; cost_points?: number; type?: string; active?: boolean };
-        Update: { title?: string; description?: string; cost_points?: number; type?: string; active?: boolean };
-        Relationships: [];
-      };
-      reward_redemptions: {
-        Row: { id: string; user_id: string; reward_id: string | null; reward_title: string; points_spent: number; status: string; created_at: string; decided_at: string | null };
-        Insert: { id?: string; user_id: string; reward_id?: string | null; reward_title?: string; points_spent?: number; status?: string };
-        Update: { status?: string; decided_at?: string | null };
-        Relationships: [];
-      };
-      body_metrics: {
-        Row: { id: string; user_id: string; measured_on: string; weight: number | null; waist: number | null; hip: number | null; arm: number | null; chest: number | null; thigh: number | null; body_fat: number | null; notes: string; created_at: string };
-        Insert: { id?: string; user_id: string; measured_on?: string; weight?: number | null; waist?: number | null; hip?: number | null; arm?: number | null; chest?: number | null; thigh?: number | null; body_fat?: number | null; notes?: string };
-        Update: Partial<{ measured_on: string; weight: number | null; waist: number | null; hip: number | null; arm: number | null; chest: number | null; thigh: number | null; body_fat: number | null; notes: string }>;
-        Relationships: [];
-      };
-      checkins: {
-        Row: { id: string; user_id: string; week_start: string; energy: number | null; sleep: number | null; nutrition: number | null; disposition: number | null; pain: string; difficulty: string; notes: string; created_at: string };
-        Insert: { id?: string; user_id: string; week_start?: string; energy?: number | null; sleep?: number | null; nutrition?: number | null; disposition?: number | null; pain?: string; difficulty?: string; notes?: string };
-        Update: Partial<{ energy: number | null; sleep: number | null; nutrition: number | null; disposition: number | null; pain: string; difficulty: string; notes: string }>;
-        Relationships: [];
-      };
-      hydration_logs: {
-        Row: { user_id: string; day: string; total_ml: number; goal_ml: number; updated_at: string };
-        Insert: { user_id: string; day?: string; total_ml?: number; goal_ml?: number };
-        Update: { total_ml?: number; goal_ml?: number };
-        Relationships: [];
-      };
-      progress_photos: {
-        Row: { id: string; user_id: string; storage_path: string; taken_on: string; note: string; created_at: string };
-        Insert: { id?: string; user_id: string; storage_path: string; taken_on?: string; note?: string };
-        Update: { note?: string; taken_on?: string };
-        Relationships: [];
-      };
-      meal_plans: {
-        Row: { id: string; user_id: string; name: string; notes: string; active: boolean; created_by: string | null; created_at: string; updated_at: string };
-        Insert: { id?: string; user_id: string; name?: string; notes?: string; active?: boolean; created_by?: string | null };
-        Update: { name?: string; notes?: string; active?: boolean };
-        Relationships: [];
-      };
-      meals: {
-        Row: { id: string; plan_id: string; name: string; time_label: string; position: number; created_at: string };
-        Insert: { id?: string; plan_id: string; name?: string; time_label?: string; position?: number };
-        Update: { name?: string; time_label?: string; position?: number };
-        Relationships: [];
-      };
-      meal_items: {
-        Row: { id: string; meal_id: string; food: string; quantity: string; substitutions: string; notes: string; position: number; created_at: string };
-        Insert: { id?: string; meal_id: string; food: string; quantity?: string; substitutions?: string; notes?: string; position?: number };
-        Update: { food?: string; quantity?: string; substitutions?: string; notes?: string; position?: number };
-        Relationships: [];
-      };
-      meal_logs: {
-        Row: { id: string; user_id: string; meal_id: string; day: string; created_at: string };
-        Insert: { id?: string; user_id: string; meal_id: string; day?: string };
-        Update: { day?: string };
-        Relationships: [];
-      };
-      recipes: {
-        Row: { id: string; title: string; description: string; ingredients: string; steps: string; active: boolean; created_by: string | null; created_at: string; updated_at: string };
-        Insert: { id?: string; title: string; description?: string; ingredients?: string; steps?: string; active?: boolean; created_by?: string | null };
-        Update: { title?: string; description?: string; ingredients?: string; steps?: string; active?: boolean };
-        Relationships: [];
-      };
       home_media: {
         Row: { key: string; storage_path: string; updated_at: string };
         Insert: { key: string; storage_path: string };
@@ -356,10 +236,6 @@ export type Database = {
     Views: Record<string, never>;
     Functions: {
       is_admin: { Args: Record<string, never>; Returns: boolean };
-      has_coaching_access: { Args: { uid?: string }; Returns: boolean };
-      points_balance: { Args: { uid?: string }; Returns: number };
-      is_staff: { Args: Record<string, never>; Returns: boolean };
-      redeem_reward: { Args: { p_reward_id: string }; Returns: string };
     };
     Enums: {
       app_role: AppRole;

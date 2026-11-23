@@ -28,7 +28,7 @@ export function CategoryFilter({
       href={build(slug)}
       prefetch={false}
       className={cn(
-        "whitespace-nowrap rounded-full border px-4 py-1.5 text-sm font-medium transition-colors",
+        "inline-flex min-h-11 items-center whitespace-nowrap rounded-full border px-4 py-1.5 text-sm font-medium transition-colors",
         isActive
           ? "border-mh-red bg-mh-red/10 text-white"
           : "border-mh-border text-mh-muted hover:border-mh-red/60 hover:text-white",

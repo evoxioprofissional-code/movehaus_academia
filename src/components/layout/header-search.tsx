@@ -33,16 +33,15 @@ export function HeaderSearch({ tone = "dark" }: { tone?: "dark" | "light" }) {
           <form
             action="/loja"
             className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-3 sm:px-6"
-            onSubmit={() => setOpen(false)}
           >
             <Search className="size-5 shrink-0 text-mh-muted" />
             <input
               ref={inputRef}
               type="search"
               name="q"
-              placeholder="Buscar produtos, programas e conteúdos..."
+              placeholder="Buscar produtos, PDFs e receitas..."
               aria-label="Buscar"
-              className="h-9 w-full bg-transparent text-[15px] text-white placeholder:text-mh-muted focus:outline-none"
+              className="h-11 min-w-0 flex-1 bg-transparent text-base text-white placeholder:text-mh-muted focus:outline-none"
             />
             <button
               type="submit"

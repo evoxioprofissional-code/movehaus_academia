@@ -2,10 +2,10 @@
 export const SITE = {
   name: "MoveHaus Training Club",
   shortName: "MoveHaus",
-  tagline: "Mais que treino. Um estilo de vida.",
+  tagline: "Produtos, PDFs e receitas em um só lugar.",
   // Número no formato internacional só com dígitos (ex.: 55 + DDD + número).
-  whatsapp: "5599999999999",
-  whatsappLabel: "(00) 00000-0000",
+  whatsapp: "5517996548450",
+  whatsappLabel: "(17) 99654-8450",
   instagram: "https://instagram.com/",
   instagramHandle: "@movehaus",
   email: "contato@movehaus.com.br",

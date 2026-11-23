@@ -156,7 +156,7 @@ export async function getOnSaleProducts(): Promise<Product[]> {
 }
 
 export async function getEbooks(): Promise<Product[]> {
-  return (await allProducts()).filter((p) => p.type === "ebook");
+  return (await allProducts()).filter((p) => p.type !== "physical");
 }
 
 export const getCategories = unstable_cache(

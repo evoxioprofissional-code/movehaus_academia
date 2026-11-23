@@ -6,9 +6,9 @@ import { EditorialPageHero } from "@/components/ui/editorial-page-hero";
 import { getEbooks } from "@/lib/catalog";
 
 export const metadata: Metadata = {
-  title: "E-books",
+  title: "PDFs e receitas",
   description:
-    "Conteúdos de nutrição da MoveHaus, lidos no leitor interno protegido.",
+    "PDFs, e-books e receitas para ler na sua biblioteca MoveHaus.",
 };
 
 export default async function EbooksPage() {
@@ -17,9 +17,10 @@ export default async function EbooksPage() {
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
       <EditorialPageHero
-        kicker="Conteúdos MoveHaus"
-        title="Conhecimento para sustentar a constância."
-        description="Materiais de nutrição e organização de rotina para ler no seu ritmo, com progresso salvo no leitor interno."
+        kicker="Biblioteca MoveHaus"
+        mobileTitle="PDFs e receitas"
+        title="Sua próxima leitura está aqui."
+        description="PDFs, e-books, receitas e materiais digitais. Compre seu acesso e leia na plataforma, com sua posição salva."
         aside="Cada conteúdo informa claramente se o acesso é único, permanente, por período ou por assinatura."
       />
 
@@ -28,7 +29,7 @@ export default async function EbooksPage() {
       ) : (
         <EmptyState
           icon={BookOpen}
-          title="Nenhum e-book publicado"
+          title="Nenhum material publicado"
           description="Os conteúdos aparecem aqui assim que forem publicados."
         />
       )}

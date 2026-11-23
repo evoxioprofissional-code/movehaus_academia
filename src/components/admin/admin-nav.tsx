@@ -18,6 +18,7 @@ const ITEMS = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
   { href: "/admin/produtos", label: "Produtos", icon: Package },
   { href: "/admin/conteudos", label: "Conteúdos", icon: BookOpen },
+  { href: "/admin/financeiro", label: "Financeiro", icon: ReceiptText },
   { href: "/admin/pedidos", label: "Pedidos", icon: ReceiptText },
   { href: "/admin/categorias", label: "Categorias", icon: Tag },
   { href: "/admin/clientes", label: "Clientes", icon: Users },

@@ -7,6 +7,7 @@ import { revalidatePath, updateTag } from "next/cache";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { requireAdmin } from "@/lib/auth/user";
 import type { Database, VariantGroup } from "@/types/database";
+import { PDF_BUCKET, pdfAttachment } from "@/lib/customer/pdf";
 
 export type FormState = { error?: string; message?: string };
 
@@ -318,9 +319,11 @@ export async function saveEbookMeta(
   await requireAdmin();
   const productId = String(fd.get("product_id") ?? "");
   if (!productId) return { error: "E-book inválido." };
+  const supabase = await createClient();
+  const { data: current } = await supabase.from("ebooks").select("cover_path,cover_url").eq("product_id", productId).maybeSingle();
   const cover = fd.get("cover");
-  let coverPath = String(fd.get("existing_cover_path") || "") || null;
-  let coverUrl = String(fd.get("cover_url") ?? "").trim() || null;
+  let coverPath = current?.cover_path ?? null;
+  let coverUrl = current?.cover_url ?? null;
   if (cover instanceof File && cover.size > 0) {
     try { validateImages([cover]); } catch (error) { return { error: error instanceof Error ? error.message : "Capa inválida." }; }
     const ext = ALLOWED_IMAGE_TYPES.get(cover.type)!;
@@ -338,7 +341,6 @@ export async function saveEbookMeta(
     intro: String(fd.get("intro") ?? "").trim(),
     status: (String(fd.get("status") || "draft") as "draft" | "published"),
   };
-  const supabase = await createClient();
   const { error } = await supabase
     .from("ebooks")
     .upsert(payload, { onConflict: "product_id" });
@@ -399,7 +401,13 @@ export async function deleteChapter(fd: FormData): Promise<void> {
   const id = String(fd.get("id") ?? "");
   const productId = String(fd.get("product_id") ?? "");
   const supabase = await createClient();
-  await supabase.from("ebook_chapters").delete().eq("id", id);
+  const { data: chapter } = await supabase.from("ebook_chapters").select("content").eq("id", id).eq("product_id", productId).maybeSingle();
+  const { error } = await supabase.from("ebook_chapters").delete().eq("id", id).eq("product_id", productId);
+  if (error) throw new Error("Não foi possível remover o material.");
+  const attachment = chapter && pdfAttachment(chapter.content);
+  if (attachment?.path.startsWith(`pdfs/${productId}/`)) {
+    await createAdminClient().storage.from(PDF_BUCKET).remove([attachment.path]);
+  }
   revalidatePath(`/admin/conteudos/${productId}`);
   revalidatePath("/admin/conteudos");
   revalidatePath("/minha-area", "layout");
@@ -448,8 +456,6 @@ export async function updateSettings(
     delivery_rules: String(fd.get("delivery_rules") ?? "").trim(),
     device_limit: toInt(fd.get("device_limit")) ?? 3,
     grace_days: toInt(fd.get("grace_days")) ?? 5,
-    nutritionist_name: String(fd.get("nutritionist_name") ?? "").trim(),
-    nutritionist_bio: String(fd.get("nutritionist_bio") ?? "").trim(),
     terms: String(fd.get("terms") ?? ""),
     privacy: String(fd.get("privacy") ?? ""),
   };
